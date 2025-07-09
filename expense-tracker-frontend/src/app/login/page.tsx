@@ -14,8 +14,6 @@ import {
   Link,
   ThemeProvider,
   createTheme,
-  Checkbox,
-  FormControlLabel
 } from '@mui/material';
 import { Visibility, VisibilityOff, Email, Lock } from '@mui/icons-material';
 import NextLink from 'next/link';
@@ -129,11 +127,7 @@ const UserLogin = () => {
                   }}
                 />
 
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <FormControlLabel
-                    control={<Checkbox sx={{ color: 'text.secondary' }} />}
-                    label={<Typography variant="body2" color="text.secondary">Remember me</Typography>}
-                  />
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end' }}>
                   <Link href="/forgot-password" color="primary" variant="body2">
                     Forgot password?
                   </Link>

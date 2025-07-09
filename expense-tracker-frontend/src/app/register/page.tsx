@@ -13,7 +13,8 @@ import {
   InputAdornment,
   Link,
   ThemeProvider,
-  createTheme
+  createTheme,
+  Tooltip
 } from '@mui/material';
 import { Visibility, VisibilityOff, Person, Email, Lock } from '@mui/icons-material';
 import NextLink from 'next/link';
@@ -172,6 +173,37 @@ const UserRegistration = () => {
                     ),
                   }}
                 />
+
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <Tooltip 
+                    title={
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                          Password Requirements:
+                        </Typography>
+                        <Typography variant="body2">• At least 8 characters</Typography>
+                        <Typography variant="body2">• At least one uppercase letter</Typography>
+                        <Typography variant="body2">• At least one lowercase letter</Typography>
+                        <Typography variant="body2">• At least one number</Typography>
+                        <Typography variant="body2">• At least one special character</Typography>
+                      </Box>
+                    }
+                    arrow
+                    placement="bottom-end"
+                  >
+                    <Typography 
+                      variant="caption" 
+                      color="text.secondary"
+                      sx={{ 
+                        cursor: 'help',
+                        textDecoration: 'underline dotted',
+                        '&:hover': { color: 'primary.main' }
+                      }}
+                    >
+                      Password requirements
+                    </Typography>
+                  </Tooltip>
+                </Box>
 
                 <Button
                   type="submit"
