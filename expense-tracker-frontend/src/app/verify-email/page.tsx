@@ -2,26 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import {
-  Box,
-  ThemeProvider,
-  createTheme
-} from '@mui/material';
+import { Box, ThemeProvider } from '@mui/material';
+import { confirmSignUp, resendConfirmationCode } from '@/lib/cognito';
 import VerificationCard from '@/components/verificationComponents/VerificationCard';
 import VerificationForm from '@/components/verificationComponents/VerificationForm';
-
-const darkTheme = createTheme({
-  palette: {
-    mode: 'dark',
-    primary: {
-      main: '#2563eb',
-    },
-    background: {
-      default: '#030712',
-      paper: '#111827',
-    },
-  },
-});
+import darkTheme from '../../components/common/theme/darkTheme';
 
 const VerifyEmailPage = () => {
   const searchParams = useSearchParams();
@@ -39,22 +24,29 @@ const VerifyEmailPage = () => {
   }, [searchParams, router]);
 
   const handleVerify = async (code: string) => {
-    // TODO: Implement email verification API call
-    console.log('Verifying code:', code, 'for email:', email);
-    
-    // Mock verification
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Redirect to dashboard on success
-    router.push('/dashboard');
+    try {
+      await confirmSignUp(email, code);
+      router.push('/login');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert('Verification failed');
+      }
+    }
   };
 
   const handleResendCode = async () => {
-    // TODO: Implement resend code API call
-    console.log('Resending code to:', email);
-    
-    // Mock resend
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      await resendConfirmationCode(email);
+      alert('Verification code sent!');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert('Failed to resend code');
+      }
+    }
   };
 
   if (!email) {

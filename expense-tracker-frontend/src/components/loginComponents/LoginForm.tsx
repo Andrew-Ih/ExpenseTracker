@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Box, Stack } from '@mui/material';
 import { useRouter } from 'next/navigation';
+import { signIn } from '@/lib/cognito';
 import EmailInput from './formComponents/EmailInput';
 import PasswordInput from './formComponents/PasswordInput';
 import SubmitButton from './formComponents/SubmitButton';
@@ -19,10 +20,21 @@ const LoginForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
+    try {
+      const result = await signIn(formData.email, formData.password);
+      if (result.AuthenticationResult?.AccessToken) {
+        localStorage.setItem('accessToken', result.AuthenticationResult.AccessToken);
+        router.push('/dashboard');
+      }
+    } catch (error: any) {
+      if (error.name === 'UserNotConfirmedException') {
+        router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`);
+      } else {
+        alert(error.message || 'Login failed');
+      }
+    } finally {
       setLoading(false);
-      router.push('/dashboard');
-    }, 2000);
+    }
   };
 
   return (
