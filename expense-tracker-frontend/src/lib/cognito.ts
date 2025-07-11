@@ -3,7 +3,9 @@ import {
   SignUpCommand, 
   ConfirmSignUpCommand, 
   InitiateAuthCommand, 
-  ResendConfirmationCodeCommand 
+  ResendConfirmationCodeCommand,
+  ForgotPasswordCommand,
+  ConfirmForgotPasswordCommand 
 } from '@aws-sdk/client-cognito-identity-provider';
 import { AWS_CONFIG } from './aws-config';
 
@@ -47,6 +49,24 @@ export const resendConfirmationCode = async (email: string) => {
   const command = new ResendConfirmationCodeCommand({
     ClientId: AWS_CONFIG.userPoolWebClientId,
     Username: email
+  });
+  return await client.send(command);
+};
+
+export const forgotPassword = async (email: string) => {
+  const command = new ForgotPasswordCommand({
+    ClientId: AWS_CONFIG.userPoolWebClientId,
+    Username: email
+  });
+  return await client.send(command);
+};
+
+export const confirmForgotPassword = async (email: string, code: string, newPassword: string) => {
+  const command = new ConfirmForgotPasswordCommand({
+    ClientId: AWS_CONFIG.userPoolWebClientId,
+    Username: email,
+    ConfirmationCode: code,
+    Password: newPassword
   });
   return await client.send(command);
 };

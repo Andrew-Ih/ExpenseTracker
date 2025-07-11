@@ -26,11 +26,20 @@ const LoginForm = () => {
         localStorage.setItem('accessToken', result.AuthenticationResult.AccessToken);
         router.push('/dashboard');
       }
-    } catch (error: any) {
-      if (error.name === 'UserNotConfirmedException') {
+    } catch (error: unknown) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'name' in error &&
+        (error as { name?: string }).name === 'UserNotConfirmedException'
+      ) {
         router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`);
       } else {
-        alert(error.message || 'Login failed');
+        alert(
+          typeof error === 'object' && error !== null && 'message' in error
+            ? (error as { message?: string }).message
+            : 'Login failed'
+        );
       }
     } finally {
       setLoading(false);
