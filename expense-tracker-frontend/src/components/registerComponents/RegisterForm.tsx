@@ -35,8 +35,12 @@ const RegisterForm = () => {
     try {
       await signUp(formData.email, formData.password, formData.fullName);
       router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`);
-    } catch (error: any) {
-      alert(error.message || 'Registration failed');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        alert(error.message || 'Registration failed');
+      } else {
+        alert('Registration failed');
+      }
     } finally {
       setLoading(false);
     }
