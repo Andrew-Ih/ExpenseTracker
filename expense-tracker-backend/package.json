@@ -1,0 +1,23 @@
+{
+  "name": "expense-tracker-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/handler.js",
+  "scripts": {
+    "dev": "serverless offline",
+    "deploy": "serverless deploy"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "serverless-http": "^3.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10",
+    "serverless": "^3.40.0",
+    "serverless-offline": "^14.4.0"
+  }
+}
