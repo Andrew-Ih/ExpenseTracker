@@ -1,0 +1,20 @@
+service: expense-tracker-api
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ca-central-1
+  stage: ${opt:stage, 'dev'}
+
+functions:
+  api:
+    handler: src/handler.handler
+    events:
+      - httpApi: '*'
+
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: 3001
