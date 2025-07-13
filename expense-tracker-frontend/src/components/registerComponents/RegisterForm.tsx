@@ -33,7 +33,19 @@ const RegisterForm = () => {
     
     setLoading(true);
     try {
-      await signUp(formData.email, formData.password, formData.fullName);
+      const result = await signUp(formData.email, formData.password, formData.fullName);
+
+      // Store registration data in localStorage for later use
+      const [firstName, ...lastNameParts] = formData.fullName.split(' ');
+      const lastName = lastNameParts.join(' ') || '';
+      
+      localStorage.setItem('pendingUserData', JSON.stringify({
+        userId: result.userSub,
+        firstName,
+        lastName,
+        email: formData.email,
+      }));
+
       router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`);
     } catch (error: unknown) {
       if (error instanceof Error) {

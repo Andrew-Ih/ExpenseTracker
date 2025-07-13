@@ -21,7 +21,8 @@ export const signUp = async (email: string, password: string, fullName: string) 
       { Name: 'name', Value: fullName }
     ]
   });
-  return await client.send(command);
+  const result = await client.send(command);
+  return { userSub: result.UserSub };
 };
 
 export const confirmSignUp = async (email: string, code: string) => {
