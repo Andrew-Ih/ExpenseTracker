@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import authRoutes from './routes/auth.js';
+import userAuthRoutes from './routes/userAuthentication.js';
 import userRoutes from './routes/users.js';
 
 const app = express();
@@ -13,7 +13,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true })); 
 
 // Authentication routes
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', userAuthRoutes);
 // User routes
 app.use('/api/users', userRoutes);
 
