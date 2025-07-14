@@ -5,6 +5,10 @@ provider:
   runtime: nodejs18.x
   region: ca-central-1
   stage: ${opt:stage, 'dev'}
+  environment:
+    COGNITO_USER_POOL_CLIENT_ID: 6co59j70meatfn2u3964k6r8ns
+    COGNITO_USER_POOL_ID: ca-central-1_uLrgknZWQ
+
   iam:
     role:
       statements:

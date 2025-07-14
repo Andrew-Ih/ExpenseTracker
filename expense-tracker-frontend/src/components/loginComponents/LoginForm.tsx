@@ -22,29 +22,21 @@ const LoginForm = () => {
     setLoading(true);
     try {
       const result = await signIn(formData.email, formData.password);
-      if (result.AuthenticationResult?.AccessToken) {
-        localStorage.setItem('accessToken', result.AuthenticationResult.AccessToken);
+      if (result.accessToken) {
+        localStorage.setItem('accessToken', result.accessToken);
         router.push('/dashboard');
       }
     } catch (error: unknown) {
-      if (
-        typeof error === 'object' &&
-        error !== null &&
-        'name' in error &&
-        (error as { name?: string }).name === 'UserNotConfirmedException'
-      ) {
-        router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`);
+      if (error instanceof Error) {
+        alert(error.message);
       } else {
-        alert(
-          typeof error === 'object' && error !== null && 'message' in error
-            ? (error as { message?: string }).message
-            : 'Login failed'
-        );
+        alert('Login failed');
       }
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>

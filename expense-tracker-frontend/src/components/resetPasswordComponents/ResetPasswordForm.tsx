@@ -8,6 +8,7 @@ import CodeInput from './formComponents/CodeInput';
 import NewPasswordInput from './formComponents/NewPasswordInput';
 import ConfirmPasswordInput from './formComponents/ConfirmPasswordInput';
 import SubmitButton from './formComponents/SubmitButton';
+import PasswordTooltip from '../common/theme/PasswordTooltip';
 
 const ResetPasswordForm = () => {
   const [formData, setFormData] = useState({
@@ -64,7 +65,8 @@ const ResetPasswordForm = () => {
       <Stack spacing={3}>
         <CodeInput value={formData.code} onChange={handleChange} email={email} />
         <NewPasswordInput value={formData.newPassword} onChange={handleChange} />
-        <ConfirmPasswordInput value={formData.confirmPassword} onChange={handleChange} />
+        <ConfirmPasswordInput value={formData.confirmPassword} onChange={handleChange} /> 
+        <PasswordTooltip />
         <SubmitButton loading={loading} />
       </Stack>
     </Box>

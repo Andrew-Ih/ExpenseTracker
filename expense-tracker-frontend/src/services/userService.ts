@@ -22,3 +22,18 @@ export const createUser = async (userData: string) => {
 
   return response.json();
 };
+
+export const getUserProfile = async () => {
+  const response = await fetch(`${API_BASE_URL}/api/users/profile`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to get user profile');
+  }
+  
+  return response.json();
+};

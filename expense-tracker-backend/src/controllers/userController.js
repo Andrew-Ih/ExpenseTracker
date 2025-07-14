@@ -31,6 +31,22 @@ class UserController {
       res.status(500).json({ error: 'Failed to create user' });
     }
   }
+
+  static async getUserProfile(req, res) {
+    try {
+      const userId = req.user.userId; // From JWT middleware
+      const user = await UserModel.getById(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+      res.json(user);
+    } catch (error) {
+      console.error('Error getting user profile:', error);
+      res.status(500).json({ error: 'Failed to get user profile' });
+    }
+  }
 }
 
 export default UserController;
