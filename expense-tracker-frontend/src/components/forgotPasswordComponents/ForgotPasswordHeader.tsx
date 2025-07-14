@@ -10,7 +10,7 @@ const ForgotPasswordHeader = () => (
       Reset Password
     </Typography>
     <Typography variant="body2" color="text.secondary" textAlign="center">
-      Enter your email address and we'll send you a code to reset your password
+      Enter your email address and we will send you a code to reset your password
     </Typography>
   </Stack>
 );
