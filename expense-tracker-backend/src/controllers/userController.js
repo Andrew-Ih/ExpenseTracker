@@ -47,6 +47,44 @@ class UserController {
       res.status(500).json({ error: 'Failed to get user profile' });
     }
   }
+
+  static async updateUserProfile(req, res) {
+    try {
+      const userId = req.user.userId; // From JWT middleware
+      const { firstName, lastName, email } = req.body;
+
+      if (!firstName && !lastName && !email) {
+        return res.status(400).json({ error: 'At least one field must be provided for update' });
+      }
+
+      const updatedUser = await UserModel.updateById(userId, { firstName, lastName, email });
+
+      if (!updatedUser) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      res.json(updatedUser);
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+      res.status(500).json({ error: 'Failed to update user profile' });
+    }
+  }
+
+  static async deleteUserProfile(req, res) {
+    try {
+      const userId = req.user.userId; // From JWT middleware
+      const deletedUser = await UserModel.deleteById(userId);
+
+      if (!deletedUser) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      res.json({ message: 'User deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      res.status(500).json({ error: 'Failed to delete user' });
+    }
+  }
 }
 
 export default UserController;
