@@ -2,8 +2,19 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Box, Typography, Button, CircularProgress, Alert } from '@mui/material';
-import { getUserProfile } from '@/services/userService';
+import { 
+  Box, 
+  Typography, 
+  Button, 
+  CircularProgress, 
+  Alert, 
+  TextField,
+  Stack,
+  Card,
+  CardContent,
+  Divider
+} from '@mui/material';
+import { getUserProfile, updateUserProfile, deleteUserProfile } from '@/services/userService';
 
 interface UserProfile {
   userId: string;
@@ -17,7 +28,17 @@ const Dashboard = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  
+  // Form state for updates
+  const [editMode, setEditMode] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: ''
+  });
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
@@ -35,13 +56,64 @@ const Dashboard = () => {
     try {
       const profile = await getUserProfile();
       setUserProfile(profile);
-      console.log('User profile loaded:', profile);
+      setFormData({
+        firstName: profile.firstName,
+        lastName: profile.lastName
+      });
     } catch (error) {
       console.error('Failed to load profile:', error);
       setError('Failed to load user profile');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleUpdateProfile = async () => {
+    setUpdating(true);
+    setError(null);
+    setSuccess(null);
+    
+    try {
+      const userData = JSON.stringify(formData);
+      await updateUserProfile(userData);
+      
+      // Reload profile to get updated data
+      await loadUserProfile();
+      setEditMode(false);
+      setSuccess('Profile updated successfully!');
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      setError('Failed to update profile');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleDeleteProfile = async () => {
+    if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+      return;
+    }
+
+    setDeleting(true);
+    setError(null);
+    
+    try {
+      await deleteUserProfile();
+      localStorage.removeItem('accessToken');
+      alert('Account deleted successfully');
+      router.push('/');
+    } catch (error) {
+      console.error('Failed to delete profile:', error);
+      setError('Failed to delete account');
+      setDeleting(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
   };
 
   const handleLogout = () => {
@@ -54,7 +126,7 @@ const Dashboard = () => {
   }
 
   return (
-    <Box sx={{ p: 4 }}>
+    <Box sx={{ p: 4, maxWidth: 800, mx: 'auto' }}>
       <Typography variant="h4" gutterBottom>
         Dashboard
       </Typography>
@@ -71,20 +143,96 @@ const Dashboard = () => {
           {error}
         </Alert>
       )}
+
+      {success && (
+        <Alert severity="success" sx={{ mb: 2 }}>
+          {success}
+        </Alert>
+      )}
       
       {userProfile && (
-        <Box sx={{ mb: 3, p: 2, border: '1px solid #ddd', borderRadius: 1 }}>
-          <Typography variant="h6" gutterBottom>
-            Welcome, {userProfile.firstName} {userProfile.lastName}!
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Email: {userProfile.email}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            User ID: {userProfile.userId}
-          </Typography>
-        </Box>
+        <Card sx={{ mb: 3 }}>
+          <CardContent>
+            <Typography variant="h6" gutterBottom>
+              User Profile
+            </Typography>
+            
+            {!editMode ? (
+              // Display Mode
+              <Stack spacing={2}>
+                <Typography variant="body1">
+                  <strong>Name:</strong> {userProfile.firstName} {userProfile.lastName}
+                </Typography>
+                <Typography variant="body1">
+                  <strong>Email:</strong> {userProfile.email}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  <strong>User ID:</strong> {userProfile.userId}
+                </Typography>
+                
+                <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                  <Button 
+                    variant="contained" 
+                    onClick={() => setEditMode(true)}
+                  >
+                    Edit Profile
+                  </Button>
+                  <Button 
+                    variant="outlined" 
+                    color="error"
+                    onClick={handleDeleteProfile}
+                    disabled={deleting}
+                  >
+                    {deleting ? 'Deleting...' : 'Delete Account'}
+                  </Button>
+                </Stack>
+              </Stack>
+            ) : (
+              // Edit Mode
+              <Stack spacing={3}>
+                <TextField
+                  name="firstName"
+                  label="First Name"
+                  value={formData.firstName}
+                  onChange={handleInputChange}
+                  fullWidth
+                />
+                <TextField
+                  name="lastName"
+                  label="Last Name"
+                  value={formData.lastName}
+                  onChange={handleInputChange}
+                  fullWidth
+                />
+                
+                <Stack direction="row" spacing={2}>
+                  <Button 
+                    variant="contained" 
+                    onClick={handleUpdateProfile}
+                    disabled={updating}
+                  >
+                    {updating ? 'Updating...' : 'Save Changes'}
+                  </Button>
+                  <Button 
+                    variant="outlined" 
+                    onClick={() => {
+                      setEditMode(false);
+                      setFormData({
+                        firstName: userProfile.firstName,
+                        lastName: userProfile.lastName
+                      });
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </Stack>
+              </Stack>
+            )}
+          </CardContent>
+        </Card>
       )}
+      
+      <Divider sx={{ my: 3 }} />
       
       <Typography variant="body1" sx={{ mb: 2 }}>
         Welcome to your expense tracker!

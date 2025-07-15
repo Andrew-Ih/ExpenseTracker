@@ -5,7 +5,9 @@ import {
   InitiateAuthCommand, 
   ResendConfirmationCodeCommand,
   ForgotPasswordCommand,
-  ConfirmForgotPasswordCommand 
+  ConfirmForgotPasswordCommand,
+  UpdateUserAttributesCommand,
+  DeleteUserCommand
 } from '@aws-sdk/client-cognito-identity-provider';
 
 const client = new CognitoIdentityProviderClient({ region: 'ca-central-1' });
@@ -69,6 +71,25 @@ class CognitoService {
       Username: email,
       ConfirmationCode: code,
       Password: newPassword
+    });
+    return await client.send(command);
+  }
+
+  static async updateUserAttributes(accessToken, firstName, lastName) {
+    const fullName = `${firstName} ${lastName}`.trim();
+    
+    const command = new UpdateUserAttributesCommand({
+      AccessToken: accessToken,
+      UserAttributes: [
+        { Name: 'name', Value: fullName }
+      ]
+    });
+    return await client.send(command);
+  }
+
+  static async deleteUser(accessToken) {
+    const command = new DeleteUserCommand({
+      AccessToken: accessToken
     });
     return await client.send(command);
   }
