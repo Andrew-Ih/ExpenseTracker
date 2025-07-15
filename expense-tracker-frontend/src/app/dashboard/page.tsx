@@ -37,8 +37,7 @@ const Dashboard = () => {
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
-    lastName: '',
-    email: ''
+    lastName: ''
   });
 
   useEffect(() => {
@@ -59,10 +58,8 @@ const Dashboard = () => {
       setUserProfile(profile);
       setFormData({
         firstName: profile.firstName,
-        lastName: profile.lastName,
-        email: profile.email
+        lastName: profile.lastName
       });
-      console.log('User profile loaded:', profile);
     } catch (error) {
       console.error('Failed to load profile:', error);
       setError('Failed to load user profile');
@@ -207,14 +204,6 @@ const Dashboard = () => {
                   onChange={handleInputChange}
                   fullWidth
                 />
-                <TextField
-                  name="email"
-                  label="Email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  fullWidth
-                />
                 
                 <Stack direction="row" spacing={2}>
                   <Button 
@@ -230,8 +219,7 @@ const Dashboard = () => {
                       setEditMode(false);
                       setFormData({
                         firstName: userProfile.firstName,
-                        lastName: userProfile.lastName,
-                        email: userProfile.email
+                        lastName: userProfile.lastName
                       });
                     }}
                   >

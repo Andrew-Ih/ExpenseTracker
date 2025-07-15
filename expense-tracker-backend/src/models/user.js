@@ -48,13 +48,7 @@ class UserModel {
       expressionAttributeNames['#ln'] = 'lastName';
       expressionAttributeValues[':ln'] = updateData.lastName;
     }
-
-    if (updateData.email !== undefined) {
-      updateExpressions.push('#em = :em');
-      expressionAttributeNames['#em'] = 'email';
-      expressionAttributeValues[':em'] = updateData.email;
-    }
-
+    
     // If no fields to update, return null
     if (updateExpressions.length === 0) {
       return null;

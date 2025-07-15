@@ -1,5 +1,4 @@
 import CognitoService from '../services/cognitoService.js';
-import UserModel from '../models/user.js';
 
 class AuthController {
   static async signUp(req, res) {

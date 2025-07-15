@@ -1,4 +1,5 @@
 import UserModel from '../models/user.js';
+import CognitoService from '../services/cognitoService.js'; 
 
 class UserController {
   static async createUser(req, res) {
@@ -51,13 +52,18 @@ class UserController {
   static async updateUserProfile(req, res) {
     try {
       const userId = req.user.userId; // From JWT middleware
-      const { firstName, lastName, email } = req.body;
+      const { firstName, lastName } = req.body;
+      const accessToken = req.headers.authorization.replace('Bearer ', '');
 
-      if (!firstName && !lastName && !email) {
+      if (!firstName && !lastName ) {
         return res.status(400).json({ error: 'At least one field must be provided for update' });
       }
 
-      const updatedUser = await UserModel.updateById(userId, { firstName, lastName, email });
+      // Update both DynamoDB and Cognito
+      const [updatedUser] = await Promise.all([
+        UserModel.updateById(userId, { firstName, lastName }),
+        CognitoService.updateUserAttributes(accessToken, firstName, lastName)
+      ]);
 
       if (!updatedUser) {
         return res.status(404).json({ error: 'User not found' });
@@ -73,7 +79,13 @@ class UserController {
   static async deleteUserProfile(req, res) {
     try {
       const userId = req.user.userId; // From JWT middleware
-      const deletedUser = await UserModel.deleteById(userId);
+      const accessToken = req.headers.authorization.replace('Bearer ', '');
+
+      // Delete from both DynamoDB and Cognito
+      const [deletedUser] = await Promise.all([
+        UserModel.deleteById(userId),
+        CognitoService.deleteUser(accessToken)
+      ]);
 
       if (!deletedUser) {
         return res.status(404).json({ error: 'User not found' });
