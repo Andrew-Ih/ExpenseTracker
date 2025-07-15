@@ -7,6 +7,7 @@ import { confirmSignUp, resendConfirmationCode } from '@/lib/cognito';
 import VerificationCard from '@/components/verificationComponents/VerificationCard';
 import VerificationForm from '@/components/verificationComponents/VerificationForm';
 import darkTheme from '../../components/common/theme/darkTheme';
+import { createUser } from '@/services/userService';
 
 const VerifyEmailPage = () => {
   const searchParams = useSearchParams();
@@ -26,7 +27,13 @@ const VerifyEmailPage = () => {
   const handleVerify = async (code: string) => {
     try {
       await confirmSignUp(email, code);
-      router.push('/login');
+      const pendingUserData = localStorage.getItem('pendingUserData');
+      
+      if(pendingUserData) {
+        await createUser(pendingUserData);
+        localStorage.removeItem('pendingUserData');
+        router.push('/login');
+      }
     } catch (error: unknown) {
       if (error instanceof Error) {
         alert(error.message);

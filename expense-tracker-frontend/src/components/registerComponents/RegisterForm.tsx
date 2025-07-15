@@ -8,7 +8,7 @@ import FullNameInput from './formComponents/FullNameInput';
 import EmailInput from './formComponents/EmailInput';
 import PasswordInput from './formComponents/PasswordInput';
 import ConfirmPasswordInput from './formComponents/ConfirmPasswordInput';
-import PasswordTooltip from './PasswordTooltip';
+import PasswordTooltip from '../common/theme/PasswordTooltip';
 import SubmitButton from './formComponents/SubmitButton';
 
 const RegisterForm = () => {
@@ -33,11 +33,22 @@ const RegisterForm = () => {
     
     setLoading(true);
     try {
-      await signUp(formData.email, formData.password, formData.fullName);
+      const result = await signUp(formData.email, formData.password, formData.fullName);
+      
+      const [firstName, ...lastNameParts] = formData.fullName.split(' ');
+      const lastName = lastNameParts.join(' ') || '';
+      
+      localStorage.setItem('pendingUserData', JSON.stringify({
+        userId: result.userSub,
+        firstName,
+        lastName,
+        email: formData.email
+      }));
+
       router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`);
     } catch (error: unknown) {
       if (error instanceof Error) {
-        alert(error.message || 'Registration failed');
+        alert(error.message);
       } else {
         alert('Registration failed');
       }

@@ -1,72 +1,91 @@
-import { 
-  CognitoIdentityProviderClient, 
-  SignUpCommand, 
-  ConfirmSignUpCommand, 
-  InitiateAuthCommand, 
-  ResendConfirmationCodeCommand,
-  ForgotPasswordCommand,
-  ConfirmForgotPasswordCommand 
-} from '@aws-sdk/client-cognito-identity-provider';
-import { AWS_CONFIG } from './aws-config';
-
-const client = new CognitoIdentityProviderClient({ region: AWS_CONFIG.region });
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const signUp = async (email: string, password: string, fullName: string) => {
-  const command = new SignUpCommand({
-    ClientId: AWS_CONFIG.userPoolWebClientId,
-    Username: email,
-    Password: password,
-    UserAttributes: [
-      { Name: 'email', Value: email },
-      { Name: 'name', Value: fullName }
-    ]
+  const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password, fullName })
   });
-  return await client.send(command);
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error);
+  }
+  
+  return response.json();
 };
 
 export const confirmSignUp = async (email: string, code: string) => {
-  const command = new ConfirmSignUpCommand({
-    ClientId: AWS_CONFIG.userPoolWebClientId,
-    Username: email,
-    ConfirmationCode: code
+  const response = await fetch(`${API_BASE_URL}/api/auth/confirm-signup`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, code })
   });
-  return await client.send(command);
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error);
+  }
+  
+  return response.json();
 };
 
 export const signIn = async (email: string, password: string) => {
-  const command = new InitiateAuthCommand({
-    ClientId: AWS_CONFIG.userPoolWebClientId,
-    AuthFlow: 'USER_PASSWORD_AUTH',
-    AuthParameters: {
-      USERNAME: email,
-      PASSWORD: password
-    }
+  const response = await fetch(`${API_BASE_URL}/api/auth/signin`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
   });
-  return await client.send(command);
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error);
+  }
+  
+  return response.json();
 };
 
 export const resendConfirmationCode = async (email: string) => {
-  const command = new ResendConfirmationCodeCommand({
-    ClientId: AWS_CONFIG.userPoolWebClientId,
-    Username: email
+  const response = await fetch(`${API_BASE_URL}/api/auth/resend-code`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email })
   });
-  return await client.send(command);
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error);
+  }
+  
+  return response.json();
 };
 
 export const forgotPassword = async (email: string) => {
-  const command = new ForgotPasswordCommand({
-    ClientId: AWS_CONFIG.userPoolWebClientId,
-    Username: email
+  const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email })
   });
-  return await client.send(command);
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error);
+  }
+  
+  return response.json();
 };
 
 export const confirmForgotPassword = async (email: string, code: string, newPassword: string) => {
-  const command = new ConfirmForgotPasswordCommand({
-    ClientId: AWS_CONFIG.userPoolWebClientId,
-    Username: email,
-    ConfirmationCode: code,
-    Password: newPassword
+  const response = await fetch(`${API_BASE_URL}/api/auth/confirm-forgot-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, code, newPassword })
   });
-  return await client.send(command);
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error);
+  }
+  
+  return response.json();
 };
