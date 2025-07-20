@@ -1,7 +1,7 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand, GetCommand, UpdateCommand, DeleteCommand } from '@aws-sdk/lib-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
-import { verifyTransactionOwnership } from '../helpers/transactionModelHelpers.js';
+import { verifyTransactionOwnership, buildUpdateExpression } from '../helpers/transactions/transactionModelHelpers.js';
 
 const client = new DynamoDBClient({ region: 'ca-central-1' });
 const docClient = DynamoDBDocumentClient.from(client);
@@ -28,7 +28,30 @@ class TransactionModel {
     return params.Item;
   }
 
-  static async deleteById(transactionId, userId) {
+  static async updateTransactionById(transactionId, userId, updateData) {
+    await verifyTransactionOwnership(docClient, transactionId, userId);
+    
+    const { 
+        updateExpression, 
+        expressionAttributeNames, 
+        expressionAttributeValues 
+    } = buildUpdateExpression(updateData);
+    
+    const params = {
+        TableName: 'ExpenseTrackerTransactions',
+        Key: { transactionId },
+        UpdateExpression: updateExpression,
+        ExpressionAttributeNames: expressionAttributeNames,
+        ExpressionAttributeValues: expressionAttributeValues,
+        ReturnValues: 'ALL_NEW'
+    };
+    
+    const result = await docClient.send(new UpdateCommand(params));
+    return result.Attributes;
+  }
+
+
+  static async deleteTransactionById(transactionId, userId) {
     await verifyTransactionOwnership(docClient, transactionId, userId);
     
     // Delete the transaction

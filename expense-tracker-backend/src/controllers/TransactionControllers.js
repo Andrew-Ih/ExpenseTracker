@@ -1,5 +1,6 @@
 import TransactionModel from "../models/TransactionModel.js";
-import { validateTransactionData } from "../helpers/transactionValidators.js";
+import { validateTransactionData } from "../helpers/transactions/transactionValidators.js";
+import { handleTransactionError } from '../helpers/transactions/transactionErrorHandlers.js';
 
 class TransactionControllers {
   static async createTransaction(req, res) {
@@ -18,16 +19,37 @@ class TransactionControllers {
       const newTransaction = await TransactionModel.createTransaction(transactionData, userId);
       res.status(201).json(newTransaction);
     } catch (error) {
-      res.status(500).json({ error: "Internal server error" });
+      handleTransactionError(error, res);
     }
   }
 
   static async getTransactions(req, res) {
-
+    res.status(200).json({ message: "This endpoint is under development" });
   }
 
   static async updateTransaction(req, res) {
+    const userId = req.user.userId; // From JWT middleware
+    const { transactionId, ...updateData } = req.body;
 
+    try {
+      if (!transactionId) {
+        return res.status(400).json({ error: "Transaction ID is required" });
+      }
+
+      // Validate update data if needed
+      if (updateData.type && !['income', 'expense'].includes(updateData.type)) {
+        return res.status(400).json({ error: "Type must be income or expense" });
+      }
+
+      const updatedTransaction = await TransactionModel.updateTransactionById( transactionId, userId, updateData );
+      
+      res.status(200).json({
+        message: "Transaction updated successfully",
+        transaction: updatedTransaction
+      });
+    } catch (error) {      
+      handleTransactionError(error, res);
+    }
   }
 
   static async deleteTransaction(req, res) {
@@ -38,20 +60,14 @@ class TransactionControllers {
       if (!transactionId) {
         return res.status(400).json({ error: "Transaction ID is required" });
       }
-      const deletedTransaction = await TransactionModel.deleteById(transactionId, userId);
+      const deletedTransaction = await TransactionModel.deleteTransactionById(transactionId, userId);
       
       res.status(200).json({
         message: "Transaction deleted successfully",
         transaction: deletedTransaction
       });
     } catch (error) {
-      if (error.message === 'Transaction not found') {
-        return res.status(404).json({ error: "Transaction not found" });
-      }
-      if (error.message.startsWith('Unauthorized')) {
-        return res.status(403).json({ error: error.message });
-      }
-      res.status(500).json({ error: "Internal server error" });
+      handleTransactionError(error, res);
     }
   }
 }
