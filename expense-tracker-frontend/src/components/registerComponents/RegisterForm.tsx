@@ -8,7 +8,7 @@ import FullNameInput from './formComponents/FullNameInput';
 import EmailInput from './formComponents/EmailInput';
 import PasswordInput from './formComponents/PasswordInput';
 import ConfirmPasswordInput from './formComponents/ConfirmPasswordInput';
-import PasswordTooltip from '../common/theme/PasswordTooltip';
+import PasswordTooltip from '../common/PasswordTooltip';
 import SubmitButton from './formComponents/SubmitButton';
 
 const RegisterForm = () => {

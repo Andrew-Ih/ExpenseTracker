@@ -2,8 +2,6 @@
 
 A full-stack web application for tracking personal expenses with secure user authentication and profile management.
 
-![Expense Tracker](https://via.placeholder.com/800x400?text=Expense+Tracker)
-
 ## Features
 
 - **User Authentication**
@@ -37,30 +35,6 @@ A full-stack web application for tracking personal expenses with secure user aut
 - **Authentication**: Amazon Cognito User Pools
 - **Deployment**: AWS Lambda via Serverless Framework
 
-## Project Structure
-
-```
-ExpenseTracker/
-├── expense-tracker-frontend/     # Next.js frontend
-│   ├── src/
-│   │   ├── app/                  # Next.js App Router pages
-│   │   ├── components/           # React components
-│   │   ├── lib/                  # Cognito integration
-│   │   └── services/             # API services
-│   └── public/                   # Static assets
-│
-└── expense-tracker-backend/      # Express.js backend
-    ├── src/
-    │   ├── controllers/          # Request handlers
-    │   ├── models/               # Data models
-    │   ├── routes/               # API routes
-    │   ├── middleware/           # Auth middleware
-    │   ├── services/             # External services
-    │   ├── app.js                # Express app
-    │   └── handler.js            # Lambda handler
-    └── serverless.yml            # Serverless config
-```
-
 ## Getting Started
 
 ### Prerequisites
@@ -91,7 +65,7 @@ npm run deploy
 # Update frontend environment variables with new API URL
 ```
 
-## AWS Services Used
+## AWS Services Used so far:
 - **Amazon Cognito**: User authentication
 - **AWS Lambda**: Serverless backend
 - **Amazon API Gateway**: REST API endpoints
@@ -111,13 +85,4 @@ npm run deploy
 3. **Data Flow**:
    - User data stored in both Cognito and DynamoDB
    - Profile updates sync between both systems
-
-## Future Enhancements
-
-- Expense tracking functionality
-- Budget management
-- Reports and analytics
-- Categories and tags
-- Receipt uploads
-- Multi-currency support
 
