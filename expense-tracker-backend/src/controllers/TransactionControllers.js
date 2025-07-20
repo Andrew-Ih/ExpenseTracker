@@ -31,7 +31,28 @@ class TransactionControllers {
   }
 
   static async deleteTransaction(req, res) {
+    const userId = req.user.userId; // From JWT middleware
+    const { transactionId } = req.body;
 
+    try {
+      if (!transactionId) {
+        return res.status(400).json({ error: "Transaction ID is required" });
+      }
+      const deletedTransaction = await TransactionModel.deleteById(transactionId, userId);
+      
+      res.status(200).json({
+        message: "Transaction deleted successfully",
+        transaction: deletedTransaction
+      });
+    } catch (error) {
+      if (error.message === 'Transaction not found') {
+        return res.status(404).json({ error: "Transaction not found" });
+      }
+      if (error.message.startsWith('Unauthorized')) {
+        return res.status(403).json({ error: error.message });
+      }
+      res.status(500).json({ error: "Internal server error" });
+    }
   }
 }
 
