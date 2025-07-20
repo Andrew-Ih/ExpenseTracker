@@ -1,8 +1,8 @@
 import UserModel from '../models/user.js';
 import CognitoService from '../services/cognitoService.js'; 
 
-class UserController {
-  static async createUser(req, res) {
+class UserProfileManagementController {
+  static async createUserProfile(req, res) {
     try {
       const { firstName, lastName, email, userId } = req.body;
       
@@ -99,4 +99,4 @@ class UserController {
   }
 }
 
-export default UserController;
+export default UserProfileManagementController;

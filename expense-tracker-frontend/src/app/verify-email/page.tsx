@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Box, ThemeProvider } from '@mui/material';
 import { confirmSignUp, resendConfirmationCode } from '@/lib/cognito';
+import PageLayout from '@/components/common/layout/PageLayout';
 import VerificationCard from '@/components/verificationComponents/VerificationCard';
 import VerificationForm from '@/components/verificationComponents/VerificationForm';
-import darkTheme from '../../components/common/theme/darkTheme';
 import { createUser } from '@/services/userService';
 
 const VerifyEmailPage = () => {
@@ -61,26 +60,15 @@ const VerifyEmailPage = () => {
   }
 
   return (
-    <ThemeProvider theme={darkTheme}>
-      <Box
-        sx={{
-          minHeight: '100vh',
-          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          p: 2
-        }}
-      >
-        <VerificationCard>
-          <VerificationForm
-            email={email}
-            onVerify={handleVerify}
-            onResendCode={handleResendCode}
-          />
-        </VerificationCard>
-      </Box>
-    </ThemeProvider>
+    <PageLayout>
+      <VerificationCard>
+        <VerificationForm
+          email={email}
+          onVerify={handleVerify}
+          onResendCode={handleResendCode}
+        />
+      </VerificationCard>
+    </PageLayout>
   );
 };
 
