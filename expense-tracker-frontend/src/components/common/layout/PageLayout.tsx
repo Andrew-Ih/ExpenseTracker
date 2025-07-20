@@ -12,12 +12,14 @@ interface PageLayoutProps {
  * Provides consistent theming and styling across the application
  */
 const PageLayout = ({ children, centered = true }: PageLayoutProps) => {
+  const selectedTheme = darkTheme;
+
   return (
-    <ThemeProvider theme={darkTheme}>
+    <ThemeProvider theme={selectedTheme}>
       <Box
         sx={{
           minHeight: '100vh',
-          background: darkTheme.palette.background.gradient,
+          background: selectedTheme.palette.background.gradient,
           display: 'flex',
           flexDirection: 'column',
           ...(centered && {
