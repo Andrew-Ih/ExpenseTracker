@@ -15,6 +15,13 @@ A full-stack web application for tracking personal expenses with secure user aut
   - Update name details
   - Delete account (removes data from both DynamoDB and Cognito)
 
+- **Transaction Management**
+  - Create, read, update, and delete financial transactions
+  - Categorize expenses and income
+  - Track transaction history
+  - User-specific transaction isolation
+  - Partial updates for transaction fields
+
 - **Responsive UI**
   - Modern Material UI components
   - Mobile-friendly design
@@ -34,6 +41,7 @@ A full-stack web application for tracking personal expenses with secure user aut
 - **Database**: Amazon DynamoDB
 - **Authentication**: Amazon Cognito User Pools
 - **Deployment**: AWS Lambda via Serverless Framework
+- **Infrastructure as Code**: AWS CloudFormation via Serverless Framework
 
 ## Getting Started
 
@@ -65,12 +73,29 @@ npm run deploy
 # Update frontend environment variables with new API URL
 ```
 
-## AWS Services Used so far:
+## AWS Services Used:
 - **Amazon Cognito**: User authentication
 - **AWS Lambda**: Serverless backend
 - **Amazon API Gateway**: REST API endpoints
 - **Amazon DynamoDB**: NoSQL database
 - **AWS IAM**: Security and permissions
+- **AWS CloudFormation**: Infrastructure as Code
+
+## Infrastructure as Code (IaC)
+
+This project uses AWS CloudFormation through the Serverless Framework to define and provision AWS infrastructure:
+
+- **DynamoDB Tables**: User and transaction tables with appropriate indexes
+- **IAM Roles and Policies**: Least privilege access for Lambda functions
+- **API Gateway**: REST API configuration
+- **Lambda Functions**: Serverless compute for the backend
+
+Benefits of using IaC with CloudFormation:
+- **Reproducible environments**: The same infrastructure can be deployed consistently
+- **Version control**: Infrastructure changes are tracked in Git
+- **Automated deployments**: One command to deploy all resources
+- **Reduced human error**: No manual steps in the AWS console
+- **Cost management**: Resources are defined explicitly, preventing unexpected charges
 
 ## Development Workflow
 
@@ -85,4 +110,10 @@ npm run deploy
 3. **Data Flow**:
    - User data stored in both Cognito and DynamoDB
    - Profile updates sync between both systems
+   - Transactions stored in DynamoDB with user isolation
 
+4. **Transaction Operations**:
+   - Create: Add new income or expense entries
+   - Read: View transaction history with filtering options
+   - Update: Modify transaction details as needed
+   - Delete: Remove unwanted transactions
