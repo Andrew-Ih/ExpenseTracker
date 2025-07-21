@@ -1,6 +1,7 @@
 import TransactionModel from "../models/TransactionModel.js";
-import { validateTransactionData } from "../helpers/transactions/transactionValidators.js";
+import { validateTransactionData, validateTransactionQueryParams, parseTransactionQueryParams } from "../helpers/transactions/transactionValidators.js";
 import { handleTransactionError } from '../helpers/transactions/transactionErrorHandlers.js';
+import { formatTransactionsResponse } from '../helpers/transactions/transactionControllerHelpers.js';
 
 class TransactionControllers {
   static async createTransaction(req, res) {
@@ -24,7 +25,29 @@ class TransactionControllers {
   }
 
   static async getTransactions(req, res) {
-    res.status(200).json({ message: "This endpoint is under development" });
+    const userId = req.user.userId; // From JWT middleware
+    try {
+      // Parse and validate query parameters
+      const validationErrors = validateTransactionQueryParams(req.body);
+      if (validationErrors) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: validationErrors 
+        });
+      }
+      
+      // Parse query parameters
+      const queryParams = parseTransactionQueryParams(req.body);
+      
+      // Get transactions with filters
+      const result = await TransactionModel.getTransactions(userId, queryParams);
+      
+      // Format and return the response
+      const response = formatTransactionsResponse(result.transactions, result.lastEvaluatedKey);
+      res.status(200).json(response);
+    } catch (error) {
+      handleTransactionError(error, res);
+    }
   }
 
   static async updateTransaction(req, res) {
