@@ -3,76 +3,86 @@ import { DynamoDBDocumentClient, PutCommand, QueryCommand, UpdateCommand, Delete
 import { v4 as uuidv4 } from 'uuid';
 import { verifyTransactionOwnership, buildUpdateExpression, buildTransactionQueryParams } from '../helpers/transactions/transactionModelHelpers.js';
 
-const client = new DynamoDBClient({ region: 'ca-central-1' });
-const docClient = DynamoDBDocumentClient.from(client);
+const dbClient = (() => {
+  const client = new DynamoDBClient({ region: 'ca-central-1' });
+  return DynamoDBDocumentClient.from(client);
+})();
 
 class TransactionModel {
-  static async createTransaction(transactionData, userId) {
+  static TABLE_NAME = 'ExpenseTrackerTransactions';
+  
+  static createTransactionItem(transactionData, userId) {
     const currentDate = new Date().toISOString();
+    const dateOnly = currentDate.split('T')[0];
+    
+    return {
+      transactionId: uuidv4(),
+      userId,
+      amount: transactionData.amount,
+      type: transactionData.type,
+      category: transactionData.category,
+      description: transactionData.description,
+      date: transactionData.date || dateOnly,
+      createdAt: dateOnly,
+      updatedAt: dateOnly
+    };
+  }
+
+  static async createTransaction(transactionData, userId) {
+    const item = this.createTransactionItem(transactionData, userId);
+    
     const params = {
-      TableName: 'ExpenseTrackerTransactions',
-      Item: {
-        transactionId: uuidv4(),
-        userId: userId,
-        amount: transactionData.amount,
-        type: transactionData.type, // 'income' or 'expense'
-        category: transactionData.category,
-        description: transactionData.description,
-        date: transactionData.date || currentDate.split('T')[0],
-        createdAt: currentDate.split('T')[0],
-        updatedAt: currentDate.split('T')[0]
-      }
+      TableName: this.TABLE_NAME,
+      Item: item
     };
     
-    await docClient.send(new PutCommand(params));
-    return params.Item;
+    await dbClient.send(new PutCommand(params));
+    return item;
   }
 
   static async getTransactions(userId, options = {}) {
-    const params = buildTransactionQueryParams(userId, options);
-    // Execute the query
-    const { Items, LastEvaluatedKey } = await docClient.send(new QueryCommand(params));
+    const params = buildTransactionQueryParams(userId, options, this.TABLE_NAME);
+    const { Items, LastEvaluatedKey } = await dbClient.send(new QueryCommand(params));
     
     return {
-        transactions: Items || [],
-        lastEvaluatedKey: LastEvaluatedKey // For pagination
+      transactions: Items || [],
+      lastEvaluatedKey: LastEvaluatedKey
     };
   }
 
   static async updateTransactionById(transactionId, userId, updateData) {
-    await verifyTransactionOwnership(docClient, transactionId, userId);
+    await verifyTransactionOwnership(dbClient, transactionId, userId, this.TABLE_NAME);
     
     const { 
-        updateExpression, 
-        expressionAttributeNames, 
-        expressionAttributeValues 
+      updateExpression, 
+      expressionAttributeNames, 
+      expressionAttributeValues 
     } = buildUpdateExpression(updateData);
     
     const params = {
-        TableName: 'ExpenseTrackerTransactions',
-        Key: { transactionId },
-        UpdateExpression: updateExpression,
-        ExpressionAttributeNames: expressionAttributeNames,
-        ExpressionAttributeValues: expressionAttributeValues,
-        ReturnValues: 'ALL_NEW'
+      TableName: this.TABLE_NAME,
+      Key: { transactionId },
+      UpdateExpression: updateExpression,
+      ExpressionAttributeNames: expressionAttributeNames,
+      ExpressionAttributeValues: expressionAttributeValues,
+      ReturnValues: 'ALL_NEW'
     };
     
-    const result = await docClient.send(new UpdateCommand(params));
+    const result = await dbClient.send(new UpdateCommand(params));
     return result.Attributes;
   }
 
   static async deleteTransactionById(transactionId, userId) {
-    await verifyTransactionOwnership(docClient, transactionId, userId);
+    await verifyTransactionOwnership(dbClient, transactionId, userId, this.TABLE_NAME);
     
-    // Delete the transaction
-    const deleteParams = {
-        TableName: 'ExpenseTrackerTransactions',
-        Key: { transactionId },
-        ReturnValues: 'ALL_OLD' // Return the deleted item
+    const params = {
+      TableName: this.TABLE_NAME,
+      Key: { transactionId },
+      ReturnValues: 'ALL_OLD'
     };
     
-    const result = await docClient.send(new DeleteCommand(deleteParams));
-    return result.Attributes; // Return the deleted transaction
+    const result = await dbClient.send(new DeleteCommand(params));
+    return result.Attributes;
   }
 }
 

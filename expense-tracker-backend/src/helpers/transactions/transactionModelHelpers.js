@@ -1,31 +1,67 @@
 import { GetCommand } from '@aws-sdk/lib-dynamodb';
 
 export const verifyTransactionOwnership = async (docClient, transactionId, userId) => {
+  const transaction = await _getTransactionById(docClient, transactionId);
+  return _verifyOwnership(transaction, userId);
+};
+
+export const buildUpdateExpression = (updateData) => {
+  const fields = ['amount', 'type', 'category', 'description', 'date'];
+
+  const { updateExpressions, expressionAttributeNames, expressionAttributeValues } = _processUpdatableFields(updateData, fields);
+  _addTimestampField(updateExpressions, expressionAttributeNames, expressionAttributeValues);
+  _validateUpdateExpressions(updateExpressions);
+  
+  return {
+    updateExpression: _formatUpdateExpression(updateExpressions),
+    expressionAttributeNames,
+    expressionAttributeValues
+  };
+};
+
+export const buildTransactionQueryParams = (userId, options = {}) => {
+  const params = _initializeBaseParams(userId);
+  
+  _addDateFilters(params, options);
+  _addCategoryFilter(params, options.category);
+  _addTypeFilter(params, options.type);
+  _addPagination(params, options);
+  
+  return _cleanupParams(params);
+};
+
+// ******************************************************
+// Helper functions for verifyTransactionOwnership
+// ******************************************************
+const _getTransactionById = async (docClient, transactionId) => {
   const getParams = {
     TableName: 'ExpenseTrackerTransactions',
     Key: { transactionId }
   };
 
   const { Item: transaction } = await docClient.send(new GetCommand(getParams));
-
+  
   if (!transaction) {
     throw new Error('Transaction not found');
   }
-
-  if (transaction.userId !== userId) {
-    throw new Error('Unauthorized: Transaction belongs to another user');
-  }
-
+  
   return transaction;
 };
 
-export const buildUpdateExpression = (updateData) => {
+const _verifyOwnership = (transaction, userId) => {
+  if (transaction.userId !== userId) {
+    throw new Error('Unauthorized: Transaction belongs to another user');
+  }
+  return transaction;
+};
+
+// ******************************************************
+// Helper functions for buildUpdateExpression
+// ******************************************************
+const _processUpdatableFields = (updateData, fields) => {
   const updateExpressions = [];
   const expressionAttributeNames = {};
   const expressionAttributeValues = {};
-  
-  // Process each updatable field
-  const fields = ['amount', 'type', 'category', 'description', 'date'];
   
   fields.forEach(field => {
     if (updateData[field] !== undefined) {
@@ -35,27 +71,32 @@ export const buildUpdateExpression = (updateData) => {
     }
   });
   
-  // Add updatedAt timestamp
-  const currentDate = new Date().toISOString();
-  updateExpressions.push('#updatedAt = :updatedAt');
-  expressionAttributeNames['#updatedAt'] = 'updatedAt';
-  expressionAttributeValues[':updatedAt'] = currentDate.split('T')[0];
-  
-  // Check if there are fields to update
-  if (updateExpressions.length === 1) { // Only updatedAt
-    throw new Error('No fields to update');
-  }
-  
-  return {
-    updateExpression: `set ${updateExpressions.join(', ')}`,
-    expressionAttributeNames,
-    expressionAttributeValues
-  };
+  return { updateExpressions, expressionAttributeNames, expressionAttributeValues };
 };
 
-export const buildTransactionQueryParams = (userId, options = {}) => {
-  // Set up base query parameters
-  const params = {
+const _addTimestampField = (expressions, names, values) => {
+  const currentDate = new Date().toISOString().split('T')[0];
+  expressions.push('#updatedAt = :updatedAt');
+  names['#updatedAt'] = 'updatedAt';
+  values[':updatedAt'] = currentDate;
+};
+
+const _validateUpdateExpressions = (expressions) => {
+  // Check if there are fields to update (besides updatedAt)
+  if (expressions.length === 1) { // Only updatedAt
+    throw new Error('No fields to update');
+  }
+};
+
+const _formatUpdateExpression = (expressions) => {
+  return `set ${expressions.join(', ')}`;
+};
+
+// ******************************************************
+// Helper functions buildTransactionQueryParams
+// ******************************************************
+const _initializeBaseParams = (userId) => {
+  return {
     TableName: 'ExpenseTrackerTransactions',
     IndexName: 'UserDateIndex',
     KeyConditionExpression: 'userId = :userId',
@@ -63,46 +104,48 @@ export const buildTransactionQueryParams = (userId, options = {}) => {
       ':userId': userId
     }
   };
+};
+
+const _addDateFilters = (params, options) => {
+  if (!options.startDate && !options.endDate) return;
   
-  // Initialize ExpressionAttributeNames
-  if (options.startDate || options.endDate || options.type) {
-    params.ExpressionAttributeNames = {};
+  params.ExpressionAttributeNames = params.ExpressionAttributeNames || {};
+  params.ExpressionAttributeNames['#date'] = 'date';
+  
+  if (options.startDate && options.endDate) {
+    params.KeyConditionExpression += ' AND #date BETWEEN :startDate AND :endDate';
+    params.ExpressionAttributeValues[':startDate'] = options.startDate;
+    params.ExpressionAttributeValues[':endDate'] = options.endDate;
+  } else if (options.startDate) {
+    params.KeyConditionExpression += ' AND #date >= :startDate';
+    params.ExpressionAttributeValues[':startDate'] = options.startDate;
+  } else if (options.endDate) {
+    params.KeyConditionExpression += ' AND #date <= :endDate';
+    params.ExpressionAttributeValues[':endDate'] = options.endDate;
   }
+};
+
+const _addCategoryFilter = (params, category) => {
+  if (!category) return;
   
-  // Add date attribute name and condition if needed
-  if (options.startDate || options.endDate) {
-    params.ExpressionAttributeNames['#date'] = 'date';
-    
-    if (options.startDate && options.endDate) {
-      params.KeyConditionExpression += ' AND #date BETWEEN :startDate AND :endDate';
-      params.ExpressionAttributeValues[':startDate'] = options.startDate;
-      params.ExpressionAttributeValues[':endDate'] = options.endDate;
-    } else if (options.startDate) {
-      params.KeyConditionExpression += ' AND #date >= :startDate';
-      params.ExpressionAttributeValues[':startDate'] = options.startDate;
-    } else if (options.endDate) {
-      params.KeyConditionExpression += ' AND #date <= :endDate';
-      params.ExpressionAttributeValues[':endDate'] = options.endDate;
-    }
-  }
+  params.FilterExpression = 'category = :category';
+  params.ExpressionAttributeValues[':category'] = category;
+};
+
+const _addTypeFilter = (params, type) => {
+  if (!type) return;
   
-  // Add category filter if provided
-  if (options.category) {
-    params.FilterExpression = 'category = :category';
-    params.ExpressionAttributeValues[':category'] = options.category;
-  }
+  params.ExpressionAttributeNames = params.ExpressionAttributeNames || {};
+  params.ExpressionAttributeNames['#type'] = 'type';
   
-  // Add type filter if provided - use expression attribute name since 'type' is a reserved word
-  if (options.type) {
-    params.ExpressionAttributeNames['#type'] = 'type';
-    const typeExpression = '#type = :type';
-    params.FilterExpression = params.FilterExpression 
-      ? `${params.FilterExpression} AND ${typeExpression}` 
-      : typeExpression;
-    params.ExpressionAttributeValues[':type'] = options.type;
-  }
-  
-  // Add pagination if provided
+  const typeExpression = '#type = :type';
+  params.FilterExpression = params.FilterExpression 
+    ? `${params.FilterExpression} AND ${typeExpression}` 
+    : typeExpression;
+  params.ExpressionAttributeValues[':type'] = type;
+};
+
+const _addPagination = (params, options) => {
   if (options.limit) {
     params.Limit = options.limit;
   }
@@ -110,12 +153,12 @@ export const buildTransactionQueryParams = (userId, options = {}) => {
   if (options.lastEvaluatedKey) {
     params.ExclusiveStartKey = options.lastEvaluatedKey;
   }
-  
-  // Remove ExpressionAttributeNames if empty
+};
+
+const _cleanupParams = (params) => {
   if (params.ExpressionAttributeNames && Object.keys(params.ExpressionAttributeNames).length === 0) {
     delete params.ExpressionAttributeNames;
   }
   
   return params;
 };
-

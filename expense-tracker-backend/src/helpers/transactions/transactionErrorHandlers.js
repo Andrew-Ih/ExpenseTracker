@@ -1,7 +1,19 @@
 
 export const handleTransactionError = (error, res) => {
-  console.error('Transaction operation error:', error);
+  // Handle validation errors
+  if (error.type === 'validation') {
+    return res.status(400).json({ 
+      error: error.message || "Validation failed", 
+      details: error.details 
+    });
+  }
   
+  // Handle missing required fields
+  if (error.type === 'missing_field') {
+    return res.status(400).json({ error: error.message });
+  }
+  
+  // Handle standard errors
   if (error.message === 'Transaction not found') {
     return res.status(404).json({ error: "Transaction not found" });
   }
