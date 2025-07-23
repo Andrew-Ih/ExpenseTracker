@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { 
   Box, 
   Typography, 
@@ -238,9 +239,19 @@ const Dashboard = () => {
         Welcome to your expense tracker!
       </Typography>
       
-      <Button variant="outlined" onClick={handleLogout}>
-        Logout
-      </Button>
+      <Stack direction="row" spacing={2}>
+        <Button 
+          variant="contained" 
+          color="primary" 
+          component={Link} 
+          href="/transactions"
+        >
+          Manage Transactions
+        </Button>
+        <Button variant="outlined" onClick={handleLogout}>
+          Logout
+        </Button>
+      </Stack>
     </Box>
   );
 };
