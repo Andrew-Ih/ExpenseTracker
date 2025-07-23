@@ -5,7 +5,6 @@ import {
   Box, 
   Paper, 
   Typography, 
-  Grid, 
   TextField, 
   Button, 
   FormControl, 
@@ -13,7 +12,8 @@ import {
   Select, 
   MenuItem,
   IconButton,
-  SelectChangeEvent
+  SelectChangeEvent,
+  Stack
 } from '@mui/material';
 import { FilterList, Clear } from '@mui/icons-material';
 import { TransactionQueryParams } from '@/services/transactionService';
@@ -77,8 +77,8 @@ const TransactionFilters = ({ onFilterChange }: TransactionFiltersProps) => {
       </Box>
 
       {filtersVisible && (
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6} md={3}>
+        <Stack spacing={2}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
             <TextField
               name="startDate"
               label="Start Date"
@@ -88,8 +88,6 @@ const TransactionFilters = ({ onFilterChange }: TransactionFiltersProps) => {
               fullWidth
               InputLabelProps={{ shrink: true }}
             />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
             <TextField
               name="endDate"
               label="End Date"
@@ -99,8 +97,6 @@ const TransactionFilters = ({ onFilterChange }: TransactionFiltersProps) => {
               fullWidth
               InputLabelProps={{ shrink: true }}
             />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
             <FormControl fullWidth>
               <InputLabel>Type</InputLabel>
               <Select
@@ -114,8 +110,6 @@ const TransactionFilters = ({ onFilterChange }: TransactionFiltersProps) => {
                 <MenuItem value="expense">Expense</MenuItem>
               </Select>
             </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
             <FormControl fullWidth>
               <InputLabel>Category</InputLabel>
               <Select
@@ -129,25 +123,23 @@ const TransactionFilters = ({ onFilterChange }: TransactionFiltersProps) => {
                 ))}
               </Select>
             </FormControl>
-          </Grid>
-          <Grid item xs={12}>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-              <Button 
-                variant="outlined" 
-                startIcon={<Clear />} 
-                onClick={handleClearFilters}
-              >
-                Clear
-              </Button>
-              <Button 
-                variant="contained" 
-                onClick={handleApplyFilters}
-              >
-                Apply Filters
-              </Button>
-            </Box>
-          </Grid>
-        </Grid>
+          </Stack>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+            <Button 
+              variant="outlined" 
+              startIcon={<Clear />} 
+              onClick={handleClearFilters}
+            >
+              Clear
+            </Button>
+            <Button 
+              variant="contained" 
+              onClick={handleApplyFilters}
+            >
+              Apply Filters
+            </Button>
+          </Box>
+        </Stack>
       )}
     </Paper>
   );
