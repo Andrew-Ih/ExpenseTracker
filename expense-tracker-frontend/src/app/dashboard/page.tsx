@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
-  Box, 
   Typography, 
   Button, 
   CircularProgress, 
@@ -12,9 +11,11 @@ import {
   Stack,
   Card,
   CardContent,
-  Divider
+  Divider,
+  Box
 } from '@mui/material';
 import { getUserProfile, updateUserProfile, deleteUserProfile } from '@/services/userService';
+import AppLayout from '@/components/layout/AppLayout';
 
 interface UserProfile {
   userId: string;
@@ -116,17 +117,13 @@ const Dashboard = () => {
     });
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    router.push('/');
-  };
 
   if (!isAuthenticated) {
     return null;
   }
 
   return (
-    <Box sx={{ p: 4, maxWidth: 800, mx: 'auto' }}>
+    <AppLayout>
       <Typography variant="h4" gutterBottom>
         Dashboard
       </Typography>
@@ -238,10 +235,7 @@ const Dashboard = () => {
         Welcome to your expense tracker!
       </Typography>
       
-      <Button variant="outlined" onClick={handleLogout}>
-        Logout
-      </Button>
-    </Box>
+    </AppLayout>
   );
 };
 
