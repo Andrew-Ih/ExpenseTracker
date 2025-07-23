@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import PageLayout from '@/components/common/layout/PageLayout';
+import AppLayout from '@/components/layout/AppLayout';
 import TransactionsContainer from '@/components/transactionComponents/TransactionsContainer';
 
 const TransactionsPage = () => {
@@ -23,9 +23,9 @@ const TransactionsPage = () => {
   }
 
   return (
-    <PageLayout centered={false}>
+    <AppLayout>
       <TransactionsContainer />
-    </PageLayout>
+    </AppLayout>
   );
 };
 

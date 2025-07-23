@@ -1,9 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Box, Typography, Paper, Tabs, Tab, Button } from '@mui/material';
-import { ArrowBack } from '@mui/icons-material';
-import Link from 'next/link';
+import { Box, Typography, Paper, Tabs, Tab } from '@mui/material';
 import TransactionList from './TransactionList';
 import TransactionForm from './TransactionForm';
 import TransactionFilters from './TransactionFilters';
@@ -84,20 +82,10 @@ const TransactionsContainer = () => {
   };
 
   return (
-    <Box sx={{ width: '100%', maxWidth: 1200, mx: 'auto', p: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h4">
-          Transactions
-        </Typography>
-        <Button
-          component={Link}
-          href="/dashboard"
-          startIcon={<ArrowBack />}
-          variant="outlined"
-        >
-          Back to Dashboard
-        </Button>
-      </Box>
+    <Box sx={{ width: '100%', maxWidth: 1200, mx: 'auto' }}>
+      <Typography variant="h4" gutterBottom>
+        Transactions
+      </Typography>
 
       <Paper sx={{ mb: 3 }}>
         <Tabs value={activeTab} onChange={handleTabChange} centered>
