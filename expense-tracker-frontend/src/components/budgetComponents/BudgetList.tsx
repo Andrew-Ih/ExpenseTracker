@@ -31,6 +31,7 @@ import { Edit, Delete } from '@mui/icons-material';
 import { Budget, deleteBudget } from '@/services/budgetService';
 import { getTransactions, Transaction } from '@/services/transactionService';
 import BudgetEditDialog from './BudgetEditDialog';
+import { formatCurrency } from '@/utils/formatCurrency';
 
 interface BudgetListProps {
   budgets: Budget[];
@@ -185,12 +186,12 @@ const BudgetList = ({
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Category</TableCell>
-                <TableCell align="right">Budget Amount</TableCell>
-                <TableCell align="right">Spent</TableCell>
-                <TableCell align="right">Remaining</TableCell>
-                <TableCell align="center">Progress</TableCell>
-                <TableCell align="center">Actions</TableCell>
+                <TableCell sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Category</TableCell>
+                <TableCell align="right" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Budget Amount</TableCell>
+                <TableCell align="right" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Spent</TableCell>
+                <TableCell align="right" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Remaining</TableCell>
+                <TableCell align="center" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Progress</TableCell>
+                <TableCell align="center" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -218,20 +219,20 @@ const BudgetList = ({
                   
                   return (
                     <TableRow key={budget.budgetId}>
-                      <TableCell>{budget.category}</TableCell>
+                      <TableCell sx={{ fontSize: '1rem' }}>{budget.category}</TableCell>
                       <TableCell align="right">
-                        <Typography color="primary.main">
-                          ${budgetAmount.toFixed(2)}
+                        <Typography color="primary.main" variant="body1" sx={{ fontWeight: 'medium' }}>
+                          {formatCurrency(budgetAmount)}
                         </Typography>
                       </TableCell>
                       <TableCell align="right">
-                        <Typography color={isOverBudget ? "error.main" : "text.primary"}>
-                          ${spent.toFixed(2)}
+                        <Typography color={isOverBudget ? "error.main" : "text.primary"} variant="body1" sx={{ fontWeight: 'medium' }}>
+                          {formatCurrency(spent)}
                         </Typography>
                       </TableCell>
                       <TableCell align="right">
-                        <Typography color={remaining >= 0 ? "success.main" : "error.main"}>
-                          ${remaining >= 0 ? remaining.toFixed(2) : '0.00'}
+                        <Typography color={remaining >= 0 ? "success.main" : "error.main"} variant="body1" sx={{ fontWeight: 'medium' }}>
+                          {formatCurrency(remaining >= 0 ? remaining : 0)}
                         </Typography>
                       </TableCell>
                       <TableCell align="center" sx={{ minWidth: 120 }}>
@@ -242,7 +243,7 @@ const BudgetList = ({
                             color={isOverBudget ? "error" : progressPercent > 80 ? "warning" : "success"}
                             sx={{ mb: 0.5 }}
                           />
-                          <Typography variant="caption" color="text.secondary">
+                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
                             {progressPercent.toFixed(0)}%
                           </Typography>
                         </Box>

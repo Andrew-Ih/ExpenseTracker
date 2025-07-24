@@ -3,6 +3,7 @@
 import { Box, Paper, Typography, Stack, LinearProgress } from '@mui/material';
 import { TrendingUp, TrendingDown, AccountBalance } from '@mui/icons-material';
 import { Budget } from '@/services/budgetService';
+import { formatCurrency } from '@/utils/formatCurrency';
 
 interface BudgetSummaryProps {
   budgets: Budget[];
@@ -29,7 +30,7 @@ const BudgetSummary = ({ budgets, budgetProgress }: BudgetSummaryProps) => {
       <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} sx={{ textAlign: 'center' }}>
         <Box sx={{ flex: 1 }}>
           <Typography variant="h4" color="primary.main">
-            ${totalBudgeted.toFixed(2)}
+            {formatCurrency(totalBudgeted)}
           </Typography>
           <Typography variant="body2" color="text.secondary">
             Total Budgeted
@@ -38,7 +39,7 @@ const BudgetSummary = ({ budgets, budgetProgress }: BudgetSummaryProps) => {
         
         <Box sx={{ flex: 1 }}>
           <Typography variant="h4" color={isOverBudget ? "error.main" : "text.primary"}>
-            ${totalSpent.toFixed(2)}
+            {formatCurrency(totalSpent)}
           </Typography>
           <Typography variant="body2" color="text.secondary">
             Total Spent
@@ -52,7 +53,7 @@ const BudgetSummary = ({ budgets, budgetProgress }: BudgetSummaryProps) => {
             sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}
           >
             {remaining >= 0 ? <TrendingUp /> : <TrendingDown />}
-            ${Math.abs(remaining).toFixed(2)}
+            {formatCurrency(Math.abs(remaining))}
           </Typography>
           <Typography variant="body2" color="text.secondary">
             {remaining >= 0 ? 'Remaining' : 'Over Budget'}

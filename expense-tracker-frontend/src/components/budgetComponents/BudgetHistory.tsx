@@ -26,6 +26,7 @@ import {
 } from '@mui/material';
 import { getBudgetSummary } from '@/services/budgetService';
 import { getTransactions, Transaction } from '@/services/transactionService';
+import { formatCurrency } from '@/utils/formatCurrency';
 
 interface BudgetHistoryProps {
   selectedMonth: string;
@@ -36,6 +37,21 @@ interface MonthlySummary {
   totalBudgeted: number;
   totalSpent: number;
   overUnderBudget: number;
+}
+
+interface BudgetSummaryResponse {
+  year: number;
+  monthlySummaries: {
+    month: string;
+    totalBudgeted: number;
+    totalSpent: number;
+    overUnderBudget: number;
+  }[];
+  yearlyTotals: {
+    totalBudgeted: number;
+    totalSpent: number;
+    totalSaved: number;
+  };
 }
 
 const BudgetHistory = ({}: BudgetHistoryProps) => {
@@ -85,7 +101,7 @@ const BudgetHistory = ({}: BudgetHistoryProps) => {
         });
         
         // Combine budget and transaction data
-        const yearlyData: MonthlySummary[] = budgetSummary.monthlySummaries.map((summary: any) => {
+        const yearlyData: MonthlySummary[] = (budgetSummary as BudgetSummaryResponse).monthlySummaries.map((summary) => {
           const totalSpent = transactionsByMonth[summary.month] || 0;
           return {
             month: summary.month,
@@ -108,14 +124,6 @@ const BudgetHistory = ({}: BudgetHistoryProps) => {
     fetchYearlySummary();
   }, [selectedYear, startMonth, endMonth]);
 
-  if (loading) {
-    return (
-      <Paper sx={{ p: 3, textAlign: 'center' }}>
-        <CircularProgress />
-      </Paper>
-    );
-  }
-
   if (error) {
     return <Alert severity="error">{error}</Alert>;
   }
@@ -134,7 +142,7 @@ const BudgetHistory = ({}: BudgetHistoryProps) => {
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} sx={{ textAlign: 'center' }}>
             <Box sx={{ flex: 1 }}>
               <Typography variant="h4" color="primary.main">
-                ${totalBudgeted.toFixed(2)}
+                {formatCurrency(totalBudgeted)}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Total Budgeted
@@ -142,7 +150,7 @@ const BudgetHistory = ({}: BudgetHistoryProps) => {
             </Box>
             <Box sx={{ flex: 1 }}>
               <Typography variant="h4" color={totalSpent > totalBudgeted ? "error.main" : "text.primary"}>
-                ${totalSpent.toFixed(2)}
+                {formatCurrency(totalSpent)}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Total Spent
@@ -150,7 +158,7 @@ const BudgetHistory = ({}: BudgetHistoryProps) => {
             </Box>
             <Box sx={{ flex: 1 }}>
               <Typography variant="h4" color={totalSaved >= 0 ? "success.main" : "error.main"}>
-                ${Math.abs(totalSaved).toFixed(2)}
+                {formatCurrency(Math.abs(totalSaved))}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {totalSaved >= 0 ? 'Total Saved' : 'Total Over Budget'}
@@ -169,7 +177,7 @@ const BudgetHistory = ({}: BudgetHistoryProps) => {
             value={selectedYear}
             onChange={(e) => setSelectedYear(parseInt(e.target.value))}
             size="small"
-            inputProps={{ min: 2020, max: 2030 }}
+            sx={{ minWidth: 100, maxWidth: 120 }}
           />
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel>From Month</InputLabel>
@@ -201,15 +209,21 @@ const BudgetHistory = ({}: BudgetHistoryProps) => {
         <Table sx={{ tableLayout: 'fixed' }}>
           <TableHead>
             <TableRow>
-              <TableCell sx={{ width: '15%' }}>Month</TableCell>
-              <TableCell align="right" sx={{ width: '20%' }}>Total Budgeted</TableCell>
-              <TableCell align="right" sx={{ width: '20%' }}>Total Spent</TableCell>
-              <TableCell align="right" sx={{ width: '20%' }}>Over/Under Budget</TableCell>
-              <TableCell align="center" sx={{ width: '25%' }}>Progress</TableCell>
+              <TableCell sx={{ width: '15%', fontSize: '1rem', fontWeight: 'bold' }}>Month</TableCell>
+              <TableCell align="right" sx={{ width: '20%', fontSize: '1rem', fontWeight: 'bold' }}>Total Budgeted</TableCell>
+              <TableCell align="right" sx={{ width: '20%', fontSize: '1rem', fontWeight: 'bold' }}>Total Spent</TableCell>
+              <TableCell align="right" sx={{ width: '20%', fontSize: '1rem', fontWeight: 'bold' }}>Over/Under Budget</TableCell>
+              <TableCell align="center" sx={{ width: '25%', fontSize: '1rem', fontWeight: 'bold' }}>Progress</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {summaries.length === 0 ? (
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={5} align="center">
+                  <CircularProgress size={24} sx={{ my: 2 }} />
+                </TableCell>
+              </TableRow>
+            ) : summaries.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} align="center">
                   <Typography variant="body1" sx={{ py: 4 }}>
@@ -227,22 +241,22 @@ const BudgetHistory = ({}: BudgetHistoryProps) => {
                 
                 return (
                   <TableRow key={summary.month}>
-                    <TableCell sx={{ fontWeight: 'medium' }}>
+                    <TableCell sx={{ fontWeight: 'medium', fontSize: '1rem' }}>
                       {monthNames[monthIndex]}
                     </TableCell>
                     <TableCell align="right" sx={{ px: 2 }}>
-                      <Typography color="primary.main" variant="body2" sx={{ fontWeight: 'medium' }}>
-                        ${summary.totalBudgeted.toFixed(2)}
+                      <Typography color="primary.main" variant="body1" sx={{ fontWeight: 'medium' }}>
+                        {formatCurrency(summary.totalBudgeted)}
                       </Typography>
                     </TableCell>
                     <TableCell align="right" sx={{ px: 2 }}>
-                      <Typography color={isOverBudget ? "error.main" : "text.primary"} variant="body2" sx={{ fontWeight: 'medium' }}>
-                        ${summary.totalSpent.toFixed(2)}
+                      <Typography color={isOverBudget ? "error.main" : "text.primary"} variant="body1" sx={{ fontWeight: 'medium' }}>
+                        {formatCurrency(summary.totalSpent)}
                       </Typography>
                     </TableCell>
                     <TableCell align="right" sx={{ px: 2 }}>
-                      <Typography color={summary.overUnderBudget >= 0 ? "success.main" : "error.main"} variant="body2" sx={{ fontWeight: 'medium' }}>
-                        {summary.overUnderBudget >= 0 ? '+' : '-'}${Math.abs(summary.overUnderBudget).toFixed(2)}
+                      <Typography color={summary.overUnderBudget >= 0 ? "success.main" : "error.main"} variant="body1" sx={{ fontWeight: 'medium' }}>
+                        {summary.overUnderBudget >= 0 ? '+' : '-'}{formatCurrency(Math.abs(summary.overUnderBudget))}
                       </Typography>
                     </TableCell>
                     <TableCell align="center" sx={{ px: 3 }}>
@@ -253,7 +267,7 @@ const BudgetHistory = ({}: BudgetHistoryProps) => {
                           color={isOverBudget ? "error" : progressPercent > 80 ? "warning" : "success"}
                           sx={{ mb: 0.5, height: 6, borderRadius: 3 }}
                         />
-                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
                           {progressPercent.toFixed(0)}%
                         </Typography>
                       </Box>
