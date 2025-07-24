@@ -22,8 +22,8 @@ import {
   TextField,
   LinearProgress
 } from '@mui/material';
-import { Edit, Delete } from '@mui/icons-material';
-import { Budget, deleteBudget } from '@/services/budgetService';
+import { Edit, Delete, ContentCopy } from '@mui/icons-material';
+import { Budget, deleteBudget, copyBudgetsToNextMonth } from '@/services/budgetService';
 import { getTransactions, Transaction } from '@/services/transactionService';
 import BudgetEditDialog from './BudgetEditDialog';
 
@@ -51,6 +51,7 @@ const BudgetList = ({
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [copyLoading, setCopyLoading] = useState(false);
 
   useEffect(() => {
     const fetchBudgetProgress = async () => {
@@ -118,6 +119,22 @@ const BudgetList = ({
     setEditDialogOpen(false);
   };
 
+  const handleCopyToNextMonth = async () => {
+    setCopyLoading(true);
+    try {
+      const currentDate = new Date(selectedMonth + '-01');
+      const nextMonth = new Date(currentDate.setMonth(currentDate.getMonth() + 1));
+      const nextMonthStr = nextMonth.toISOString().slice(0, 7);
+      
+      await copyBudgetsToNextMonth(selectedMonth, nextMonthStr);
+      alert(`Budgets copied to ${nextMonthStr} successfully!`);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to copy budgets');
+    } finally {
+      setCopyLoading(false);
+    }
+  };
+
   if (error) {
     return <Alert severity="error">{error}</Alert>;
   }
@@ -125,15 +142,26 @@ const BudgetList = ({
   return (
     <>
       <Paper sx={{ p: 3, mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-          <Typography variant="h6">Budgets for:</Typography>
-          <TextField
-            type="month"
-            value={selectedMonth}
-            onChange={(e) => onMonthChange(e.target.value)}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Typography variant="h6">Budgets for:</Typography>
+            <TextField
+              type="month"
+              value={selectedMonth}
+              onChange={(e) => onMonthChange(e.target.value)}
+              size="small"
+              InputLabelProps={{ shrink: true }}
+            />
+          </Box>
+          <Button
+            variant="outlined"
+            startIcon={<ContentCopy />}
+            onClick={handleCopyToNextMonth}
+            disabled={copyLoading || budgets.length === 0}
             size="small"
-            InputLabelProps={{ shrink: true }}
-          />
+          >
+            {copyLoading ? 'Copying...' : 'Copy to Next Month'}
+          </Button>
         </Box>
 
         <TableContainer>
@@ -143,6 +171,7 @@ const BudgetList = ({
                 <TableCell>Category</TableCell>
                 <TableCell align="right">Budget Amount</TableCell>
                 <TableCell align="right">Spent</TableCell>
+                <TableCell align="right">Remaining</TableCell>
                 <TableCell align="center">Progress</TableCell>
                 <TableCell align="center">Actions</TableCell>
               </TableRow>
@@ -150,13 +179,13 @@ const BudgetList = ({
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={5} align="center">
+                  <TableCell colSpan={6} align="center">
                     <CircularProgress size={24} />
                   </TableCell>
                 </TableRow>
               ) : budgets.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} align="center">
+                  <TableCell colSpan={6} align="center">
                     <Typography variant="body1" sx={{ py: 2 }}>
                       No budgets found for this month
                     </Typography>
@@ -166,6 +195,7 @@ const BudgetList = ({
                 budgets.map((budget) => {
                   const spent = budget.budgetId ? budgetProgress[budget.budgetId] || 0 : 0;
                   const budgetAmount = parseFloat(budget.amount.toString());
+                  const remaining = budgetAmount - spent;
                   const progressPercent = budgetAmount > 0 ? (spent / budgetAmount) * 100 : 0;
                   const isOverBudget = spent > budgetAmount;
                   
@@ -180,6 +210,11 @@ const BudgetList = ({
                       <TableCell align="right">
                         <Typography color={isOverBudget ? "error.main" : "text.primary"}>
                           ${spent.toFixed(2)}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="right">
+                        <Typography color={remaining >= 0 ? "success.main" : "error.main"}>
+                          ${Math.abs(remaining).toFixed(2)}
                         </Typography>
                       </TableCell>
                       <TableCell align="center" sx={{ minWidth: 120 }}>

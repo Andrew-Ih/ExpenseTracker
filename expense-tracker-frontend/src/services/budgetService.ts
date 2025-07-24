@@ -81,3 +81,37 @@ export const deleteBudget = async (budgetId: string) => {
 
   return response.json();
 };
+
+export const getBudgetHistory = async (months: string[]) => {
+  const response = await fetch(`${API_BASE_URL}/api/budget/getBudgetHistory?months=${months.join(',')}`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+      'Content-Type': 'application/json'
+    }
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to fetch budget history');
+  }
+
+  return response.json();
+};
+
+export const copyBudgetsToNextMonth = async (fromMonth: string, toMonth: string) => {
+  const response = await fetch(`${API_BASE_URL}/api/budget/copyBudgets`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ fromMonth, toMonth })
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to copy budgets');
+  }
+
+  return response.json();
+};

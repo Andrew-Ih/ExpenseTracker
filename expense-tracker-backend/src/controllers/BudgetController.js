@@ -18,6 +18,9 @@ class BudgetController {
       res.status(201).json(budget);
     } catch (error) {
       console.error('Create budget error:', error);
+      if (error.message.includes('already exists')) {
+        return res.status(409).json({ error: error.message });
+      }
       res.status(500).json({ error: 'Failed to create budget' });
     }
   }
@@ -84,6 +87,46 @@ class BudgetController {
         return res.status(404).json({ error: 'Budget not found or access denied' });
       }
       res.status(500).json({ error: 'Failed to delete budget' });
+    }
+  }
+
+  static async getBudgetHistory(req, res) {
+    try {
+      const userId = req.user.userId;
+      const { months } = req.query;
+
+      if (!months) {
+        return res.status(400).json({ error: 'Months parameter is required' });
+      }
+
+      const monthsArray = months.split(',');
+      const history = await BudgetModel.getBudgetHistory(userId, monthsArray);
+      
+      res.json(history);
+    } catch (error) {
+      console.error('Get budget history error:', error);
+      res.status(500).json({ error: 'Failed to get budget history' });
+    }
+  }
+
+  static async copyBudgetsToNextMonth(req, res) {
+    try {
+      const userId = req.user.userId;
+      const { fromMonth, toMonth } = req.body;
+
+      if (!fromMonth || !toMonth) {
+        return res.status(400).json({ error: 'Both fromMonth and toMonth are required' });
+      }
+
+      const copiedBudgets = await BudgetModel.copyBudgetsToNextMonth(userId, fromMonth, toMonth);
+      
+      res.json({
+        message: 'Budgets copied successfully',
+        budgets: copiedBudgets
+      });
+    } catch (error) {
+      console.error('Copy budgets error:', error);
+      res.status(500).json({ error: 'Failed to copy budgets' });
     }
   }
 }

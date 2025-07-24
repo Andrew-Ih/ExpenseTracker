@@ -25,6 +25,12 @@ class BudgetModel {
   }
 
   static async createBudget(budgetData, userId) {
+    // Check for duplicate budget
+    const isDuplicate = await this.checkDuplicateBudget(userId, budgetData.category, budgetData.month);
+    if (isDuplicate) {
+      throw new Error(`Budget for ${budgetData.category} already exists for ${budgetData.month}`);
+    }
+
     const item = this.createBudgetItem(budgetData, userId);
     
     const params = {
@@ -54,6 +60,58 @@ class BudgetModel {
 
     const { Items } = await dbClient.send(new QueryCommand(params));
     return Items || [];
+  }
+
+  static async getBudgetHistory(userId, months) {
+    const results = [];
+    
+    for (const month of months) {
+      const budgets = await this.getBudgets(userId, month);
+      results.push({ month, budgets });
+    }
+    
+    return results;
+  }
+
+  static async checkDuplicateBudget(userId, category, month) {
+    const params = {
+      TableName: this.TABLE_NAME,
+      IndexName: 'UserMonthIndex',
+      KeyConditionExpression: 'userId = :userId AND #month = :month',
+      FilterExpression: 'category = :category',
+      ExpressionAttributeNames: { '#month': 'month' },
+      ExpressionAttributeValues: {
+        ':userId': userId,
+        ':month': month,
+        ':category': category
+      }
+    };
+
+    const { Items } = await dbClient.send(new QueryCommand(params));
+    return Items && Items.length > 0;
+  }
+
+  static async copyBudgetsToNextMonth(userId, fromMonth, toMonth) {
+    const sourceBudgets = await this.getBudgets(userId, fromMonth);
+    const copiedBudgets = [];
+
+    for (const budget of sourceBudgets) {
+      const newBudget = this.createBudgetItem({
+        category: budget.category,
+        amount: budget.amount,
+        month: toMonth
+      }, userId);
+
+      const params = {
+        TableName: this.TABLE_NAME,
+        Item: newBudget
+      };
+
+      await dbClient.send(new PutCommand(params));
+      copiedBudgets.push(newBudget);
+    }
+
+    return copiedBudgets;
   }
 
   static async updateBudgetById(budgetId, userId, updateData) {
