@@ -187,7 +187,7 @@ const BudgetList = ({
                           <LinearProgress 
                             variant="determinate" 
                             value={Math.min(progressPercent, 100)}
-                            color={isOverBudget ? "error" : progressPercent > 80 ? "warning" : "primary"}
+                            color={isOverBudget ? "error" : progressPercent > 80 ? "warning" : "success"}
                             sx={{ mb: 0.5 }}
                           />
                           <Typography variant="caption" color="text.secondary">
