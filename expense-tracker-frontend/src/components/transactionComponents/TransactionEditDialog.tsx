@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Dialog, 
   DialogTitle, 
@@ -40,6 +40,10 @@ const TransactionEditDialog = ({
   const [formData, setFormData] = useState<Transaction>({ ...transaction });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setFormData({ ...transaction });
+  }, [transaction]);
 
   const handleTextFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
