@@ -91,7 +91,7 @@ const TransactionEditDialog = ({
             onChange={handleTextFieldChange}
             required
             fullWidth
-            inputProps={{ step: "0.01" }}
+            inputProps={{ step: "1" }}
           />
 
           <FormControl fullWidth required>

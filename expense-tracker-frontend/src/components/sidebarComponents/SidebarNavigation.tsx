@@ -12,7 +12,7 @@ const SidebarNavigation = ({ pathname }: SidebarNavigationProps) => {
   const menuItems = [
     { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
     { text: 'Transactions', icon: <Receipt />, path: '/transactions' },
-    { text: 'Budget', icon: <AccountBalance />, path: '/budget' }
+    { text: 'Budgets', icon: <AccountBalance />, path: '/budget' }
   ];
 
   return (

@@ -52,6 +52,8 @@ const BudgetList = ({
   const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [copyLoading, setCopyLoading] = useState(false);
+  const [copySuccess, setCopySuccess] = useState<string | null>(null);
+  const [copyError, setCopyError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchBudgetProgress = async () => {
@@ -121,15 +123,19 @@ const BudgetList = ({
 
   const handleCopyToNextMonth = async () => {
     setCopyLoading(true);
+    setCopySuccess(null);
+    setCopyError(null);
+    
     try {
-      const currentDate = new Date(selectedMonth + '-01');
-      const nextMonth = new Date(currentDate.setMonth(currentDate.getMonth() + 1));
+      const [year, month] = selectedMonth.split('-');
+      const nextMonth = new Date(parseInt(year), parseInt(month), 1);
       const nextMonthStr = nextMonth.toISOString().slice(0, 7);
       
       await copyBudgetsToNextMonth(selectedMonth, nextMonthStr);
-      alert(`Budgets copied to ${nextMonthStr} successfully!`);
+      setCopySuccess(`Budgets copied to ${nextMonthStr} successfully!`);
+      setTimeout(() => setCopySuccess(null), 5000);
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to copy budgets');
+      setCopyError(err instanceof Error ? err.message : 'Failed to copy budgets');
     } finally {
       setCopyLoading(false);
     }
@@ -163,6 +169,9 @@ const BudgetList = ({
             {copyLoading ? 'Copying...' : 'Copy to Next Month'}
           </Button>
         </Box>
+
+        {copySuccess && <Alert severity="success" sx={{ mb: 2 }}>{copySuccess}</Alert>}
+        {copyError && <Alert severity="error" sx={{ mb: 2 }}>{copyError}</Alert>}
 
         <TableContainer>
           <Table>
@@ -214,7 +223,7 @@ const BudgetList = ({
                       </TableCell>
                       <TableCell align="right">
                         <Typography color={remaining >= 0 ? "success.main" : "error.main"}>
-                          ${Math.abs(remaining).toFixed(2)}
+                          ${remaining >= 0 ? remaining.toFixed(2) : '0.00'}
                         </Typography>
                       </TableCell>
                       <TableCell align="center" sx={{ minWidth: 120 }}>

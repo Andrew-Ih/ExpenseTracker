@@ -104,7 +104,7 @@ const BudgetEditDialog = ({
             onChange={handleTextFieldChange}
             required
             fullWidth
-            inputProps={{ step: "0.01", min: "0.01" }}
+            inputProps={{ step: "1", min: "1" }}
           />
         </Stack>
       </DialogContent>

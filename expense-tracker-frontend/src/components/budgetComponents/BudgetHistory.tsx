@@ -87,8 +87,8 @@ const BudgetHistory = ({ selectedMonth }: BudgetHistoryProps) => {
           <TableHead>
             <TableRow>
               <TableCell>Category</TableCell>
-              {history.map(monthData => (
-                <TableCell key={monthData.month} align="right">
+              {history.map((monthData, index) => (
+                <TableCell key={`${monthData.month}-${index}`} align="right">
                   {new Date(monthData.month + '-01').toLocaleDateString('en-US', { 
                     month: 'short', 
                     year: 'numeric' 
@@ -101,10 +101,10 @@ const BudgetHistory = ({ selectedMonth }: BudgetHistoryProps) => {
             {allCategories.map(category => (
               <TableRow key={category}>
                 <TableCell>{category}</TableCell>
-                {history.map(monthData => {
+                {history.map((monthData, index) => {
                   const budget = monthData.budgets.find((b: Budget) => b.category === category);
                   return (
-                    <TableCell key={monthData.month} align="right">
+                    <TableCell key={`${monthData.month}-${index}`} align="right">
                       {budget ? `$${parseFloat(budget.amount.toString()).toFixed(2)}` : '-'}
                     </TableCell>
                   );
@@ -113,12 +113,12 @@ const BudgetHistory = ({ selectedMonth }: BudgetHistoryProps) => {
             ))}
             <TableRow sx={{ borderTop: 2, borderColor: 'divider' }}>
               <TableCell sx={{ fontWeight: 'bold' }}>Total</TableCell>
-              {history.map(monthData => {
+              {history.map((monthData, index) => {
                 const total = monthData.budgets.reduce((sum: number, budget: Budget) => 
                   sum + parseFloat(budget.amount.toString()), 0
                 );
                 return (
-                  <TableCell key={monthData.month} align="right" sx={{ fontWeight: 'bold' }}>
+                  <TableCell key={`${monthData.month}-${index}`} align="right" sx={{ fontWeight: 'bold' }}>
                     ${total.toFixed(2)}
                   </TableCell>
                 );
