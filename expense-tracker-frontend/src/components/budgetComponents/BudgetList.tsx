@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Box, 
   Paper, 
@@ -19,10 +19,12 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField
+  TextField,
+  LinearProgress
 } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import { Budget, deleteBudget } from '@/services/budgetService';
+import { getTransactions, Transaction } from '@/services/transactionService';
 import BudgetEditDialog from './BudgetEditDialog';
 
 interface BudgetListProps {
@@ -44,10 +46,47 @@ const BudgetList = ({
   onDelete,
   onUpdate
 }: BudgetListProps) => {
+  const [budgetProgress, setBudgetProgress] = useState<Record<string, number>>({});
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchBudgetProgress = async () => {
+      const progress: Record<string, number> = {};
+      
+      for (const budget of budgets) {
+        try {
+          const startDate = `${selectedMonth}-01`;
+          const endDate = `${selectedMonth}-31`;
+          
+          const result = await getTransactions({
+            startDate,
+            endDate,
+            category: budget.category,
+            type: 'expense'
+          });
+          
+          const totalSpent = result.transactions.reduce((sum: number, transaction: Transaction) => 
+            sum + parseFloat(transaction.amount.toString()), 0
+          );
+          
+          if (budget.budgetId) {
+            progress[budget.budgetId] = totalSpent;
+          }
+        } catch (error) {
+          console.error('Error fetching progress for', budget.category, error);
+        }
+      }
+      
+      setBudgetProgress(progress);
+    };
+
+    if (budgets.length > 0) {
+      fetchBudgetProgress();
+    }
+  }, [budgets, selectedMonth]);
 
   const handleEditClick = (budget: Budget) => {
     setSelectedBudget(budget);
@@ -103,51 +142,78 @@ const BudgetList = ({
               <TableRow>
                 <TableCell>Category</TableCell>
                 <TableCell align="right">Budget Amount</TableCell>
+                <TableCell align="right">Spent</TableCell>
+                <TableCell align="center">Progress</TableCell>
                 <TableCell align="center">Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={3} align="center">
+                  <TableCell colSpan={5} align="center">
                     <CircularProgress size={24} />
                   </TableCell>
                 </TableRow>
               ) : budgets.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={3} align="center">
+                  <TableCell colSpan={5} align="center">
                     <Typography variant="body1" sx={{ py: 2 }}>
                       No budgets found for this month
                     </Typography>
                   </TableCell>
                 </TableRow>
               ) : (
-                budgets.map((budget) => (
-                  <TableRow key={budget.budgetId}>
-                    <TableCell>{budget.category}</TableCell>
-                    <TableCell align="right">
-                      <Typography color="primary.main">
-                        ${parseFloat(budget.amount.toString()).toFixed(2)}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <IconButton 
-                        size="small" 
-                        color="primary" 
-                        onClick={() => handleEditClick(budget)}
-                      >
-                        <Edit />
-                      </IconButton>
-                      <IconButton 
-                        size="small" 
-                        color="error" 
-                        onClick={() => handleDeleteClick(budget)}
-                      >
-                        <Delete />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))
+                budgets.map((budget) => {
+                  const spent = budget.budgetId ? budgetProgress[budget.budgetId] || 0 : 0;
+                  const budgetAmount = parseFloat(budget.amount.toString());
+                  const progressPercent = budgetAmount > 0 ? (spent / budgetAmount) * 100 : 0;
+                  const isOverBudget = spent > budgetAmount;
+                  
+                  return (
+                    <TableRow key={budget.budgetId}>
+                      <TableCell>{budget.category}</TableCell>
+                      <TableCell align="right">
+                        <Typography color="primary.main">
+                          ${budgetAmount.toFixed(2)}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="right">
+                        <Typography color={isOverBudget ? "error.main" : "text.primary"}>
+                          ${spent.toFixed(2)}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center" sx={{ minWidth: 120 }}>
+                        <Box sx={{ width: '100%' }}>
+                          <LinearProgress 
+                            variant="determinate" 
+                            value={Math.min(progressPercent, 100)}
+                            color={isOverBudget ? "error" : progressPercent > 80 ? "warning" : "primary"}
+                            sx={{ mb: 0.5 }}
+                          />
+                          <Typography variant="caption" color="text.secondary">
+                            {progressPercent.toFixed(0)}%
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell align="center">
+                        <IconButton 
+                          size="small" 
+                          color="primary" 
+                          onClick={() => handleEditClick(budget)}
+                        >
+                          <Edit />
+                        </IconButton>
+                        <IconButton 
+                          size="small" 
+                          color="error" 
+                          onClick={() => handleDeleteClick(budget)}
+                        >
+                          <Delete />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>
