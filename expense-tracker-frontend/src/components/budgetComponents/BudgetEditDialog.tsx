@@ -16,34 +16,33 @@ import {
   Alert,
   SelectChangeEvent
 } from '@mui/material';
-import { Transaction, updateTransaction } from '@/services/transactionService';
+import { Budget, updateBudget } from '@/services/budgetService';
 
-interface TransactionEditDialogProps {
+interface BudgetEditDialogProps {
   open: boolean;
   onClose: () => void;
-  transaction: Transaction;
-  onUpdate: (transaction: Transaction) => void;
+  budget: Budget;
+  onUpdate: (budget: Budget) => void;
 }
 
 const categories = [
   'Food', 'Transportation', 'Housing', 'Utilities', 'Entertainment', 
-  'Healthcare', 'Education', 'Shopping', 'Personal', 'Salary', 
-  'Investment', 'Gift', 'Other'
+  'Healthcare', 'Education', 'Shopping', 'Personal', 'Other'
 ];
 
-const TransactionEditDialog = ({ 
+const BudgetEditDialog = ({ 
   open, 
   onClose, 
-  transaction, 
+  budget, 
   onUpdate 
-}: TransactionEditDialogProps) => {
-  const [formData, setFormData] = useState<Transaction>({ ...transaction });
+}: BudgetEditDialogProps) => {
+  const [formData, setFormData] = useState<Budget>({ ...budget });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setFormData({ ...transaction });
-  }, [transaction]);
+    setFormData({ ...budget });
+  }, [budget]);
 
   const handleTextFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -60,17 +59,17 @@ const TransactionEditDialog = ({
   };
 
   const handleSubmit = async () => {
-    if (!formData.transactionId) return;
+    if (!formData.budgetId) return;
     
     setLoading(true);
     setError(null);
     
     try {
-      const { transactionId, ...updateData } = formData;
-      const result = await updateTransaction(transactionId, updateData);
-      onUpdate(result.transaction);
+      const { budgetId, ...updateData } = formData;
+      const result = await updateBudget(budgetId, updateData);
+      onUpdate(result.budget);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update transaction');
+      setError(err instanceof Error ? err.message : 'Failed to update budget');
     } finally {
       setLoading(false);
     }
@@ -78,35 +77,11 @@ const TransactionEditDialog = ({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Edit Transaction</DialogTitle>
+      <DialogTitle>Edit Budget</DialogTitle>
       <DialogContent>
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         
         <Stack spacing={3} sx={{ mt: 1 }}>
-          <TextField
-            name="amount"
-            label="Amount"
-            type="number"
-            value={formData.amount}
-            onChange={handleTextFieldChange}
-            required
-            fullWidth
-            inputProps={{ step: "1" }}
-          />
-
-          <FormControl fullWidth required>
-            <InputLabel>Type</InputLabel>
-            <Select
-              name="type"
-              value={formData.type}
-              label="Type"
-              onChange={handleSelectChange}
-            >
-              <MenuItem value="income">Income</MenuItem>
-              <MenuItem value="expense">Expense</MenuItem>
-            </Select>
-          </FormControl>
-
           <FormControl fullWidth required>
             <InputLabel>Category</InputLabel>
             <Select
@@ -122,24 +97,14 @@ const TransactionEditDialog = ({
           </FormControl>
 
           <TextField
-            name="description"
-            label="Description"
-            value={formData.description}
-            onChange={handleTextFieldChange}
-            fullWidth
-            multiline
-            rows={2}
-          />
-
-          <TextField
-            name="date"
-            label="Date"
-            type="date"
-            value={formData.date}
+            name="amount"
+            label="Budget Amount"
+            type="number"
+            value={formData.amount}
             onChange={handleTextFieldChange}
             required
             fullWidth
-            InputLabelProps={{ shrink: true }}
+            inputProps={{ step: "1", min: "1" }}
           />
         </Stack>
       </DialogContent>
@@ -158,4 +123,4 @@ const TransactionEditDialog = ({
   );
 };
 
-export default TransactionEditDialog;
+export default BudgetEditDialog;

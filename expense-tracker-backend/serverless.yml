@@ -24,6 +24,8 @@ provider:
             - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerUsers"
             - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerTransactions"
             - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerTransactions/index/*"
+            - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerBudgets"
+            - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerBudgets/index/*"
 
 functions:
   api:
@@ -65,6 +67,31 @@ resources:
               - AttributeName: userId
                 KeyType: HASH
               - AttributeName: date
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+    
+    BudgetsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ExpenseTrackerBudgets
+        AttributeDefinitions:
+          - AttributeName: budgetId
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: month
+            AttributeType: S
+        KeySchema:
+          - AttributeName: budgetId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: UserMonthIndex
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+              - AttributeName: month
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
