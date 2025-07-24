@@ -22,8 +22,8 @@ import {
   TextField,
   LinearProgress
 } from '@mui/material';
-import { Edit, Delete, ContentCopy } from '@mui/icons-material';
-import { Budget, deleteBudget, copyBudgetsToNextMonth } from '@/services/budgetService';
+import { Edit, Delete } from '@mui/icons-material';
+import { Budget, deleteBudget } from '@/services/budgetService';
 import { getTransactions, Transaction } from '@/services/transactionService';
 import BudgetEditDialog from './BudgetEditDialog';
 
@@ -51,9 +51,7 @@ const BudgetList = ({
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [copyLoading, setCopyLoading] = useState(false);
-  const [copySuccess, setCopySuccess] = useState<string | null>(null);
-  const [copyError, setCopyError] = useState<string | null>(null);
+
 
   useEffect(() => {
     const fetchBudgetProgress = async () => {
@@ -121,25 +119,7 @@ const BudgetList = ({
     setEditDialogOpen(false);
   };
 
-  const handleCopyToNextMonth = async () => {
-    setCopyLoading(true);
-    setCopySuccess(null);
-    setCopyError(null);
-    
-    try {
-      const [year, month] = selectedMonth.split('-');
-      const nextMonth = new Date(parseInt(year), parseInt(month), 1);
-      const nextMonthStr = nextMonth.toISOString().slice(0, 7);
-      
-      await copyBudgetsToNextMonth(selectedMonth, nextMonthStr);
-      setCopySuccess(`Budgets copied to ${nextMonthStr} successfully!`);
-      setTimeout(() => setCopySuccess(null), 5000);
-    } catch (err) {
-      setCopyError(err instanceof Error ? err.message : 'Failed to copy budgets');
-    } finally {
-      setCopyLoading(false);
-    }
-  };
+
 
   if (error) {
     return <Alert severity="error">{error}</Alert>;
@@ -148,30 +128,16 @@ const BudgetList = ({
   return (
     <>
       <Paper sx={{ p: 3, mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="h6">Budgets for:</Typography>
-            <TextField
-              type="month"
-              value={selectedMonth}
-              onChange={(e) => onMonthChange(e.target.value)}
-              size="small"
-              InputLabelProps={{ shrink: true }}
-            />
-          </Box>
-          <Button
-            variant="outlined"
-            startIcon={<ContentCopy />}
-            onClick={handleCopyToNextMonth}
-            disabled={copyLoading || budgets.length === 0}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+          <Typography variant="h6">Budgets for:</Typography>
+          <TextField
+            type="month"
+            value={selectedMonth}
+            onChange={(e) => onMonthChange(e.target.value)}
             size="small"
-          >
-            {copyLoading ? 'Copying...' : 'Copy to Next Month'}
-          </Button>
+            InputLabelProps={{ shrink: true }}
+          />
         </Box>
-
-        {copySuccess && <Alert severity="success" sx={{ mb: 2 }}>{copySuccess}</Alert>}
-        {copyError && <Alert severity="error" sx={{ mb: 2 }}>{copyError}</Alert>}
 
         <TableContainer>
           <Table>

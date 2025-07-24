@@ -109,26 +109,7 @@ class BudgetController {
     }
   }
 
-  static async copyBudgetsToNextMonth(req, res) {
-    try {
-      const userId = req.user.userId;
-      const { fromMonth, toMonth } = req.body;
 
-      if (!fromMonth || !toMonth) {
-        return res.status(400).json({ error: 'Both fromMonth and toMonth are required' });
-      }
-
-      const copiedBudgets = await BudgetModel.copyBudgetsToNextMonth(userId, fromMonth, toMonth);
-      
-      res.json({
-        message: 'Budgets copied successfully',
-        budgets: copiedBudgets
-      });
-    } catch (error) {
-      console.error('Copy budgets error:', error);
-      res.status(500).json({ error: 'Failed to copy budgets' });
-    }
-  }
 }
 
 export default BudgetController;
