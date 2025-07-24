@@ -1,7 +1,7 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand, QueryCommand, UpdateCommand, DeleteCommand } from '@aws-sdk/lib-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
-import { verifyBudgetOwnership, buildBudgetUpdateExpression, buildBudgetQueryParams, buildDuplicateCheckParams } from '../helpers/budgets/budgetModelHelpers.js';
+import { verifyBudgetOwnership, buildBudgetUpdateExpression, buildBudgetQueryParams, buildDuplicateCheckParams, buildBudgetSummaryParams, processBudgetSummaryData } from '../helpers/budgets/budgetModelHelpers.js';
 
 const dbClient = (() => {
   const client = new DynamoDBClient({ region: 'ca-central-1' });
@@ -49,15 +49,11 @@ class BudgetModel {
     return Items || [];
   }
 
-  static async getBudgetHistory(userId, months) {
-    const results = [];
+  static async getBudgetSummary(userId, year, startMonth, endMonth) {
+    const params = buildBudgetSummaryParams(userId, year, startMonth, endMonth, this.TABLE_NAME);
+    const { Items: budgets } = await dbClient.send(new QueryCommand(params));
     
-    for (const month of months) {
-      const budgets = await this.getBudgets(userId, month);
-      results.push({ month, budgets });
-    }
-    
-    return results;
+    return processBudgetSummaryData(budgets, year, startMonth, endMonth);
   }
 
   static async checkDuplicateBudget(userId, category, month) {
@@ -65,8 +61,6 @@ class BudgetModel {
     const { Items } = await dbClient.send(new QueryCommand(params));
     return Items && Items.length > 0;
   }
-
-
 
   static async updateBudgetById(budgetId, userId, updateData) {
     await verifyBudgetOwnership(dbClient, budgetId, userId, this.TABLE_NAME);

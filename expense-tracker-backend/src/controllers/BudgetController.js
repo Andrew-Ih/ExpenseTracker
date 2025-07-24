@@ -1,6 +1,6 @@
 import BudgetModel from "../models/BudgetModel.js";
 import { budgetControllerWrapper } from '../helpers/budgets/budgetControllerWrapper.js';
-import { validateBudgetData, validateBudgetUpdateData, validateBudgetHistoryParams } from '../helpers/budgets/budgetValidators.js';
+import { validateBudgetData, validateBudgetUpdateData } from '../helpers/budgets/budgetValidators.js';
 
 class BudgetController {
   static createBudget = budgetControllerWrapper(async (req, res) => {
@@ -58,16 +58,16 @@ class BudgetController {
     });
   });
 
-  static getBudgetHistory = budgetControllerWrapper(async (req, res) => {
+  static getBudgetSummary = budgetControllerWrapper(async (req, res) => {
     const userId = req.user.userId;
-    const bodyParams = req.body;
+    const { year, startMonth, endMonth } = req.body;
 
-    validateBudgetHistoryParams(bodyParams);
+    if (!year || !startMonth || !endMonth) {
+      throw { type: 'missing_field', message: 'Year, startMonth, and endMonth are required' };
+    }
 
-    const monthsArray = bodyParams.months;
-    const history = await BudgetModel.getBudgetHistory(userId, monthsArray);
-    
-    res.json(history);
+    const summary = await BudgetModel.getBudgetSummary(userId, year, startMonth, endMonth);
+    res.json(summary);
   });
 }
 

@@ -24,7 +24,7 @@ import {
   Stack,
   SelectChangeEvent
 } from '@mui/material';
-import { getBudgetHistory, Budget } from '@/services/budgetService';
+import { getBudgetSummary } from '@/services/budgetService';
 import { getTransactions, Transaction } from '@/services/transactionService';
 
 interface BudgetHistoryProps {
@@ -65,40 +65,35 @@ const BudgetHistory = ({}: BudgetHistoryProps) => {
       setError(null);
       
       try {
-        const yearlyData: MonthlySummary[] = [];
+        // Single API call to get budget summary
+        const budgetSummary = await getBudgetSummary(selectedYear, startMonth, endMonth);
         
-        for (let month = startMonth; month <= endMonth; month++) {
-          const monthStr = `${selectedYear}-${month.toString().padStart(2, '0')}`;
-          
-          // Get budgets for the month
-          const budgetResult = await getBudgetHistory([monthStr]);
-          const budgets = budgetResult[0]?.budgets || [];
-          const totalBudgeted = budgets.reduce((sum: number, budget: Budget) => 
-            sum + parseFloat(budget.amount.toString()), 0
-          );
-          
-          // Get transactions for the month
-          const startDate = `${monthStr}-01`;
-          const endDate = `${monthStr}-31`;
-          const transactionResult = await getTransactions({
-            startDate,
-            endDate,
-            type: 'expense'
-          });
-          
-          const totalSpent = transactionResult.transactions.reduce((sum: number, transaction: Transaction) => 
-            sum + parseFloat(transaction.amount.toString()), 0
-          );
-          
-          const overUnderBudget = totalBudgeted - totalSpent;
-          
-          yearlyData.push({
-            month: monthStr,
-            totalBudgeted,
+        // Get transaction data for the year range
+        const startDate = `${selectedYear}-${startMonth.toString().padStart(2, '0')}-01`;
+        const endDate = `${selectedYear}-${endMonth.toString().padStart(2, '0')}-31`;
+        const transactionResult = await getTransactions({
+          startDate,
+          endDate,
+          type: 'expense'
+        });
+        
+        // Group transactions by month
+        const transactionsByMonth: Record<string, number> = {};
+        transactionResult.transactions.forEach((transaction: Transaction) => {
+          const month = transaction.date.slice(0, 7); // YYYY-MM
+          transactionsByMonth[month] = (transactionsByMonth[month] || 0) + parseFloat(transaction.amount.toString());
+        });
+        
+        // Combine budget and transaction data
+        const yearlyData: MonthlySummary[] = budgetSummary.monthlySummaries.map((summary: any) => {
+          const totalSpent = transactionsByMonth[summary.month] || 0;
+          return {
+            month: summary.month,
+            totalBudgeted: summary.totalBudgeted,
             totalSpent,
-            overUnderBudget
-          });
-        }
+            overUnderBudget: summary.totalBudgeted - totalSpent
+          };
+        });
         
         setSummaries(yearlyData);
       } catch (err) {

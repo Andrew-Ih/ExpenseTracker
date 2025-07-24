@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.post('/createBudget', authenticateUser, BudgetController.createBudget);
 router.get('/getBudgets', authenticateUser, BudgetController.getBudgets);
-router.post('/getBudgetHistory', authenticateUser, BudgetController.getBudgetHistory);
+router.post('/getBudgetSummary', authenticateUser, BudgetController.getBudgetSummary);
 router.put('/updateBudget', authenticateUser, BudgetController.updateBudget);
 router.delete('/deleteBudget', authenticateUser, BudgetController.deleteBudget);
 

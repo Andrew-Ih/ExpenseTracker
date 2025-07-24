@@ -29,17 +29,3 @@ export const validateBudgetUpdateData = (data) => {
   
   return errors.length > 0 ? errors : null;
 };
-
-export const validateBudgetHistoryParams = (params) => {
-  const errors = [];
-  
-  if (!params.months) {
-    throw { type: 'missing_field', message: 'Months parameter is required' };
-  }
-  
-  if (!Array.isArray(params.months)) {
-    throw { type: 'validation', message: 'Months must be an array' };
-  }
-  
-  return errors.length > 0 ? errors : null;
-};

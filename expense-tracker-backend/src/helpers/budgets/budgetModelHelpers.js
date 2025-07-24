@@ -44,6 +44,50 @@ export const buildDuplicateCheckParams = (userId, category, month, tableName) =>
   };
 };
 
+export const buildBudgetSummaryParams = (userId, year, startMonth, endMonth, tableName) => {
+  return {
+    TableName: tableName,
+    IndexName: 'UserMonthIndex',
+    KeyConditionExpression: 'userId = :userId AND #month BETWEEN :startMonth AND :endMonth',
+    ExpressionAttributeNames: { '#month': 'month' },
+    ExpressionAttributeValues: {
+      ':userId': userId,
+      ':startMonth': `${year}-${startMonth.toString().padStart(2, '0')}`,
+      ':endMonth': `${year}-${endMonth.toString().padStart(2, '0')}`
+    }
+  };
+};
+
+export const processBudgetSummaryData = (budgets, year, startMonth, endMonth) => {
+  const monthlySummaries = [];
+  let yearlyTotalBudgeted = 0;
+  
+  for (let month = startMonth; month <= endMonth; month++) {
+    const monthStr = `${year}-${month.toString().padStart(2, '0')}`;
+    const monthBudgets = budgets?.filter(b => b.month === monthStr) || [];
+    const totalBudgeted = monthBudgets.reduce((sum, budget) => sum + parseFloat(budget.amount), 0);
+    
+    monthlySummaries.push({
+      month: monthStr,
+      totalBudgeted,
+      totalSpent: 0,
+      overUnderBudget: 0
+    });
+    
+    yearlyTotalBudgeted += totalBudgeted;
+  }
+  
+  return {
+    year,
+    monthlySummaries,
+    yearlyTotals: {
+      totalBudgeted: yearlyTotalBudgeted,
+      totalSpent: 0,
+      totalSaved: 0
+    }
+  };
+};
+
 // ******************************************************
 // Helper functions for verifyBudgetOwnership
 // ******************************************************
