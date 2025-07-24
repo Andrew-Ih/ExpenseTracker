@@ -1,6 +1,7 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand, QueryCommand, UpdateCommand, DeleteCommand } from '@aws-sdk/lib-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
+import { verifyBudgetOwnership, buildBudgetUpdateExpression, buildBudgetQueryParams, buildDuplicateCheckParams } from '../helpers/budgets/budgetModelHelpers.js';
 
 const dbClient = (() => {
   const client = new DynamoDBClient({ region: 'ca-central-1' });
@@ -43,21 +44,7 @@ class BudgetModel {
   }
 
   static async getBudgets(userId, month = null) {
-    const params = {
-      TableName: this.TABLE_NAME,
-      IndexName: 'UserMonthIndex',
-      KeyConditionExpression: 'userId = :userId',
-      ExpressionAttributeValues: {
-        ':userId': userId
-      }
-    };
-
-    if (month) {
-      params.KeyConditionExpression += ' AND #month = :month';
-      params.ExpressionAttributeNames = { '#month': 'month' };
-      params.ExpressionAttributeValues[':month'] = month;
-    }
-
+    const params = buildBudgetQueryParams(userId, month, this.TABLE_NAME);
     const { Items } = await dbClient.send(new QueryCommand(params));
     return Items || [];
   }
@@ -74,19 +61,7 @@ class BudgetModel {
   }
 
   static async checkDuplicateBudget(userId, category, month) {
-    const params = {
-      TableName: this.TABLE_NAME,
-      IndexName: 'UserMonthIndex',
-      KeyConditionExpression: 'userId = :userId AND #month = :month',
-      FilterExpression: 'category = :category',
-      ExpressionAttributeNames: { '#month': 'month' },
-      ExpressionAttributeValues: {
-        ':userId': userId,
-        ':month': month,
-        ':category': category
-      }
-    };
-
+    const params = buildDuplicateCheckParams(userId, category, month, this.TABLE_NAME);
     const { Items } = await dbClient.send(new QueryCommand(params));
     return Items && Items.length > 0;
   }
@@ -94,49 +69,36 @@ class BudgetModel {
 
 
   static async updateBudgetById(budgetId, userId, updateData) {
-    const updateExpressions = [];
-    const expressionAttributeNames = {};
-    const expressionAttributeValues = { ':userId': userId };
-
-    if (updateData.amount !== undefined) {
-      updateExpressions.push('#amount = :amount');
-      expressionAttributeNames['#amount'] = 'amount';
-      expressionAttributeValues[':amount'] = updateData.amount;
-    }
-
-    if (updateData.category !== undefined) {
-      updateExpressions.push('#category = :category');
-      expressionAttributeNames['#category'] = 'category';
-      expressionAttributeValues[':category'] = updateData.category;
-    }
-
-    updateExpressions.push('#updatedAt = :updatedAt');
-    expressionAttributeNames['#updatedAt'] = 'updatedAt';
-    expressionAttributeValues[':updatedAt'] = new Date().toISOString().split('T')[0];
-
+    await verifyBudgetOwnership(dbClient, budgetId, userId, this.TABLE_NAME);
+    
+    const { 
+      updateExpression, 
+      expressionAttributeNames, 
+      expressionAttributeValues 
+    } = buildBudgetUpdateExpression(updateData);
+    
     const params = {
       TableName: this.TABLE_NAME,
       Key: { budgetId },
-      UpdateExpression: `SET ${updateExpressions.join(', ')}`,
-      ConditionExpression: 'userId = :userId',
+      UpdateExpression: updateExpression,
       ExpressionAttributeNames: expressionAttributeNames,
       ExpressionAttributeValues: expressionAttributeValues,
       ReturnValues: 'ALL_NEW'
     };
-
+    
     const result = await dbClient.send(new UpdateCommand(params));
     return result.Attributes;
   }
 
   static async deleteBudgetById(budgetId, userId) {
+    await verifyBudgetOwnership(dbClient, budgetId, userId, this.TABLE_NAME);
+    
     const params = {
       TableName: this.TABLE_NAME,
       Key: { budgetId },
-      ConditionExpression: 'userId = :userId',
-      ExpressionAttributeValues: { ':userId': userId },
       ReturnValues: 'ALL_OLD'
     };
-
+    
     const result = await dbClient.send(new DeleteCommand(params));
     return result.Attributes;
   }

@@ -1,115 +1,74 @@
 import BudgetModel from "../models/BudgetModel.js";
+import { budgetControllerWrapper } from '../helpers/budgets/budgetControllerWrapper.js';
+import { validateBudgetData, validateBudgetUpdateData, validateBudgetHistoryParams } from '../helpers/budgets/budgetValidators.js';
 
 class BudgetController {
-  static async createBudget(req, res) {
-    try {
-      const userId = req.user.userId;
-      const { category, amount, month } = req.body;
+  static createBudget = budgetControllerWrapper(async (req, res) => {
+    const userId = req.user.userId;
+    const budgetData = req.body;
 
-      if (!category || !amount || !month) {
-        return res.status(400).json({ error: 'Category, amount, and month are required' });
-      }
-
-      if (amount <= 0) {
-        return res.status(400).json({ error: 'Amount must be greater than 0' });
-      }
-
-      const budget = await BudgetModel.createBudget({ category, amount, month }, userId);
-      res.status(201).json(budget);
-    } catch (error) {
-      console.error('Create budget error:', error);
-      if (error.message.includes('already exists')) {
-        return res.status(409).json({ error: error.message });
-      }
-      res.status(500).json({ error: 'Failed to create budget' });
+    const validationErrors = validateBudgetData(budgetData);
+    if (validationErrors) {
+      throw { type: 'validation', message: 'Validation failed', details: validationErrors };
     }
-  }
 
-  static async getBudgets(req, res) {
-    try {
-      const userId = req.user.userId;
-      const { month } = req.query;
+    const budget = await BudgetModel.createBudget(budgetData, userId);
+    res.status(201).json(budget);
+  });
 
-      const budgets = await BudgetModel.getBudgets(userId, month);
-      res.json(budgets);
-    } catch (error) {
-      console.error('Get budgets error:', error);
-      res.status(500).json({ error: 'Failed to get budgets' });
+  static getBudgets = budgetControllerWrapper(async (req, res) => {
+    const userId = req.user.userId;
+    const { month } = req.query;
+
+    const budgets = await BudgetModel.getBudgets(userId, month);
+    res.json(budgets);
+  });
+
+  static updateBudget = budgetControllerWrapper(async (req, res) => {
+    const userId = req.user.userId;
+    const updateData = req.body;
+
+    const validationErrors = validateBudgetUpdateData(updateData);
+    if (validationErrors) {
+      throw { type: 'validation', message: 'Validation failed', details: validationErrors };
     }
-  }
 
-  static async updateBudget(req, res) {
-    try {
-      const userId = req.user.userId;
-      const { budgetId, amount, category } = req.body;
+    const { budgetId, ...fieldsToUpdate } = updateData;
+    const updatedBudget = await BudgetModel.updateBudgetById(budgetId, userId, fieldsToUpdate);
+    
+    res.json({
+      message: "Budget updated successfully",
+      budget: updatedBudget
+    });
+  });
 
-      if (!budgetId) {
-        return res.status(400).json({ error: 'Budget ID is required' });
-      }
+  static deleteBudget = budgetControllerWrapper(async (req, res) => {
+    const userId = req.user.userId;
+    const { budgetId } = req.body;
 
-      if (amount !== undefined && amount <= 0) {
-        return res.status(400).json({ error: 'Amount must be greater than 0' });
-      }
-
-      const updatedBudget = await BudgetModel.updateBudgetById(budgetId, userId, { amount, category });
-      
-      res.json({
-        message: "Budget updated successfully",
-        budget: updatedBudget
-      });
-    } catch (error) {
-      console.error('Update budget error:', error);
-      if (error.name === 'ConditionalCheckFailedException') {
-        return res.status(404).json({ error: 'Budget not found or access denied' });
-      }
-      res.status(500).json({ error: 'Failed to update budget' });
+    if (!budgetId) {
+      throw { type: 'missing_field', message: 'Budget ID is required' };
     }
-  }
 
-  static async deleteBudget(req, res) {
-    try {
-      const userId = req.user.userId;
-      const { budgetId } = req.body;
+    const deletedBudget = await BudgetModel.deleteBudgetById(budgetId, userId);
+    
+    res.json({
+      message: "Budget deleted successfully",
+      budget: deletedBudget
+    });
+  });
 
-      if (!budgetId) {
-        return res.status(400).json({ error: 'Budget ID is required' });
-      }
+  static getBudgetHistory = budgetControllerWrapper(async (req, res) => {
+    const userId = req.user.userId;
+    const queryParams = req.query;
 
-      const deletedBudget = await BudgetModel.deleteBudgetById(budgetId, userId);
-      
-      res.json({
-        message: "Budget deleted successfully",
-        budget: deletedBudget
-      });
-    } catch (error) {
-      console.error('Delete budget error:', error);
-      if (error.name === 'ConditionalCheckFailedException') {
-        return res.status(404).json({ error: 'Budget not found or access denied' });
-      }
-      res.status(500).json({ error: 'Failed to delete budget' });
-    }
-  }
+    validateBudgetHistoryParams(queryParams);
 
-  static async getBudgetHistory(req, res) {
-    try {
-      const userId = req.user.userId;
-      const { months } = req.query;
-
-      if (!months) {
-        return res.status(400).json({ error: 'Months parameter is required' });
-      }
-
-      const monthsArray = months.split(',');
-      const history = await BudgetModel.getBudgetHistory(userId, monthsArray);
-      
-      res.json(history);
-    } catch (error) {
-      console.error('Get budget history error:', error);
-      res.status(500).json({ error: 'Failed to get budget history' });
-    }
-  }
-
-
+    const monthsArray = queryParams.months.split(',');
+    const history = await BudgetModel.getBudgetHistory(userId, monthsArray);
+    
+    res.json(history);
+  });
 }
 
 export default BudgetController;
