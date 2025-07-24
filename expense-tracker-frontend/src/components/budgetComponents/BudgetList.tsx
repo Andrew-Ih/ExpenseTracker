@@ -20,7 +20,12 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  LinearProgress
+  LinearProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent
 } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import { Budget, deleteBudget } from '@/services/budgetService';
@@ -55,6 +60,13 @@ const BudgetList = ({
 
   useEffect(() => {
     const fetchBudgetProgress = async () => {
+      // Validate year from selectedMonth - only proceed if it's a valid 4-digit year
+      const year = selectedMonth.split('-')[0];
+      if (!year || year.length !== 4 || isNaN(parseInt(year))) {
+        setBudgetProgress({});
+        return;
+      }
+
       const progress: Record<string, number> = {};
       
       for (const budget of budgets) {
@@ -130,12 +142,42 @@ const BudgetList = ({
       <Paper sx={{ p: 3, mb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
           <Typography variant="h6">Budgets for:</Typography>
+          <FormControl size="small" sx={{ minWidth: 120 }}>
+            <InputLabel>Month</InputLabel>
+            <Select
+              value={parseInt(selectedMonth.split('-')[1])}
+              label="Month"
+              onChange={(e: SelectChangeEvent<number>) => {
+                const year = selectedMonth.split('-')[0];
+                const month = (e.target.value as number).toString().padStart(2, '0');
+                onMonthChange(`${year}-${month}`);
+              }}
+            >
+              <MenuItem value={1}>January</MenuItem>
+              <MenuItem value={2}>February</MenuItem>
+              <MenuItem value={3}>March</MenuItem>
+              <MenuItem value={4}>April</MenuItem>
+              <MenuItem value={5}>May</MenuItem>
+              <MenuItem value={6}>June</MenuItem>
+              <MenuItem value={7}>July</MenuItem>
+              <MenuItem value={8}>August</MenuItem>
+              <MenuItem value={9}>September</MenuItem>
+              <MenuItem value={10}>October</MenuItem>
+              <MenuItem value={11}>November</MenuItem>
+              <MenuItem value={12}>December</MenuItem>
+            </Select>
+          </FormControl>
           <TextField
-            type="month"
-            value={selectedMonth}
-            onChange={(e) => onMonthChange(e.target.value)}
+            type="number"
+            label="Year"
+            value={parseInt(selectedMonth.split('-')[0])}
+            onChange={(e) => {
+              const month = selectedMonth.split('-')[1];
+              const year = e.target.value;
+              onMonthChange(`${year}-${month}`);
+            }}
             size="small"
-            InputLabelProps={{ shrink: true }}
+            sx={{ minWidth: 100, maxWidth: 120 }}
           />
         </Box>
 

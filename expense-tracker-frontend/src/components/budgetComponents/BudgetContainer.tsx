@@ -36,6 +36,13 @@ const BudgetContainer = () => {
 
   useEffect(() => {
     const fetchBudgetProgress = async () => {
+      // Validate year from selectedMonth - only proceed if it's a valid 4-digit year
+      const year = selectedMonth.split('-')[0];
+      if (!year || year.length !== 4 || isNaN(parseInt(year))) {
+        setBudgetProgress({});
+        return;
+      }
+
       const progress: Record<string, number> = {};
       
       for (const budget of budgets) {

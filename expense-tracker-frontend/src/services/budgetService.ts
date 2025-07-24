@@ -83,16 +83,25 @@ export const deleteBudget = async (budgetId: string) => {
 };
 
 export const getBudgetHistory = async (months: string[]) => {
-  const response = await fetch(`${API_BASE_URL}/api/budget/getBudgetHistory?months=${months.join(',')}`, {
+  const response = await fetch(`${API_BASE_URL}/api/budget/getBudgetHistory`, {
+    method: 'POST',
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
       'Content-Type': 'application/json'
-    }
+    },
+    body: JSON.stringify({ months })
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to fetch budget history');
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to fetch budget history');
+    } else {
+      const text = await response.text();
+      console.error('Non-JSON response:', text);
+      throw new Error(`Server error: ${response.status} ${response.statusText}`);
+    }
   }
 
   return response.json();

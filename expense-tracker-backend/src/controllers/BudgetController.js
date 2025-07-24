@@ -60,11 +60,11 @@ class BudgetController {
 
   static getBudgetHistory = budgetControllerWrapper(async (req, res) => {
     const userId = req.user.userId;
-    const queryParams = req.query;
+    const bodyParams = req.body;
 
-    validateBudgetHistoryParams(queryParams);
+    validateBudgetHistoryParams(bodyParams);
 
-    const monthsArray = queryParams.months.split(',');
+    const monthsArray = bodyParams.months;
     const history = await BudgetModel.getBudgetHistory(userId, monthsArray);
     
     res.json(history);

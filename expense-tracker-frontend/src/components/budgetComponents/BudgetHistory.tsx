@@ -53,6 +53,14 @@ const BudgetHistory = ({}: BudgetHistoryProps) => {
 
   useEffect(() => {
     const fetchYearlySummary = async () => {
+      // Validate year input - only check if it's a valid 4-digit year
+      if (!selectedYear || selectedYear.toString().length !== 4 || isNaN(selectedYear)) {
+        setSummaries([]);
+        setError(null);
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       setError(null);
       
@@ -94,7 +102,9 @@ const BudgetHistory = ({}: BudgetHistoryProps) => {
         
         setSummaries(yearlyData);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch budget history');
+        console.error('Budget history error:', err);
+        setSummaries([]);
+        setError(null); // Don't show error, just show empty state
       } finally {
         setLoading(false);
       }
@@ -204,47 +214,59 @@ const BudgetHistory = ({}: BudgetHistoryProps) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {summaries.map((summary) => {
-              const progressPercent = summary.totalBudgeted > 0 ? (summary.totalSpent / summary.totalBudgeted) * 100 : 0;
-              const isOverBudget = summary.totalSpent > summary.totalBudgeted;
-              const monthIndex = parseInt(summary.month.split('-')[1]) - 1;
-              
-              return (
-                <TableRow key={summary.month}>
-                  <TableCell sx={{ fontWeight: 'medium' }}>
-                    {monthNames[monthIndex]}
-                  </TableCell>
-                  <TableCell align="right" sx={{ px: 2 }}>
-                    <Typography color="primary.main" variant="body2" sx={{ fontWeight: 'medium' }}>
-                      ${summary.totalBudgeted.toFixed(2)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="right" sx={{ px: 2 }}>
-                    <Typography color={isOverBudget ? "error.main" : "text.primary"} variant="body2" sx={{ fontWeight: 'medium' }}>
-                      ${summary.totalSpent.toFixed(2)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="right" sx={{ px: 2 }}>
-                    <Typography color={summary.overUnderBudget >= 0 ? "success.main" : "error.main"} variant="body2" sx={{ fontWeight: 'medium' }}>
-                      {summary.overUnderBudget >= 0 ? '+' : '-'}${Math.abs(summary.overUnderBudget).toFixed(2)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="center" sx={{ px: 3 }}>
-                    <Box sx={{ width: '100%', maxWidth: 150, mx: 'auto' }}>
-                      <LinearProgress 
-                        variant="determinate" 
-                        value={Math.min(progressPercent, 100)}
-                        color={isOverBudget ? "error" : progressPercent > 80 ? "warning" : "success"}
-                        sx={{ mb: 0.5, height: 6, borderRadius: 3 }}
-                      />
-                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-                        {progressPercent.toFixed(0)}%
+            {summaries.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} align="center">
+                  <Typography variant="body1" sx={{ py: 4 }}>
+                    {!selectedYear || selectedYear.toString().length !== 4 || isNaN(selectedYear)
+                      ? 'Please enter a valid 4-digit year'
+                      : 'No budget history available for this period'}
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            ) : (
+              summaries.map((summary) => {
+                const progressPercent = summary.totalBudgeted > 0 ? (summary.totalSpent / summary.totalBudgeted) * 100 : 0;
+                const isOverBudget = summary.totalSpent > summary.totalBudgeted;
+                const monthIndex = parseInt(summary.month.split('-')[1]) - 1;
+                
+                return (
+                  <TableRow key={summary.month}>
+                    <TableCell sx={{ fontWeight: 'medium' }}>
+                      {monthNames[monthIndex]}
+                    </TableCell>
+                    <TableCell align="right" sx={{ px: 2 }}>
+                      <Typography color="primary.main" variant="body2" sx={{ fontWeight: 'medium' }}>
+                        ${summary.totalBudgeted.toFixed(2)}
                       </Typography>
-                    </Box>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+                    </TableCell>
+                    <TableCell align="right" sx={{ px: 2 }}>
+                      <Typography color={isOverBudget ? "error.main" : "text.primary"} variant="body2" sx={{ fontWeight: 'medium' }}>
+                        ${summary.totalSpent.toFixed(2)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="right" sx={{ px: 2 }}>
+                      <Typography color={summary.overUnderBudget >= 0 ? "success.main" : "error.main"} variant="body2" sx={{ fontWeight: 'medium' }}>
+                        {summary.overUnderBudget >= 0 ? '+' : '-'}${Math.abs(summary.overUnderBudget).toFixed(2)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center" sx={{ px: 3 }}>
+                      <Box sx={{ width: '100%', maxWidth: 150, mx: 'auto' }}>
+                        <LinearProgress 
+                          variant="determinate" 
+                          value={Math.min(progressPercent, 100)}
+                          color={isOverBudget ? "error" : progressPercent > 80 ? "warning" : "success"}
+                          sx={{ mb: 0.5, height: 6, borderRadius: 3 }}
+                        />
+                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                          {progressPercent.toFixed(0)}%
+                        </Typography>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
           </TableBody>
         </Table>
       </TableContainer>
