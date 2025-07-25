@@ -1,6 +1,6 @@
 # Expense Tracker
 
-A full-stack web application for tracking personal expenses with secure user authentication and profile management.
+A full-stack web application for tracking personal expenses with secure user authentication, profile management, transactions and and comprehensive budget tracking. 
 
 ## Features
 
@@ -18,14 +18,25 @@ A full-stack web application for tracking personal expenses with secure user aut
 - **Transaction Management**
   - Create, read, update, and delete financial transactions
   - Categorize expenses and income
-  - Track transaction history
+  - Track transaction history with advanced filtering
   - User-specific transaction isolation
   - Partial updates for transaction fields
+  - Pagination support for large datasets
 
-- **Responsive UI**
-  - Modern Material UI components
-  - Mobile-friendly design
-  - Dark theme support
+- **Budget Management**
+  - Create monthly budgets by category
+  - Real-time budget vs actual spending tracking
+  - Visual progress indicators with color-coded alerts
+  - Budget history with yearly summaries
+  - Over/under budget analysis
+  - Duplicate budget prevention
+
+- **Enhanced UI/UX**
+  - Modern Material UI components with dark theme
+  - Mobile-friendly responsive design
+  - Professional currency formatting with commas
+  - Smooth loading states without jarring re-renders
+  - Intuitive navigation with sidebar layout
 
 ## Tech Stack
 
@@ -34,14 +45,17 @@ A full-stack web application for tracking personal expenses with secure user aut
 - **UI Library**: Material UI (MUI) v7
 - **Authentication**: AWS Cognito integration
 - **Styling**: Tailwind CSS
+- **State Management**: React hooks
+- **Type Safety**: TypeScript
 
 ### Backend
 - **Runtime**: Node.js with Express.js
-- **Architecture**: MVC pattern with serverless deployment
-- **Database**: Amazon DynamoDB
+- **Architecture**: MVC pattern with helper abstraction
+- **Database**: Amazon DynamoDB with GSI optimization
 - **Authentication**: Amazon Cognito User Pools
 - **Deployment**: AWS Lambda via Serverless Framework
-- **Infrastructure as Code**: AWS CloudFormation via Serverless Framework
+- **Infrastructure as Code**: AWS CloudFormation
+- **Error Handling**: Centralized error management
 
 ## Getting Started
 
@@ -55,6 +69,7 @@ A full-stack web application for tracking personal expenses with secure user aut
 cd expense-tracker-frontend
 npm install
 npm run dev
+- Frontend runs on http://localhost:3000
 ```
 
 ### Backend Setup
@@ -62,6 +77,7 @@ npm run dev
 cd expense-tracker-backend
 npm install
 npm run dev  # Run locally with serverless-offline
+- Backend runs on http://localhost:3001
 ```
 
 ### Deployment
@@ -74,12 +90,28 @@ npm run deploy
 ```
 
 ## AWS Services Used:
-- **Amazon Cognito**: User authentication
-- **AWS Lambda**: Serverless backend
+- **Amazon Cognito**: User authentication and management
+- **AWS Lambda**: Serverless backend compute
 - **Amazon API Gateway**: REST API endpoints
-- **Amazon DynamoDB**: NoSQL database
+- **Amazon DynamoDB**: NoSQL database with GSI
 - **AWS IAM**: Security and permissions
 - **AWS CloudFormation**: Infrastructure as Code
+
+## Architecture Highlights
+
+### Database Design
+- **Users Table**: Profile information synced with Cognito
+- **Transactions Table**: Financial records with UserDateIndex GSI
+- **Budgets Table**: Monthly budget allocations with UserMonthIndex GSI
+- **Optimized Queries**: Single-query operations for better performance
+
+### Code Organization
+- **MVC Pattern**: Clear separation of concerns
+- **Helper Functions**: Abstracted DynamoDB operations
+- **Error Handling**: Centralized error management with user-friendly messages
+- **Validation**: Input validation at multiple layers
+- **Type Safety**: Full TypeScript implementation
+
 
 ## Infrastructure as Code (IaC)
 
@@ -104,8 +136,8 @@ Benefits of using IaC with CloudFormation:
    - Backend runs on http://localhost:3001
 
 2. **Authentication Flow**:
-   - User registers → Email verification → Login → JWT token
-   - Token used for authenticated API requests
+   - Registration → Email verification → Login → JWT token
+   - Token-based API authentication
 
 3. **Data Flow**:
    - User data stored in both Cognito and DynamoDB
@@ -117,3 +149,36 @@ Benefits of using IaC with CloudFormation:
    - Read: View transaction history with filtering options
    - Update: Modify transaction details as needed
    - Delete: Remove unwanted transactions
+
+5. **Budget Operations**:
+  - Create: Monthly budget allocation by category
+  - Track: Real-time spending vs budget comparison
+  - Analyze: Historical performance and trends
+  - Visualize: Progress bars and color-coded indicators
+
+  ## Development Notes
+
+For detailed information about issues encountered during development, solutions implemented, and technical learnings, see [DEVELOPMENT_NOTES.md](./DEVELOPMENT_NOTES.md).
+
+**Key Issues Resolved:**
+- Performance optimization (24 API calls → 2 API calls)
+- Improved loading states and user experience
+- Input validation and error handling
+- Code architecture and maintainability
+- UI consistency and professional formatting
+
+## Key Learnings
+
+1. **Performance Optimization**: Always consider the number of API calls and database queries. Batch operations when possible.
+
+2. **User Experience**: Loading states should maintain visual continuity. Avoid full-page re-renders.
+
+3. **Input Validation**: Validate on both client and server. Prevent unnecessary API calls with client-side checks.
+
+4. **Code Architecture**: Abstract common patterns early. Use helper functions and centralized error handling.
+
+5. **Professional Polish**: Consistent formatting, proper typography, and attention to detail make a significant difference.
+
+6. **Database Design**: Proper GSI design enables efficient queries. Consider access patterns when designing tables.
+
+7. **Error Handling**: User-friendly error messages are crucial. Technical errors should be logged, not displayed to users.
