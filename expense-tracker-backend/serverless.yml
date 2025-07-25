@@ -22,6 +22,10 @@ provider:
             - dynamodb:Scan
           Resource:
             - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerUsers"
+            - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerTransactions"
+            - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerTransactions/index/*"
+            - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerBudgets"
+            - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerBudgets/index/*"
 
 functions:
   api:
@@ -41,6 +45,56 @@ resources:
         KeySchema:
           - AttributeName: userId
             KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+    
+    TransactionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ExpenseTrackerTransactions
+        AttributeDefinitions:
+          - AttributeName: transactionId
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: date
+            AttributeType: S
+        KeySchema:
+          - AttributeName: transactionId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: UserDateIndex
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+              - AttributeName: date
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+    
+    BudgetsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ExpenseTrackerBudgets
+        AttributeDefinitions:
+          - AttributeName: budgetId
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: month
+            AttributeType: S
+        KeySchema:
+          - AttributeName: budgetId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: UserMonthIndex
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+              - AttributeName: month
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
         BillingMode: PAY_PER_REQUEST
 
 plugins:

@@ -8,7 +8,7 @@ import CodeInput from './formComponents/CodeInput';
 import NewPasswordInput from './formComponents/NewPasswordInput';
 import ConfirmPasswordInput from './formComponents/ConfirmPasswordInput';
 import SubmitButton from './formComponents/SubmitButton';
-import PasswordTooltip from '../common/theme/PasswordTooltip';
+import PasswordTooltip from '../common/PasswordTooltip';
 
 const ResetPasswordForm = () => {
   const [formData, setFormData] = useState({

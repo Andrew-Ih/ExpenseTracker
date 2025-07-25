@@ -1,7 +1,7 @@
 import CognitoService from '../services/cognitoService.js';
 
-class AuthController {
-  static async signUp(req, res) {
+class UserAuthenticationController {
+  static async registerNewUser(req, res) {
     try {
       const { email, password, fullName } = req.body;
       
@@ -21,7 +21,7 @@ class AuthController {
     }
   }
 
-  static async confirmSignUp(req, res) {
+  static async verifyUserEmail(req, res) {
     try {
       const { email, code } = req.body;
       
@@ -38,7 +38,7 @@ class AuthController {
     }
   }
 
-  static async signIn(req, res) {
+  static async authenticateUser(req, res) {
     try {
       const { email, password } = req.body;
       
@@ -60,7 +60,7 @@ class AuthController {
     }
   }
 
-  static async resendConfirmationCode(req, res) {
+  static async regenerateVerificationCode(req, res) {
     try {
       const { email } = req.body;
       
@@ -77,7 +77,7 @@ class AuthController {
     }
   }
 
-  static async forgotPassword(req, res) {
+  static async initiatePasswordReset(req, res) {
     try {
       const { email } = req.body;
       
@@ -94,7 +94,7 @@ class AuthController {
     }
   }
 
-  static async confirmForgotPassword(req, res) {
+  static async completePasswordReset(req, res) {
     try {
       const { email, code, newPassword } = req.body;
       
@@ -112,4 +112,4 @@ class AuthController {
   }
 }
 
-export default AuthController;
+export default UserAuthenticationController;
