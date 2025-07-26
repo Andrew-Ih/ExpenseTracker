@@ -3,6 +3,7 @@ import RecurringTransactionModel from "../models/RecurringTransactionModel.js";
 import { validateTransactionData, validateTransactionQueryParams, parseTransactionQueryParams, validateRecurringTransactionData } from "../helpers/transactions/transactionValidators.js";
 import { formatTransactionsResponse } from '../helpers/transactions/transactionControllerHelpers.js';
 import { transactionControllerWrapper } from '../helpers/transactions/transactionControllerWrapper.js';
+import { calculateTransactionSummary, getCurrentMonthDateRange, getMonthDateRange, getCurrentYearDateRange, validateMonthYear } from '../helpers/transactions/transactionSummaryHelpers.js';
 
 class TransactionControllers {
   static createTransaction = transactionControllerWrapper(async (req, res) => {
@@ -129,6 +130,43 @@ class TransactionControllers {
     res.status(200).json({
       message: "Recurring transaction deleted successfully",
       recurringTransaction: deletedRecurring
+    });
+  });
+
+  static getTransactionSummary = transactionControllerWrapper(async (req, res) => {
+    const userId = req.user.userId;
+    const { month, year, period } = req.query;
+    
+    let dateRange;
+    
+    if (period === 'current-year') {
+      dateRange = getCurrentYearDateRange();
+    } else if (month && year) {
+      const validationErrors = validateMonthYear(parseInt(month), parseInt(year));
+      if (validationErrors) {
+        throw { type: 'validation', message: 'Invalid month/year', details: validationErrors };
+      }
+      dateRange = getMonthDateRange(parseInt(month), parseInt(year));
+    } else {
+      // Default to current month
+      dateRange = getCurrentMonthDateRange();
+    }
+    
+    const result = await TransactionModel.getTransactions(userId, {
+      startDate: dateRange.startDate,
+      endDate: dateRange.endDate
+    });
+    
+    const summary = calculateTransactionSummary(result.transactions);
+    
+    res.status(200).json({
+      summary,
+      period: {
+        startDate: dateRange.startDate,
+        endDate: dateRange.endDate,
+        month: month ? parseInt(month) : new Date().getMonth() + 1,
+        year: year ? parseInt(year) : new Date().getFullYear()
+      }
     });
   });
 }
