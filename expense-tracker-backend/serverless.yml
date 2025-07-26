@@ -26,6 +26,8 @@ provider:
             - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerTransactions/index/*"
             - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerBudgets"
             - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerBudgets/index/*"
+            - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerRecurringTransactions"
+            - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerRecurringTransactions/index/*"
 
 functions:
   api:
@@ -93,6 +95,27 @@ resources:
                 KeyType: HASH
               - AttributeName: month
                 KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+    
+    RecurringTransactionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ExpenseTrackerRecurringTransactions
+        AttributeDefinitions:
+          - AttributeName: recurringId
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: recurringId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: UserRecurringIndex
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
             Projection:
               ProjectionType: ALL
         BillingMode: PAY_PER_REQUEST

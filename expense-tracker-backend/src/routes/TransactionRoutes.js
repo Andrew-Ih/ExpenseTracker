@@ -9,4 +9,10 @@ router.post('/getTransactions', authenticateUser, TransactionControllers.getTran
 router.put('/updateTransaction', authenticateUser, TransactionControllers.updateTransaction);
 router.delete('/deleteTransaction', authenticateUser, TransactionControllers.deleteTransaction);
 
+// Recurring transaction routes
+router.post('/createRecurring', authenticateUser, TransactionControllers.createRecurringTransaction);
+router.get('/getRecurring', authenticateUser, TransactionControllers.getRecurringTransactions);
+router.put('/updateRecurring', authenticateUser, TransactionControllers.updateRecurringTransaction);
+router.delete('/deleteRecurring', authenticateUser, TransactionControllers.deleteRecurringTransaction);
+
 export default router;
