@@ -1,6 +1,5 @@
 import TransactionModel from "../models/TransactionModel.js";
-import RecurringTransactionModel from "../models/RecurringTransactionModel.js";
-import { validateTransactionData, validateTransactionQueryParams, parseTransactionQueryParams, validateRecurringTransactionData } from "../helpers/transactions/transactionValidators.js";
+import { validateTransactionData, validateTransactionQueryParams, parseTransactionQueryParams } from "../helpers/transactions/transactionValidators.js";
 import { formatTransactionsResponse } from '../helpers/transactions/transactionControllerHelpers.js';
 import { transactionControllerWrapper } from '../helpers/transactions/transactionControllerWrapper.js';
 import { calculateTransactionSummary, getCurrentMonthDateRange, getMonthDateRange, getCurrentYearDateRange, validateMonthYear } from '../helpers/transactions/transactionSummaryHelpers.js';
@@ -67,69 +66,6 @@ class TransactionControllers {
     res.status(200).json({
       message: "Transaction deleted successfully",
       transaction: deletedTransaction
-    });
-  });
-
-  static createRecurringTransaction = transactionControllerWrapper(async (req, res) => {
-    const userId = req.user.userId;
-    const recurringData = req.body;
-
-    const validationErrors = validateRecurringTransactionData(recurringData);
-    if (validationErrors) {
-      throw { type: 'validation', message: 'Validation failed', details: validationErrors };
-    }
-
-    // Create recurring template
-    const recurringTemplate = await RecurringTransactionModel.createRecurring(recurringData, userId);
-    
-    // Generate all instances at once
-    const transactions = await TransactionModel.createRecurringInstances(recurringTemplate, userId);
-    
-    res.status(201).json({
-      message: 'Recurring transaction created successfully',
-      recurringTemplate,
-      generatedCount: transactions.length,
-      transactions: transactions.slice(0, 5) // Return first 5 for confirmation
-    });
-  });
-
-  static getRecurringTransactions = transactionControllerWrapper(async (req, res) => {
-    const userId = req.user.userId;
-    
-    const recurringTransactions = await RecurringTransactionModel.getRecurringTransactions(userId);
-    
-    res.status(200).json(recurringTransactions);
-  });
-
-  static updateRecurringTransaction = transactionControllerWrapper(async (req, res) => {
-    const userId = req.user.userId;
-    const { recurringId, ...updateData } = req.body;
-
-    if (!recurringId) {
-      throw { type: 'missing_field', message: 'Recurring ID is required' };
-    }
-
-    const updatedRecurring = await RecurringTransactionModel.updateRecurringById(recurringId, userId, updateData);
-    
-    res.status(200).json({
-      message: "Recurring transaction updated successfully",
-      recurringTransaction: updatedRecurring
-    });
-  });
-
-  static deleteRecurringTransaction = transactionControllerWrapper(async (req, res) => {
-    const userId = req.user.userId;
-    const { recurringId } = req.body;
-
-    if (!recurringId) {
-      throw { type: 'missing_field', message: 'Recurring ID is required' };
-    }
-    
-    const deletedRecurring = await RecurringTransactionModel.deleteRecurringById(recurringId);
-    
-    res.status(200).json({
-      message: "Recurring transaction deleted successfully",
-      recurringTransaction: deletedRecurring
     });
   });
 
