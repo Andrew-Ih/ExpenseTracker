@@ -1,8 +1,8 @@
 import TransactionModel from "../models/TransactionModel.js";
 import { validateTransactionData, validateTransactionQueryParams, parseTransactionQueryParams } from "../helpers/transactions/transactionValidators.js";
-import { formatTransactionsResponse } from '../helpers/transactions/transactionControllerHelpers.js';
+import { formatTransactionsResponse, getDateRange } from '../helpers/transactions/transactionControllerHelpers.js';
 import { transactionControllerWrapper } from '../helpers/transactions/transactionControllerWrapper.js';
-import { calculateTransactionSummary, getCurrentMonthDateRange, getMonthDateRange, getCurrentYearDateRange, validateMonthYear } from '../helpers/transactions/transactionSummaryHelpers.js';
+import { calculateTransactionSummary } from '../helpers/transactions/transactionSummaryHelpers.js';
 
 class TransactionControllers {
   static createTransaction = transactionControllerWrapper(async (req, res) => {
@@ -72,27 +72,9 @@ class TransactionControllers {
   static getTransactionSummary = transactionControllerWrapper(async (req, res) => {
     const userId = req.user.userId;
     const { month, year, period } = req.query;
-    
-    let dateRange;
-    
-    if (period === 'current-year') {
-      dateRange = getCurrentYearDateRange();
-    } else if (month && year) {
-      const validationErrors = validateMonthYear(parseInt(month), parseInt(year));
-      if (validationErrors) {
-        throw { type: 'validation', message: 'Invalid month/year', details: validationErrors };
-      }
-      dateRange = getMonthDateRange(parseInt(month), parseInt(year));
-    } else {
-      // Default to current month
-      dateRange = getCurrentMonthDateRange();
-    }
-    
-    const result = await TransactionModel.getTransactions(userId, {
-      startDate: dateRange.startDate,
-      endDate: dateRange.endDate
-    });
-    
+
+    const dateRange = getDateRange(period, month, year);
+    const result = await TransactionModel.getTransactions(userId, { startDate: dateRange.startDate, endDate: dateRange.endDate });
     const summary = calculateTransactionSummary(result.transactions);
     
     res.status(200).json({
