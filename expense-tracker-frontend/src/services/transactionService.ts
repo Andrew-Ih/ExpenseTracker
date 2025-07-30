@@ -173,3 +173,33 @@ export const deleteRecurringTransaction = async (recurringId: string) => {
 
   return response.json();
 };
+
+export interface TransactionSummary {
+  totalIncome: number;
+  totalExpenses: number;
+  netIncome: number;
+  transactionCount: number;
+  incomeCount: number;
+  expenseCount: number;
+}
+
+export const getTransactionSummary = async (month?: number, year?: number, period?: string) => {
+  const params = new URLSearchParams();
+  if (month) params.append('month', month.toString());
+  if (year) params.append('year', year.toString());
+  if (period) params.append('period', period);
+
+  const response = await fetch(`${API_BASE_URL}/api/transactions/getSummary?${params.toString()}`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+      'Content-Type': 'application/json'
+    }
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to fetch transaction summary');
+  }
+
+  return response.json();
+};
