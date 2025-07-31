@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Stack, Typography, Alert, CircularProgress, Paper, Box, Divider } from '@mui/material';
+import { Stack, Typography, Alert, CircularProgress, Paper, Box, Divider, TextField, Button } from '@mui/material';
 import { Person, Security, TrendingUp, DeleteForever } from '@mui/icons-material';
 import { getUserProfile, updateUserProfile, deleteUserProfile } from '@/services/userService';
 import { getTransactionSummary } from '@/services/transactionService';
@@ -32,7 +32,7 @@ const ProfileContainer = () => {
 
   useEffect(() => {
     loadProfileData();
-  });
+  }, []);
 
   // Update state when userProfile changes
   useEffect(() => {
@@ -206,82 +206,41 @@ const ProfileContainer = () => {
               {/* Name Fields */}
               {isEditing ? (
                 <Stack spacing={2}>
-                  <Box>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      First Name
-                    </Typography>
-                    <input
-                      type="text"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '8px 12px',
-                        border: errors.firstName ? '1px solid #d32f2f' : '1px solid #ccc',
-                        borderRadius: '4px',
-                        fontSize: '16px'
-                      }}
-                    />
-                    {errors.firstName && (
-                      <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
-                        {errors.firstName}
-                      </Typography>
-                    )}
-                  </Box>
-
-                  <Box>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      Last Name
-                    </Typography>
-                    <input
-                      type="text"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '8px 12px',
-                        border: errors.lastName ? '1px solid #d32f2f' : '1px solid #ccc',
-                        borderRadius: '4px',
-                        fontSize: '16px'
-                      }}
-                    />
-                    {errors.lastName && (
-                      <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
-                        {errors.lastName}
-                      </Typography>
-                    )}
-                  </Box>
-
+                  <TextField
+                    label="First Name"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    error={!!errors.firstName}
+                    helperText={errors.firstName}
+                    fullWidth
+                    size="small"
+                  />
+                  <TextField
+                    label="Last Name"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    error={!!errors.lastName}
+                    helperText={errors.lastName}
+                    fullWidth
+                    size="small"
+                  />
                   <Box sx={{ display: 'flex', gap: 1 }}>
-                    <button
+                    <Button
+                      variant="contained"
                       onClick={handleSave}
                       disabled={updateLoading}
-                      style={{
-                        padding: '8px 16px',
-                        backgroundColor: '#1976d2',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: updateLoading ? 'not-allowed' : 'pointer',
-                        opacity: updateLoading ? 0.7 : 1
-                      }}
+                      size="small"
                     >
                       {updateLoading ? 'Saving...' : 'Save'}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="outlined"
                       onClick={handleCancel}
                       disabled={updateLoading}
-                      style={{
-                        padding: '8px 16px',
-                        backgroundColor: 'transparent',
-                        color: '#666',
-                        border: '1px solid #ccc',
-                        borderRadius: '4px',
-                        cursor: updateLoading ? 'not-allowed' : 'pointer'
-                      }}
+                      size="small"
                     >
                       Cancel
-                    </button>
+                    </Button>
                   </Box>
                 </Stack>
               ) : (
@@ -292,20 +251,14 @@ const ProfileContainer = () => {
                   <Typography variant="body1" sx={{ fontWeight: 500 }}>
                     {userProfile.firstName} {userProfile.lastName}
                   </Typography>
-                  <button
+                  <Button
+                    variant="outlined"
                     onClick={handleEdit}
-                    style={{
-                      marginTop: '8px',
-                      padding: '6px 12px',
-                      backgroundColor: 'transparent',
-                      color: '#1976d2',
-                      border: '1px solid #1976d2',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
+                    size="small"
+                    sx={{ mt: 1 }}
                   >
                     Edit
-                  </button>
+                  </Button>
                 </Box>
               )}
             </Stack>
@@ -353,19 +306,13 @@ const ProfileContainer = () => {
                 <Typography variant="body2" color="text.secondary" gutterBottom>
                   Password Management
                 </Typography>
-                <button
+                <Button
+                  variant="contained"
                   onClick={handleChangePassword}
-                  style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#1976d2',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer'
-                  }}
+                  size="small"
                 >
                   Change Password
-                </button>
+                </Button>
               </Box>
 
               <Divider />
@@ -400,21 +347,14 @@ const ProfileContainer = () => {
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                 This action will permanently delete your account and all associated data.
               </Typography>
-              <button
+              <Button
+                variant="contained"
+                color="error"
                 onClick={handleAccountDeletion}
                 disabled={updateLoading}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#d32f2f',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: updateLoading ? 'not-allowed' : 'pointer',
-                  opacity: updateLoading ? 0.7 : 1
-                }}
               >
                 {updateLoading ? 'Deleting...' : 'Delete Account'}
-              </button>
+              </Button>
             </Box>
           </Stack>
         </Paper>
