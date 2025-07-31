@@ -75,7 +75,7 @@ const ProfileInformation = ({ userProfile, onUpdate, loading }: ProfileInformati
     try {
       await onUpdate(firstName.trim(), lastName.trim());
       setIsEditing(false);
-    } catch (error) {
+    } catch {
       // Error handling is done in the parent component
     }
   };
