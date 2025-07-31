@@ -32,7 +32,7 @@ const ProfileContainer = () => {
 
   useEffect(() => {
     loadProfileData();
-  }, []);
+  });
 
   // Update state when userProfile changes
   useEffect(() => {
