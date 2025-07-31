@@ -102,7 +102,8 @@ const _initializeBaseParams = (userId) => {
     KeyConditionExpression: 'userId = :userId',
     ExpressionAttributeValues: {
       ':userId': userId
-    }
+    },
+    ScanIndexForward: false // Sort in descending order (latest first)
   };
 };
 
