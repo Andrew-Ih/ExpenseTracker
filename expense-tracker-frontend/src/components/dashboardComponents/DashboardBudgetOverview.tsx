@@ -92,6 +92,13 @@ const DashboardBudgetOverview = ({ budgets }: DashboardBudgetOverviewProps) => {
     setCurrentPage(page);
   };
 
+  const getCurrentMonthName = () => {
+    const currentDate = new Date();
+    const monthName = currentDate.toLocaleDateString('en-US', { month: 'long' });
+    const year = currentDate.getFullYear();
+    return `${monthName} ${year}`;
+  };
+
   if (budgets.length === 0) {
     return (
       <Paper sx={{ p: 3, height: '100%' }}>
@@ -114,7 +121,7 @@ const DashboardBudgetOverview = ({ budgets }: DashboardBudgetOverviewProps) => {
       </Typography>
       
       <Chip 
-        label="Current Month" 
+        label={getCurrentMonthName()} 
         size="small" 
         color="primary" 
         variant="outlined"

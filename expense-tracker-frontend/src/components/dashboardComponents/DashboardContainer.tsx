@@ -6,11 +6,11 @@ import DashboardWelcome from './DashboardWelcome';
 import DashboardStats from './DashboardStats';
 import DashboardTransactionSummary from './DashboardTransactionSummary';
 import DashboardBudgetOverview from './DashboardBudgetOverview';
-import DashboardRecentTransactions from './DashboardRecentTransactions';
+// import DashboardRecentTransactions from './DashboardRecentTransactions';
 import { getUserProfile } from '@/services/userService';
 import { getTransactionSummary } from '@/services/transactionService';
 import { getBudgets } from '@/services/budgetService';
-import { getTransactions, Transaction, TransactionSummary } from '@/services/transactionService';
+import { getTransactions, TransactionSummary } from '@/services/transactionService';
 import { Budget } from '@/services/budgetService';
 
 interface UserProfile {
@@ -42,7 +42,7 @@ const DashboardContainer = () => {
   const [dashboardStats, setDashboardStats] = useState<DashboardStatsData | null>(null);
   const [transactionSummary, setTransactionSummary] = useState<TransactionSummaryResponse | null>(null);
   const [budgets, setBudgets] = useState<Budget[]>([]);
-  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
+  // const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,7 +60,7 @@ const DashboardContainer = () => {
         profileResult,
         summaryResult,
         budgetsResult,
-        transactionsResult
+        // transactionsResult
       ] = await Promise.all([
         getUserProfile(),
         getTransactionSummary(),
@@ -71,7 +71,7 @@ const DashboardContainer = () => {
       setUserProfile(profileResult);
       setTransactionSummary(summaryResult);
       setBudgets(budgetsResult);
-      setRecentTransactions(transactionsResult.transactions || []);
+      // setRecentTransactions(transactionsResult.transactions || []);
 
       // Calculate dashboard stats
       const stats: DashboardStatsData = {
@@ -130,9 +130,9 @@ const DashboardContainer = () => {
           </Box>
         </Stack>
         
-        <Box sx={{ width: '100%' }}>
+        {/* <Box sx={{ width: '100%' }}>
           <DashboardRecentTransactions transactions={recentTransactions} />
-        </Box>
+        </Box> */}
       </Stack>
     </Box>
   );
