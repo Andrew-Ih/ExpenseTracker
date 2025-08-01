@@ -139,9 +139,12 @@ export default function AIChatSuggestions({ onSuggestionClick }: AIChatSuggestio
                       color: 'text.primary'
                     },
                     '&:hover': {
-                      bgcolor: `${category.color}.light`,
-                      color: `${category.color}.dark`,
-                      borderColor: `${category.color}.main`
+                      bgcolor: `${category.color}.main`,
+                      color: 'white',
+                      borderColor: `${category.color}.main`,
+                      '& .MuiChip-label': {
+                        color: 'white'
+                      }                      
                     }
                   }}
                 />

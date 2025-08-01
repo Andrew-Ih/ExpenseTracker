@@ -24,14 +24,14 @@ export default function AIChatMessages({ messages, isLoading }: AIChatMessagesPr
 
   return (
     <Box sx={{ 
-      flex: 1, 
+      height: '100%',
       overflow: 'auto',
       p: 2,
       display: 'flex',
       flexDirection: 'column',
       bgcolor: 'background.default'
     }}>
-      <Stack spacing={2} sx={{ flex: 1 }}>
+      <Stack spacing={2} sx={{ flex: 1, minHeight: 0 }}>
         {messages.map((message, index) => (
           <AIChatMessage 
             key={`${message.id}-${index}`}
