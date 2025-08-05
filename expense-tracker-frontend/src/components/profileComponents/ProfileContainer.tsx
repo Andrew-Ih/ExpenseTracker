@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { Stack, Typography, Alert, CircularProgress, Paper, Box, Divider, TextField, Button } from '@mui/material';
-import { Person, Security, TrendingUp, DeleteForever } from '@mui/icons-material';
+import { Person, Security, DeleteForever } from '@mui/icons-material';
 import { getUserProfile, updateUserProfile, deleteUserProfile } from '@/services/userService';
-import { getTransactionSummary } from '@/services/transactionService';
-import { getBudgets } from '@/services/budgetService';
+// import { getTransactionSummary } from '@/services/transactionService';
+// import { getBudgets } from '@/services/budgetService';
 
 interface UserProfile {
   userId: string;
@@ -14,14 +14,14 @@ interface UserProfile {
   email: string;
 }
 
-interface AccountStats {
-  totalTransactions: number;
-  totalBudgets: number;
-}
+// interface AccountStats {
+//   totalTransactions: number;
+//   totalBudgets: number;
+// }
 
 const ProfileContainer = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [accountStats, setAccountStats] = useState<AccountStats | null>(null);
+  // const [accountStats, setAccountStats] = useState<AccountStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updateLoading, setUpdateLoading] = useState(false);
@@ -49,7 +49,7 @@ const ProfileContainer = () => {
 
       const profile = await getUserProfile();
       setUserProfile(profile);
-      await loadAccountStatistics();
+      // await loadAccountStatistics();
 
     } catch (err) {
       console.error('Error loading profile data:', err);
@@ -59,21 +59,21 @@ const ProfileContainer = () => {
     }
   };
 
-  const loadAccountStatistics = async () => {
-    try {
-      const transactionSummary = await getTransactionSummary();
-      const totalTransactions = transactionSummary.summary.transactionCount;
-      const budgets = await getBudgets();
-      const totalBudgets = budgets.length;
+  // const loadAccountStatistics = async () => {
+  //   try {
+  //     const transactionSummary = await getTransactionSummary();
+  //     const totalTransactions = transactionSummary.summary.transactionCount;
+  //     const budgets = await getBudgets();
+  //     const totalBudgets = budgets.length;
 
-      setAccountStats({
-        totalTransactions,
-        totalBudgets
-      });
-    } catch (err) {
-      console.error('Error loading account statistics:', err);
-    }
-  };
+  //     setAccountStats({
+  //       totalTransactions,
+  //       totalBudgets
+  //     });
+  //   } catch (err) {
+  //     console.error('Error loading account statistics:', err);
+  //   }
+  // };
 
   const handleEdit = () => {
     setFirstName(userProfile?.firstName || '');
@@ -265,7 +265,7 @@ const ProfileContainer = () => {
           </Paper>
 
           {/* Account Statistics */}
-          <Paper sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column' }}>
+          {/* <Paper sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
               <TrendingUp color="primary" />
               <Typography variant="h6">Account Overview</Typography>
@@ -292,7 +292,7 @@ const ProfileContainer = () => {
                 </Typography>
               </Box>
             </Stack>
-          </Paper>
+          </Paper> */}
 
           {/* Security Settings */}
           <Paper sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column' }}>
