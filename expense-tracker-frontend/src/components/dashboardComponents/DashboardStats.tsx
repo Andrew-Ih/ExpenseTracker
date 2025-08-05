@@ -56,65 +56,66 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
   ];
 
   return (
-    <Stack 
-      direction="row" 
-      spacing={3} 
-      sx={{ 
-        mb: 3,
-        width: '100%'
-      }}
-    >
-      {statCards.map((card, index) => (
-        <Paper 
-          key={index}
-          sx={{ 
-            p: 3, 
-            flex: 1,
-            minHeight: 120,
-            background: `linear-gradient(135deg, ${card.bgColor}15 0%, ${card.bgColor}05 100%)`,
-            border: `1px solid ${card.bgColor}30`,
-            transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-            '&:hover': {
-              transform: 'translateY(-2px)',
-              boxShadow: 3
-            }
-          }}
-        >
-          <Stack spacing={2} sx={{ height: '100%' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <Box sx={{ mb: 3 }}>
+      <Stack 
+        direction="row" 
+        spacing={3} 
+        sx={{ 
+          width: '100%'
+        }}
+      >
+        {statCards.map((card, index) => (
+          <Paper 
+            key={index}
+            sx={{ 
+              p: 3, 
+              flex: 1,
+              minHeight: 120,
+              background: `linear-gradient(135deg, ${card.bgColor}15 0%, ${card.bgColor}05 100%)`,
+              border: `1px solid ${card.bgColor}30`,
+              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: 3
+              }
+            }}
+          >
+            <Stack spacing={2} sx={{ height: '100%' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Typography 
+                  variant="h6" 
+                  color="text.secondary"
+                  sx={{ fontWeight: 500 }}
+                >
+                  {card.title}
+                </Typography>
+                <Box 
+                  sx={{ 
+                    p: 1, 
+                    borderRadius: 1, 
+                    bgcolor: `${card.iconBgColor}20`,
+                    color: card.iconBgColor
+                  }}
+                >
+                  {card.icon}
+                </Box>
+              </Box>
+              
               <Typography 
-                variant="body2" 
-                color="text.secondary"
-                sx={{ fontWeight: 500 }}
-              >
-                {card.title}
-              </Typography>
-              <Box 
+                variant="h4" 
+                color={card.color}
                 sx={{ 
-                  p: 1, 
-                  borderRadius: 1, 
-                  bgcolor: `${card.iconBgColor}20`,
-                  color: card.iconBgColor
+                  fontWeight: 700,
+                  fontSize: { xs: '1.5rem', md: '2rem' }
                 }}
               >
-                {card.icon}
-              </Box>
-            </Box>
-            
-            <Typography 
-              variant="h4" 
-              color={card.color}
-              sx={{ 
-                fontWeight: 700,
-                fontSize: { xs: '1.5rem', md: '2rem' }
-              }}
-            >
-              {card.value}
-            </Typography>
-          </Stack>
-        </Paper>
-      ))}
-    </Stack>
+                {card.value}
+              </Typography>
+            </Stack>
+          </Paper>
+        ))}
+      </Stack>
+    </Box>
   );
 };
 

@@ -203,3 +203,19 @@ export const getTransactionSummary = async (month?: number, year?: number, perio
 
   return response.json();
 };
+
+export const getAllTimeTransactionSummary = async () => {
+  const response = await fetch(`${API_BASE_URL}/api/transactions/getAllTimeSummary`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+      'Content-Type': 'application/json'
+    }
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to fetch all-time transaction summary');
+  }
+
+  return response.json();
+};

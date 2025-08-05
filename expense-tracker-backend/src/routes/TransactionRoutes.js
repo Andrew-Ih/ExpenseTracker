@@ -8,6 +8,7 @@ const router = express.Router();
 router.post('/createTransaction', authenticateUser, TransactionControllers.createTransaction);
 router.post('/getTransactions', authenticateUser, TransactionControllers.getTransactions);
 router.get('/getSummary', authenticateUser, TransactionControllers.getTransactionSummary);
+router.get('/getAllTimeSummary', authenticateUser, TransactionControllers.getAllTimeTransactionSummary);
 router.put('/updateTransaction', authenticateUser, TransactionControllers.updateTransaction);
 router.delete('/deleteTransaction', authenticateUser, TransactionControllers.deleteTransaction);
 
