@@ -1,9 +1,11 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import userAuthRoutes from './routes/UserAuthenticationRoute.js';
 import userProfileManagementRoutes from './routes/UserProfileManagementRoute.js';
 import TransactionRoutes from './routes/TransactionRoutes.js';
 import BudgetRoutes from './routes/BudgetRoutes.js';
+import AIRoutes from './routes/AIRoutes.js';
 
 const app = express();
 
@@ -22,5 +24,7 @@ app.use('/api/users', userProfileManagementRoutes);
 app.use('/api/transactions', TransactionRoutes);
 // Budget routes
 app.use('/api/budget', BudgetRoutes);
+// AI routes
+app.use('/api/ai', AIRoutes);
 
 export default app;
