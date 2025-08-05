@@ -178,9 +178,17 @@ class AIService {
   }
 
   async clearChatHistory(): Promise<void> {
-    // This would typically call the backend to clear chat history
-    // For now, we just clear local storage
-    localStorage.removeItem('ai_chat_history');
+    try {
+      // await this.fetchWithAuth('/api/ai/chat-history', {
+      //   method: 'DELETE'
+      // });
+      
+      // Also clear local storage
+      localStorage.removeItem('ai_chat_history');
+    } catch (error) {
+      console.error('Failed to clear chat history:', error);
+      throw new Error('Failed to clear chat history');
+    }
   }
 }
 

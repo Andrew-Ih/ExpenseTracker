@@ -106,7 +106,7 @@ export function useAIChat() {
       if (response.suggestions) {
         setState(prev => ({
           ...prev,
-          suggestions: response.suggestions
+          suggestions: response.suggestions || []
         }));
       }
 
@@ -142,14 +142,32 @@ export function useAIChat() {
   }, [addMessage]);
 
   // Clear all messages
-  const clearMessages = useCallback(() => {
-    setState(prev => ({
-      ...prev,
-      messages: [],
-      error: null,
-      suggestions: []
-    }));
-    localStorage.removeItem(STORAGE_KEY);
+  const clearMessages = useCallback(async () => {
+    try {
+      // Clear backend chat history
+      // await aiService.clearChatHistory();
+      
+      // Clear frontend state
+      setState(prev => ({
+        ...prev,
+        messages: [],
+        error: null,
+        suggestions: []
+      }));
+      
+      // Clear localStorage
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (error) {
+      console.error('Failed to clear chat history:', error);
+      // Still clear frontend state even if backend fails
+      setState(prev => ({
+        ...prev,
+        messages: [],
+        error: null,
+        suggestions: []
+      }));
+      localStorage.removeItem(STORAGE_KEY);
+    }
   }, []);
 
   // Remove specific message

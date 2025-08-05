@@ -30,12 +30,20 @@ export default function AIChatContainer() {
     setShowSuggestions(true);
   }, [clearMessages]);
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+  };
+
   return (
-    <Box sx={{ 
-      height: 'calc(100vh - 48px)', // Account for AppLayout padding
-      display: 'flex',
-      flexDirection: 'column',
-      bgcolor: 'background.default'
+    
+    <Box 
+      component="form"
+      onSubmit={handleSubmit}
+      sx={{ 
+        height: 'calc(100vh - 48px)', // Account for AppLayout padding
+        display: 'flex',
+        flexDirection: 'column',
+        bgcolor: 'background.default'
     }}>
       {/* Header */}
       <AIChatHeader onClearChat={handleClearChat} />
