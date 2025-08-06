@@ -1,4 +1,4 @@
-import { AIChatRequest, AIChatResponse, FinancialData, FinancialSummary } from '../types/ai';
+import { AIChatResponse, FinancialData, FinancialSummary } from '../types/ai';
 import * as transactionService from './transactionService';
 import * as budgetService from './budgetService';
 import * as userService from './userService';
@@ -38,14 +38,17 @@ class AIService {
       // Fetch user profile
       const userProfile = await userService.getUserProfile();
 
-      // Fetch recent transactions (last 3 months)
-      const threeMonthsAgo = new Date();
-      threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+      // Fetch ALL transactions (remove limit and extend range)
+      const oneYearAgo = new Date();
+      oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
       
       const transactions = await transactionService.getTransactions({
-        startDate: threeMonthsAgo.toISOString().split('T')[0],
-        limit: 100
+        startDate: oneYearAgo.toISOString().split('T')[0],
+        // Remove limit to get all transactions
       });
+
+      // Fetch recurring transactions
+      const recurringTransactions = await transactionService.getRecurringTransactions();
 
       // Fetch current month budgets
       const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
@@ -56,6 +59,7 @@ class AIService {
 
       return {
         transactions: transactions.transactions,
+        recurringTransactions: recurringTransactions.transactions || [],
         budgets,
         userProfile,
         summary
@@ -107,14 +111,13 @@ class AIService {
 
   async sendMessage(message: string, signal?: AbortSignal): Promise<AIChatResponse> {
     try {
-      // Get financial context
-      const context = await this.getFinancialContext();
-
-      const request: AIChatRequest = {
+      // Simplified - just send the message, let backend handle data fetching
+      const request = {
         message,
-        userId: context.userProfile.userId,
-        context
+        userId: localStorage.getItem('userId') // If you have userId in localStorage
       };
+
+      console.log('Sending message to AI backend:', message);
 
       const response = await this.fetchWithAuth('/api/ai/chat', {
         method: 'POST',
@@ -122,7 +125,10 @@ class AIService {
         signal
       });
 
+      console.log('AI response status:', response.status);
       const data = await response.json();
+      console.log('AI response data:', data);
+      
       return data;
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {

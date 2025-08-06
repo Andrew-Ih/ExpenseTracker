@@ -10,16 +10,6 @@ export interface Message {
   };
 }
 
-export interface AIChatRequest {
-  message: string;
-  userId: string;
-  context?: {
-    transactions?: Transaction[];
-    budgets?: Budget[];
-    userProfile?: UserProfile;
-  };
-}
-
 export interface AIChatResponse {
   message: string;
   metadata?: {
@@ -40,6 +30,7 @@ export interface AIServiceConfig {
 
 export interface FinancialData {
   transactions: Transaction[];
+  recurringTransactions: RecurringTransaction[];
   budgets: Budget[];
   userProfile: UserProfile;
   summary: FinancialSummary;
@@ -86,4 +77,22 @@ export interface AIChatState {
   isLoading: boolean;
   error: string | null;
   suggestions: string[];
+}
+
+// Add RecurringTransaction interface
+export interface RecurringTransaction {
+  id: string;
+  templateData: {
+    amount: number;
+    type: 'income' | 'expense';
+    category: string;
+    description: string;
+  };
+  recurringConfig: {
+    frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
+    startDate: string;
+    endDate?: string;
+    startYear: number;
+    endYear?: number;
+  };
 } 

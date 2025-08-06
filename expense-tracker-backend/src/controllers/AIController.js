@@ -9,8 +9,6 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// ... existing imports and setup ...
-
 class AIController {
   static async chat(req, res) {
     try {
@@ -25,25 +23,60 @@ class AIController {
       await ChatHistoryModel.saveMessage(userId, message, 'user');
 
       // Step 2: Get recent chat history (last 10 messages)
-      const chatHistory = await ChatHistoryModel.getRecentMessages(userId, 10);
+      let chatHistory = await ChatHistoryModel.getRecentMessages(userId, 10);
 
-      // Step 3: Get user's financial data
-      const [transactions, budgets, userProfile] = await Promise.all([
-        TransactionModel.getTransactions(userId, { limit: 50 }), // Reduced from 100
+      // Add this: Clear old chat history if it's causing confusion
+      if (chatHistory.length > 20) {
+        console.log('Clearing old chat history to improve AI responses');
+        await ChatHistoryModel.clearChatHistory(userId);
+        chatHistory = [];
+      }
+
+      // Step 3: Extract month from message and get filtered data
+      const monthMatch = message.match(/(january|february|march|april|may|june|july|august|september|october|november|december|\d{4}-\d{2})/i);
+      let filteredTransactions;
+      
+      if (monthMatch) {
+        const monthStr = monthMatch[1].toLowerCase();
+        const currentYear = new Date().getFullYear();
+        const monthMap = {
+          'january': `${currentYear}-01`, 'february': `${currentYear}-02`, 'march': `${currentYear}-03`,
+          'april': `${currentYear}-04`, 'may': `${currentYear}-05`, 'june': `${currentYear}-06`,
+          'july': `${currentYear}-07`, 'august': `${currentYear}-08`, 'september': `${currentYear}-09`,
+          'october': `${currentYear}-10`, 'november': `${currentYear}-11`, 'december': `${currentYear}-12`
+        };
+        
+        const targetMonth = monthMap[monthStr] || monthStr;
+        
+        // Fetch transactions for specific month
+        filteredTransactions = await TransactionModel.getTransactions(userId, { 
+          startDate: `${targetMonth}-01`,
+          endDate: `${targetMonth}-31`
+        });
+        
+        // Keep this one for basic monitoring
+        console.log(`AI request processed for user ${userId} - ${message.substring(0, 50)}...`);
+      } else {
+        // Fetch all recent transactions
+        filteredTransactions = await TransactionModel.getTransactions(userId, { limit: 50 });
+      }
+
+      // Step 4: Get other financial data
+      const [budgets, userProfile] = await Promise.all([
         BudgetModel.getBudgets(userId),
         UserModel.getById(userId)
       ]);
 
-      // Step 4: Create context for AI
-      const context = AIController.createFinancialContext(transactions.transactions, budgets, userProfile);
+      // Step 5: Create context for AI
+      const context = AIController.createFinancialContext(filteredTransactions.transactions, budgets, userProfile);
       
-      // Step 5: Create prompt with chat history
+      // Step 6: Create prompt with chat history
       const prompt = AIController.createPromptWithHistory(message, context, chatHistory);
 
-      // Step 6: Get AI response using OpenAI
+      // Step 7: Get AI response using OpenAI
       const aiResponse = await AIController.getOpenAIResponse(prompt);
 
-      // Step 7: Save AI response to chat history
+      // Step 8: Save AI response to chat history
       await ChatHistoryModel.saveMessage(userId, aiResponse, 'assistant');
 
       res.json({
@@ -52,6 +85,7 @@ class AIController {
       });
 
     } catch (error) {
+      // Keep this for error tracking
       console.error('AI Chat error:', error);
       res.status(500).json({ error: 'Failed to process AI request' });
     }
@@ -67,7 +101,7 @@ class AIController {
       .filter(t => t.type === 'expense')
       .reduce((sum, t) => sum + parseFloat(t.amount), 0);
 
-    // Only get top 3 spending categories to reduce tokens
+    // Get ALL spending categories, not just top 3
     const spendingByCategory = transactions
       .filter(t => t.type === 'expense')
       .reduce((acc, t) => {
@@ -75,9 +109,8 @@ class AIController {
         return acc;
       }, {});
 
-    const topCategories = Object.entries(spendingByCategory)
-      .sort(([,a], [,b]) => b - a)
-      .slice(0, 3); // Only top 3 categories
+    const allCategories = Object.entries(spendingByCategory)
+      .sort(([,a], [,b]) => b - a);
 
     return {
       user: {
@@ -90,9 +123,9 @@ class AIController {
         netIncome: totalIncome - totalExpenses,
         transactionCount: transactions.length
       },
-      topCategories: Object.fromEntries(topCategories),
-      recentTransactions: transactions.slice(0, 5), // Only 5 recent transactions
-      budgets: budgets.slice(0, 3) // Only 3 budgets
+      topCategories: Object.fromEntries(allCategories), // All categories
+      recentTransactions: transactions.slice(0, 10), // More transactions
+      budgets: budgets // ALL budgets, not just 3
     };
   }
 
@@ -100,32 +133,55 @@ class AIController {
   static createPromptWithHistory(userMessage, context, chatHistory) {
     let conversationHistory = '';
     
-    // Add recent conversation history (excluding the current message)
-    if (chatHistory.length > 1) {
+    // Only include very recent history (last 3 messages max)
+    if (chatHistory.length > 1 && chatHistory.length <= 6) {
       conversationHistory = '\n\nRecent conversation:\n';
-      chatHistory.slice(0, -1).forEach(msg => {
+      chatHistory.slice(-6).forEach(msg => {
         const role = msg.role === 'user' ? 'User' : 'Assistant';
         conversationHistory += `${role}: ${msg.content}\n`;
       });
     }
 
-    return `You are a helpful financial assistant with memory of previous conversations. Answer the user's question specifically and reference previous context when relevant.
+    return `You are a precise financial assistant. You have access to the user's financial data. Answer questions accurately and completely.
 
-User: ${context.user.name}
-Income: $${context.summary.totalIncome.toFixed(0)}
-Expenses: $${context.summary.totalExpenses.toFixed(0)}
-Net: $${context.summary.netIncome.toFixed(0)}
+USER DATA:
+- Name: ${context.user.name}
+- Total Income: $${context.summary.totalIncome.toFixed(0)}
+- Total Expenses: $${context.summary.totalExpenses.toFixed(0)}
+- Net Income: $${context.summary.netIncome.toFixed(0)}
+- Number of Transactions: ${context.summary.transactionCount}
 
-Top spending: ${Object.entries(context.topCategories)
-  .map(([category, amount]) => `${category}: $${amount.toFixed(0)}`)
-  .join(', ')}${conversationHistory}
+ALL BUDGETS (${context.budgets.length} budgets):
+${context.budgets.map((budget, index) => 
+  `${index + 1}. ${budget.category}: $${budget.amount} (Month: ${budget.month})`
+).join('\n')}
 
-Current question: ${userMessage}
+SPENDING BY CATEGORY:
+${Object.entries(context.topCategories)
+  .map(([category, amount]) => `- ${category}: $${amount.toFixed(0)}`)
+  .join('\n')}
 
-Answer the question directly. If the user asks about previous questions or context, reference the conversation history above. Only provide advice if specifically asked for it.`;
+ALL TRANSACTIONS (${context.recentTransactions.length} transactions):
+${context.recentTransactions.map((t, index) => 
+  `${index + 1}. ${t.date}: ${t.description} (${t.category}) - $${t.amount}`
+).join('\n')}
+
+${conversationHistory}
+
+USER QUESTION: ${userMessage}
+
+INSTRUCTIONS: 
+- Answer the user's question directly and completely
+- If asked for budget count, count the ACTUAL budgets listed above
+- If asked for budget details, list ALL budgets with categories and amounts
+- If asked for transaction count, give the exact number
+- If asked for transaction list, list ALL transactions with dates, descriptions, categories, and amounts
+- Be precise with amounts and dates
+- Do not make up or guess any information
+- If you don't have the data, say so clearly`;
   }
   
-  // Helper method to communicate with OpenAI (more direct)
+  // Helper method to communicate with OpenAI (improved)
   static async getOpenAIResponse(prompt) {
     try {
       const completion = await openai.chat.completions.create({
@@ -133,15 +189,17 @@ Answer the question directly. If the user asks about previous questions or conte
         messages: [
           {
             role: "system",
-            content: "You are a helpful financial assistant with memory of previous conversations. Answer questions specifically and reference previous context when relevant. Keep responses brief and to the point."
+            content: "You are a precise financial assistant. Always provide accurate, complete information based on the data provided. List all relevant transactions when asked. Be specific with amounts, dates, and categories. Do not truncate responses."
           },
           {
             role: "user",
             content: prompt
           }
         ],
-        max_tokens: 200, // Increased for more detailed responses
-        temperature: 0.3 // Lower temperature for more consistent responses
+        max_tokens: 500, // Increased from 200
+        temperature: 0.1, // Lower temperature for more consistent responses
+        presence_penalty: 0.1, // Slight penalty for repetition
+        frequency_penalty: 0.1 // Slight penalty for repetitive phrases
       });
 
       return completion.choices[0].message.content;
@@ -161,6 +219,22 @@ Answer the question directly. If the user asks about previous questions or conte
     } catch (error) {
       console.error('Clear chat history error:', error);
       res.status(500).json({ error: 'Failed to clear chat history' });
+    }
+  }
+
+  // Optional: Add auto-clear for old history
+  static async autoClearOldHistory(userId) {
+    try {
+      const chatHistory = await ChatHistoryModel.getRecentMessages(userId, 50);
+      if (chatHistory.length > 30) {
+        console.log(`Auto-clearing old chat history for user ${userId}`);
+        await ChatHistoryModel.clearChatHistory(userId);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Auto-clear history error:', error);
+      return false;
     }
   }
 }
