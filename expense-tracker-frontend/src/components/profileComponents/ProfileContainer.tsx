@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Stack, Typography, Alert, CircularProgress, Paper, Box, Divider, TextField, Button } from '@mui/material';
+import { Stack, Typography, Alert, CircularProgress, Paper, Box, Divider, TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { Person, Security, DeleteForever } from '@mui/icons-material';
 import { getUserProfile, updateUserProfile, deleteUserProfile } from '@/services/userService';
 // import { getTransactionSummary } from '@/services/transactionService';
@@ -29,6 +29,9 @@ const ProfileContainer = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [errors, setErrors] = useState<{ firstName?: string; lastName?: string }>({});
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [confirmEmail, setConfirmEmail] = useState('');
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   useEffect(() => {
     loadProfileData();
@@ -129,21 +132,40 @@ const ProfileContainer = () => {
     window.location.href = '/reset-password';
   };
 
-  const handleAccountDeletion = async () => {
-    if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-      try {
-        setUpdateLoading(true);
-        setError(null);
+  const handleAccountDeletion = () => {
+    setDeleteModalOpen(true);
+    setConfirmEmail('');
+    setEmailError(null);
+  };
 
-        await deleteUserProfile();
-        window.location.href = '/';
+  const handleCloseDeleteModal = () => {
+    setDeleteModalOpen(false);
+    setConfirmEmail('');
+    setEmailError(null);
+  };
 
-      } catch (err) {
-        console.error('Error deleting account:', err);
-        setError('Failed to delete account');
-      } finally {
-        setUpdateLoading(false);
-      }
+  const handleConfirmDelete = async () => {
+    if (!userProfile) return;
+
+    // Validate email
+    if (confirmEmail.trim() !== userProfile.email.trim()) {
+      setEmailError('Please enter your email address exactly as shown');
+      return;
+    }
+
+    try {
+      setUpdateLoading(true);
+      setError(null);
+
+      await deleteUserProfile();
+      window.location.href = '/';
+
+    } catch (err) {
+      console.error('Error deleting account:', err);
+      setError('Failed to delete account');
+    } finally {
+      setUpdateLoading(false);
+      setDeleteModalOpen(false);
     }
   };
 
@@ -359,6 +381,59 @@ const ProfileContainer = () => {
           </Stack>
         </Paper>
       </Stack>
+
+      <Dialog open={deleteModalOpen} onClose={handleCloseDeleteModal} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ color: 'error.main' }}>
+          Confirm Account Deletion
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={3}>
+            <Alert severity="error">
+              <Typography variant="body2" fontWeight={500}>
+                This action cannot be undone!
+              </Typography>
+              <Typography variant="body2">
+                Once you delete your account, all your data will be permanently removed and cannot be recovered.
+              </Typography>
+            </Alert>
+
+            <Box>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                To confirm deletion, please enter your email address exactly as shown:
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontWeight: 500 }}>
+                {userProfile?.email}
+              </Typography>
+              <TextField
+                label="Enter your email address"
+                type="email"
+                value={confirmEmail}
+                onChange={(e) => {
+                  setConfirmEmail(e.target.value);
+                  if (emailError) setEmailError(null);
+                }}
+                error={!!emailError}
+                helperText={emailError}
+                fullWidth
+                size="small"
+              />
+            </Box>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteModal} disabled={updateLoading}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleConfirmDelete}
+            disabled={updateLoading || confirmEmail.trim() !== (userProfile?.email || '').trim()}
+          >
+            {updateLoading ? 'Deleting...' : 'Confirm Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Stack>
   );
 };
