@@ -12,26 +12,47 @@ interface AIChatMessagesProps {
 }
 
 export default function AIChatMessages({ messages, isLoading }: AIChatMessagesProps) {
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
   };
 
   useEffect(() => {
-    scrollToBottom();
+    // Use setTimeout to ensure DOM is fully updated before scrolling
+    const timeoutId = setTimeout(() => {
+      scrollToBottom();
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
   }, [messages, isLoading]);
 
   return (
-    <Box sx={{ 
-      height: '100%',
-      overflow: 'auto',
-      p: 2,
-      display: 'flex',
-      flexDirection: 'column',
-      bgcolor: 'background.default'
-    }}>
-      <Stack spacing={2} sx={{ flex: 1, minHeight: 0 }}>
+    <Box 
+      ref={containerRef}
+      sx={{ 
+        height: '100%',
+        overflow: 'auto',
+        p: 2,
+        display: 'flex',
+        flexDirection: 'column',
+        bgcolor: 'background.default',
+        '&::-webkit-scrollbar': {
+          width: 6,
+        },
+        '&::-webkit-scrollbar-track': {
+          backgroundColor: 'rgba(0,0,0,0.1)',
+          borderRadius: 3,
+        },
+        '&::-webkit-scrollbar-thumb': {
+          backgroundColor: 'rgba(0,0,0,0.3)',
+          borderRadius: 3,
+        },
+      }}
+    >
+      <Stack spacing={2}>
         {messages.map((message, index) => (
           <AIChatMessage 
             key={`${message.id}-${index}`}
@@ -41,8 +62,6 @@ export default function AIChatMessages({ messages, isLoading }: AIChatMessagesPr
         
         {isLoading && <AILoadingIndicator />}
       </Stack>
-      
-      <div ref={messagesEndRef} />
     </Box>
   );
 } 
