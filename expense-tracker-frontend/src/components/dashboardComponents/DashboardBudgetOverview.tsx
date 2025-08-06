@@ -13,12 +13,10 @@ interface DashboardBudgetOverviewProps {
 
 const DashboardBudgetOverview = ({ budgets }: DashboardBudgetOverviewProps) => {
   const [budgetProgress, setBudgetProgress] = useState<Record<string, number>>({});
-  const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const budgetsPerPage = 3; // Show 3 budgets per page
 
   const fetchBudgetProgress = useCallback(async () => {
-    setLoading(true);
     const progress: Record<string, number> = {};
     
     try {
@@ -50,9 +48,7 @@ const DashboardBudgetOverview = ({ budgets }: DashboardBudgetOverviewProps) => {
       setBudgetProgress(progress);
     } catch (error) {
       console.error('Error fetching budget progress:', error);
-    } finally {
-      setLoading(false);
-    }
+    } 
   }, [budgets]);
 
   useEffect(() => {
@@ -106,7 +102,15 @@ const DashboardBudgetOverview = ({ budgets }: DashboardBudgetOverviewProps) => {
           <AccountBalance />
           Budget Overview
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography 
+          variant="h6" 
+          color="text.secondary" 
+          sx={{ 
+            textAlign: 'center', 
+            py: 4,
+            fontStyle: 'italic'
+          }}
+        >
           No budgets set for this month
         </Typography>
       </Paper>
@@ -227,14 +231,6 @@ const DashboardBudgetOverview = ({ budgets }: DashboardBudgetOverviewProps) => {
           </Box>
         )}
       </Box>
-      
-      {loading && (
-        <Box sx={{ mt: 2, textAlign: 'center' }}>
-          <Typography variant="body2" color="text.secondary">
-            Loading budget progress...
-          </Typography>
-        </Box>
-      )}
     </Paper>
   );
 };

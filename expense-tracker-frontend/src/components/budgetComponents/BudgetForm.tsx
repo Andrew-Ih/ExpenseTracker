@@ -15,7 +15,7 @@ import {
   Stack,
   SelectChangeEvent
 } from '@mui/material';
-import { createBudget, Budget } from '@/services/budgetService';
+import { createBudget } from '@/services/budgetService';
 
 interface BudgetFormProps {
   onBudgetAdded: () => void;
@@ -36,9 +36,13 @@ const BudgetForm = ({ onBudgetAdded }: BudgetFormProps) => {
   const currentMonth = currentDate.getMonth() + 1; // 1-12
   const currentYear = currentDate.getFullYear();
 
-  const [formData, setFormData] = useState<Omit<Budget, 'budgetId'>>({
+  const [formData, setFormData] = useState<{
+    category: string;
+    amount: string;
+    month: string;
+  }>({
     category: '',
-    amount: 0,
+    amount: '',
     month: `${currentYear}-${currentMonth.toString().padStart(2, '0')}`
   });
   
@@ -103,8 +107,13 @@ const BudgetForm = ({ onBudgetAdded }: BudgetFormProps) => {
     }
 
     // Validate amount
-    if (!formData.amount || formData.amount <= 0) {
-      errors.amount = 'Amount must be greater than 0';
+    if (!formData.amount || formData.amount.trim() === '') {
+      errors.amount = 'Amount is required';
+    } else {
+      const amount = parseFloat(formData.amount);
+      if (isNaN(amount) || amount <= 0) {
+        errors.amount = 'Amount must be greater than 0';
+      }
     }
 
     // Validate year
@@ -135,14 +144,18 @@ const BudgetForm = ({ onBudgetAdded }: BudgetFormProps) => {
     }
 
     try {
-      await createBudget(formData);
+      const budgetData = {
+        ...formData,
+        amount: parseFloat(formData.amount)
+      };
+      await createBudget(budgetData);
       setSuccess('Budget created successfully!');
       onBudgetAdded();
       
       // Reset form
       setFormData({
         category: '',
-        amount: 0,
+        amount: '',
         month: `${currentYear}-${currentMonth.toString().padStart(2, '0')}`
       });
       setSelectedMonth(currentMonth);
@@ -196,6 +209,7 @@ const BudgetForm = ({ onBudgetAdded }: BudgetFormProps) => {
             error={!!validationErrors.amount}
             helperText={validationErrors.amount}
             inputProps={{ step: "0.01", min: "0.01" }}
+            placeholder="0"
           />
 
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>

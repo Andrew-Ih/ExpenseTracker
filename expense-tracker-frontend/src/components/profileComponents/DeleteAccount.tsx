@@ -14,8 +14,7 @@ import {
   DialogActions,
   TextField,
   FormControlLabel,
-  Checkbox,
-  Divider 
+  Checkbox
 } from '@mui/material';
 import { 
   DeleteForever, 
@@ -66,7 +65,7 @@ const DeleteAccount = ({ onDelete, loading }: DeleteAccountProps) => {
     try {
       await onDelete();
       setDialogOpen(false);
-    } catch (error) {
+    } catch {
       // Error handling is done in the parent component
     }
   };

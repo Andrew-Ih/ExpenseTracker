@@ -66,7 +66,7 @@ const DashboardContainer = () => {
         getUserProfile(),
         getTransactionSummary(), // Current month
         getAllTimeTransactionSummary(), // All-time data
-        getBudgets(),
+        getBudgets(new Date().toISOString().slice(0, 7)),
         getTransactions({ limit: 5 }) // Get recent 5 transactions
       ]);
 
