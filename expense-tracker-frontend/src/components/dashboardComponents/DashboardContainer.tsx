@@ -8,7 +8,7 @@ import DashboardTransactionSummary from './DashboardTransactionSummary';
 import DashboardBudgetOverview from './DashboardBudgetOverview';
 // import DashboardRecentTransactions from './DashboardRecentTransactions';
 import { getUserProfile } from '@/services/userService';
-import { getTransactionSummary } from '@/services/transactionService';
+import { getTransactionSummary, getAllTimeTransactionSummary } from '@/services/transactionService';
 import { getBudgets } from '@/services/budgetService';
 import { getTransactions, TransactionSummary } from '@/services/transactionService';
 import { Budget } from '@/services/budgetService';
@@ -59,12 +59,14 @@ const DashboardContainer = () => {
       const [
         profileResult,
         summaryResult,
+        allTimeResult,
         budgetsResult,
         // transactionsResult
       ] = await Promise.all([
         getUserProfile(),
-        getTransactionSummary(),
-        getBudgets(),
+        getTransactionSummary(), // Current month
+        getAllTimeTransactionSummary(), // All-time data
+        getBudgets(new Date().toISOString().slice(0, 7)),
         getTransactions({ limit: 5 }) // Get recent 5 transactions
       ]);
 
@@ -73,13 +75,13 @@ const DashboardContainer = () => {
       setBudgets(budgetsResult);
       // setRecentTransactions(transactionsResult.transactions || []);
 
-      // Calculate dashboard stats
+      // Calculate dashboard stats using all-time data
       const stats: DashboardStatsData = {
-        totalIncome: summaryResult.summary?.totalIncome || 0,
-        totalExpenses: summaryResult.summary?.totalExpenses || 0,
-        netIncome: summaryResult.summary?.netIncome || 0,
-        savingsRate: summaryResult.summary?.totalIncome > 0 
-          ? ((summaryResult.summary?.netIncome || 0) / summaryResult.summary?.totalIncome) * 100 
+        totalIncome: allTimeResult.summary?.totalIncome || 0,
+        totalExpenses: allTimeResult.summary?.totalExpenses || 0,
+        netIncome: allTimeResult.summary?.netIncome || 0,
+        savingsRate: allTimeResult.summary?.totalIncome > 0 
+          ? ((allTimeResult.summary?.netIncome || 0) / allTimeResult.summary?.totalIncome) * 100 
           : 0
       };
       setDashboardStats(stats);

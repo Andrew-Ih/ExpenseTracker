@@ -87,6 +87,25 @@ class TransactionControllers {
       }
     });
   });
+
+  static getAllTimeTransactionSummary = transactionControllerWrapper(async (req, res) => {
+    const userId = req.user.userId;
+
+    // Get all transactions without date filters
+    const result = await TransactionModel.getTransactions(userId, { limit: 10000 }); // High limit to get all transactions
+    const summary = calculateTransactionSummary(result.transactions);
+    
+    res.status(200).json({
+      summary,
+      period: {
+        startDate: null,
+        endDate: null,
+        month: null,
+        year: null,
+        type: 'all-time'
+      }
+    });
+  });
 }
 
 export default TransactionControllers;

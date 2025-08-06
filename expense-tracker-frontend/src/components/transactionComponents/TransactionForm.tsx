@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Box, 
   Paper, 
@@ -23,6 +23,14 @@ interface TransactionFormProps {
   onTransactionAdded: () => void;
 }
 
+interface FormData {
+  amount: string;
+  type: 'income' | 'expense';
+  category: string;
+  description: string;
+  date: string;
+}
+
 const categories = [
   'Food', 'Transportation', 'Housing', 'Utilities', 'Entertainment', 
   'Healthcare', 'Education', 'Shopping', 'Personal', 'Salary', 
@@ -30,8 +38,8 @@ const categories = [
 ];
 
 const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
-  const [formData, setFormData] = useState<Omit<Transaction, 'transactionId'>>({
-    amount: 0,
+  const [formData, setFormData] = useState<FormData>({
+    amount: '',
     type: 'expense',
     category: '',
     description: '',
@@ -53,11 +61,57 @@ const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [amountError, setAmountError] = useState<string | null>(null);
+
+  // Auto-dismiss error messages after 5 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
 
   const handleTextFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     if (name) {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      if (name === 'amount') {
+        // Handle amount field specifically
+        setFormData(prev => ({ ...prev, [name]: value }));
+        
+        // Clear amount error when user starts typing
+        if (amountError) {
+          setAmountError(null);
+        }
+        
+        // Validate amount in real-time
+        if (value !== '') {
+          const numValue = parseFloat(value);
+          if (isNaN(numValue)) {
+            setAmountError('Please enter a valid number');
+          } else if (numValue < 0) {
+            setAmountError('Amount cannot be negative');
+          } else if (numValue === 0) {
+            setAmountError('Amount must be greater than 0');
+          } else {
+            setAmountError(null);
+          }
+        } else {
+          setAmountError(null);
+        }
+      } else {
+        setFormData(prev => ({ ...prev, [name]: value }));
+      }
     }
   };
 
@@ -116,6 +170,21 @@ const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
     setLoading(true);
     setError(null);
     setSuccess(null);
+    setAmountError(null); // Clear amount error on new submission
+
+    // Final validation before submission
+    if (formData.amount === '') {
+      setAmountError('Amount is required');
+      setLoading(false);
+      return;
+    }
+
+    const amount = parseFloat(formData.amount);
+    if (isNaN(amount) || amount <= 0) {
+      setAmountError('Amount must be greater than 0');
+      setLoading(false);
+      return;
+    }
 
     try {
       if (isRecurring) {
@@ -128,7 +197,10 @@ const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
         }
         
         const recurringData: RecurringTransaction = {
-          templateData: formData,
+          templateData: {
+            ...formData,
+            amount: amount
+          },
           frequency: recurringConfig.frequency,
           dayOfMonth: recurringConfig.dayOfMonth,
           ...(recurringConfig.frequency === 'yearly' && { monthOfYear: recurringConfig.monthOfYear }),
@@ -142,7 +214,12 @@ const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
         const result = await createRecurringTransaction(recurringData);
         setSuccess(`Recurring transaction created! Generated ${result.generatedCount} transactions.`);
       } else {
-        await createTransaction(formData);
+        const transactionData: Transaction = {
+          ...formData,
+          amount: amount
+        };
+        
+        await createTransaction(transactionData);
         setSuccess('Transaction created successfully!');
       }
       
@@ -150,7 +227,7 @@ const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
       
       // Reset form
       setFormData({
-        amount: 0,
+        amount: '',
         type: 'expense',
         category: '',
         description: '',
@@ -193,7 +270,12 @@ const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
             onChange={handleTextFieldChange}
             required
             fullWidth
-            inputProps={{ step: "0.01" }}
+            error={!!amountError}
+            helperText={amountError}
+            inputProps={{ 
+              step: "0.01",
+              min: "0"
+            }}
           />
 
           <FormControl fullWidth required>
@@ -246,15 +328,17 @@ const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
             />
           )}
 
-          <FormControlLabel
-            control={
-              <Checkbox 
-                checked={isRecurring} 
-                onChange={(e) => setIsRecurring(e.target.checked)} 
-              />
-            }
-            label="Make this a recurring transaction"
-          />
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <FormControlLabel
+              control={
+                <Checkbox 
+                  checked={isRecurring} 
+                  onChange={(e) => setIsRecurring(e.target.checked)} 
+                />
+              }
+              label="Make this a recurring transaction"
+            />
+          </Box>
 
           {isRecurring && (
             <>
@@ -344,7 +428,7 @@ const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
                     onChange={(e) => setRecurringConfig({...recurringConfig, startYear: parseInt(e.target.value)})}
                     required
                     fullWidth
-                    inputProps={{ min: 2020, max: 2030 }}
+                    inputProps={{ min: 2020, max: 3000 }}
                   />
                   <TextField
                     type="number"
@@ -353,7 +437,7 @@ const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
                     onChange={(e) => setRecurringConfig({...recurringConfig, endYear: parseInt(e.target.value)})}
                     required
                     fullWidth
-                    inputProps={{ min: 2020, max: 2030 }}
+                    inputProps={{ min: 2020, max: 3000 }}
                   />
                 </Stack>
               ) : (
@@ -383,7 +467,7 @@ const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
                       onChange={(e) => setRecurringConfig({...recurringConfig, startYear: parseInt(e.target.value)})}
                       required
                       fullWidth
-                      inputProps={{ min: 2020, max: 2030 }}
+                      inputProps={{ min: 2020, max: 3000 }}
                     />
                   </Stack>
                   
@@ -412,7 +496,7 @@ const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
                       onChange={(e) => setRecurringConfig({...recurringConfig, endYear: parseInt(e.target.value)})}
                       required
                       fullWidth
-                      inputProps={{ min: 2020, max: 2030 }}
+                      inputProps={{ min: 2020, max: 3000 }}
                     />
                   </Stack>
                 </>

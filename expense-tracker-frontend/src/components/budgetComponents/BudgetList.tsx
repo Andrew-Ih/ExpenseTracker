@@ -25,11 +25,11 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  SelectChangeEvent
+  SelectChangeEvent,
+  Stack
 } from '@mui/material';
-import { Edit, Delete } from '@mui/icons-material';
+import { Edit, Delete, ChevronLeft, ChevronRight } from '@mui/icons-material';
 import { Budget, deleteBudget } from '@/services/budgetService';
-import { getTransactions, Transaction } from '@/services/transactionService';
 import BudgetEditDialog from './BudgetEditDialog';
 import { formatCurrency } from '@/utils/formatCurrency';
 
@@ -41,6 +41,7 @@ interface BudgetListProps {
   onMonthChange: (month: string) => void;
   onDelete: (budgetId: string) => void;
   onUpdate: (budget: Budget) => void;
+  budgetProgress: Record<string, number>;
 }
 
 const BudgetList = ({ 
@@ -50,57 +51,50 @@ const BudgetList = ({
   selectedMonth,
   onMonthChange,
   onDelete,
-  onUpdate
+  onUpdate,
+  budgetProgress
 }: BudgetListProps) => {
-  const [budgetProgress, setBudgetProgress] = useState<Record<string, number>>({});
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [yearInput, setYearInput] = useState(selectedMonth.split('-')[0]);
 
-
+  // Update yearInput when selectedMonth changes from external sources
   useEffect(() => {
-    const fetchBudgetProgress = async () => {
-      // Validate year from selectedMonth - only proceed if it's a valid 4-digit year
-      const year = selectedMonth.split('-')[0];
-      if (!year || year.length !== 4 || isNaN(parseInt(year))) {
-        setBudgetProgress({});
-        return;
-      }
+    setYearInput(selectedMonth.split('-')[0]);
+  }, [selectedMonth]);
 
-      const progress: Record<string, number> = {};
-      
-      for (const budget of budgets) {
-        try {
-          const startDate = `${selectedMonth}-01`;
-          const endDate = `${selectedMonth}-31`;
-          
-          const result = await getTransactions({
-            startDate,
-            endDate,
-            category: budget.category,
-            type: 'expense'
-          });
-          
-          const totalSpent = result.transactions.reduce((sum: number, transaction: Transaction) => 
-            sum + parseFloat(transaction.amount.toString()), 0
-          );
-          
-          if (budget.budgetId) {
-            progress[budget.budgetId] = totalSpent;
-          }
-        } catch (error) {
-          console.error('Error fetching progress for', budget.category, error);
-        }
-      }
-      
-      setBudgetProgress(progress);
-    };
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
 
-    if (budgets.length > 0) {
-      fetchBudgetProgress();
+  const currentMonth = parseInt(selectedMonth.split('-')[1]);
+  const currentYear = parseInt(selectedMonth.split('-')[0]);
+
+  const handlePreviousMonth = () => {
+    if (currentMonth === 1) {
+      onMonthChange(`${currentYear - 1}-12`);
+    } else {
+      const newMonth = (currentMonth - 1).toString().padStart(2, '0');
+      onMonthChange(`${currentYear}-${newMonth}`);
     }
-  }, [budgets, selectedMonth]);
+  };
+
+  const handleNextMonth = () => {
+    if (currentMonth === 12) {
+      onMonthChange(`${currentYear + 1}-01`);
+    } else {
+      const newMonth = (currentMonth + 1).toString().padStart(2, '0');
+      onMonthChange(`${currentYear}-${newMonth}`);
+    }
+  };
+
+  const handleYearChange = (newYear: number) => {
+    const month = selectedMonth.split('-')[1];
+    onMonthChange(`${newYear}-${month}`);
+  };
 
   const handleEditClick = (budget: Budget) => {
     setSelectedBudget(budget);
@@ -132,8 +126,6 @@ const BudgetList = ({
     setEditDialogOpen(false);
   };
 
-
-
   if (error) {
     return <Alert severity="error">{error}</Alert>;
   }
@@ -141,46 +133,52 @@ const BudgetList = ({
   return (
     <>
       <Paper sx={{ p: 3, mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+        {/* Month/Year Navigation */}
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center" sx={{ mb: 3 }}>
           <Typography variant="h6">Budgets for:</Typography>
-          <FormControl size="small" sx={{ minWidth: 120 }}>
-            <InputLabel>Month</InputLabel>
-            <Select
-              value={parseInt(selectedMonth.split('-')[1])}
-              label="Month"
-              onChange={(e: SelectChangeEvent<number>) => {
-                const year = selectedMonth.split('-')[0];
-                const month = (e.target.value as number).toString().padStart(2, '0');
-                onMonthChange(`${year}-${month}`);
-              }}
-            >
-              <MenuItem value={1}>January</MenuItem>
-              <MenuItem value={2}>February</MenuItem>
-              <MenuItem value={3}>March</MenuItem>
-              <MenuItem value={4}>April</MenuItem>
-              <MenuItem value={5}>May</MenuItem>
-              <MenuItem value={6}>June</MenuItem>
-              <MenuItem value={7}>July</MenuItem>
-              <MenuItem value={8}>August</MenuItem>
-              <MenuItem value={9}>September</MenuItem>
-              <MenuItem value={10}>October</MenuItem>
-              <MenuItem value={11}>November</MenuItem>
-              <MenuItem value={12}>December</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField
-            type="number"
-            label="Year"
-            value={parseInt(selectedMonth.split('-')[0])}
-            onChange={(e) => {
-              const month = selectedMonth.split('-')[1];
-              const year = e.target.value;
-              onMonthChange(`${year}-${month}`);
-            }}
-            size="small"
-            sx={{ minWidth: 100, maxWidth: 120 }}
-          />
-        </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <IconButton onClick={handlePreviousMonth} size="small">
+              <ChevronLeft />
+            </IconButton>
+            
+            <FormControl size="small" sx={{ minWidth: 120 }}>
+              <InputLabel>Month</InputLabel>
+              <Select
+                value={currentMonth}
+                label="Month"
+                onChange={(e: SelectChangeEvent<number>) => {
+                  const newMonth = (e.target.value as number).toString().padStart(2, '0');
+                  onMonthChange(`${currentYear}-${newMonth}`);
+                }}
+              >
+                {monthNames.map((month, index) => (
+                  <MenuItem key={index} value={index + 1}>{month}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            
+            <Box sx={{ position: 'relative' }}>
+              <TextField
+                type="number"
+                label="Year"
+                value={yearInput}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setYearInput(value); // Always update display
+                  if (value.length === 4 && !isNaN(parseInt(value))) {
+                    handleYearChange(parseInt(value));
+                  }
+                }}
+                size="small"
+                sx={{ minWidth: 100, maxWidth: 120 }}
+              />
+            </Box>
+            
+            <IconButton onClick={handleNextMonth} size="small">
+              <ChevronRight />
+            </IconButton>
+          </Box>
+        </Stack>
 
         <TableContainer>
           <Table>

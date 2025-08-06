@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Paper, Typography, Stack, Alert, Fade } from '@mui/material';
+import { Box, Paper, Typography, Stack, Alert } from '@mui/material';
 import { TrendingUp, TrendingDown, Receipt, AccountBalance } from '@mui/icons-material';
 import { TransactionSummary as TransactionSummaryType } from '@/services/transactionService';
 import { formatCurrency } from '@/utils/formatCurrency';

@@ -59,6 +59,7 @@ const BudgetHistory = ({}: BudgetHistoryProps) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [yearInput, setYearInput] = useState(new Date().getFullYear().toString());
   const [startMonth, setStartMonth] = useState(1);
   const [endMonth, setEndMonth] = useState(12);
 
@@ -66,6 +67,11 @@ const BudgetHistory = ({}: BudgetHistoryProps) => {
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
+
+  // Update yearInput when selectedYear changes from external sources
+  useEffect(() => {
+    setYearInput(selectedYear.toString());
+  }, [selectedYear]);
 
   useEffect(() => {
     const fetchYearlySummary = async () => {
@@ -174,8 +180,14 @@ const BudgetHistory = ({}: BudgetHistoryProps) => {
           <TextField
             type="number"
             label="Year"
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+            value={yearInput}
+            onChange={(e) => {
+              const value = e.target.value;
+              setYearInput(value); // Always update display
+              if (value.length === 4 && !isNaN(parseInt(value))) {
+                setSelectedYear(parseInt(value));
+              }
+            }}
             size="small"
             sx={{ minWidth: 100, maxWidth: 120 }}
           />

@@ -23,6 +23,7 @@ import {
 import { Edit, Delete } from '@mui/icons-material';
 import { Transaction, deleteTransaction } from '@/services/transactionService';
 import TransactionEditDialog from './TransactionEditDialog';
+import { formatCurrency } from '@/utils/formatCurrency';
 
 interface TransactionListProps {
   transactions: Transaction[];
@@ -150,7 +151,7 @@ const TransactionList = ({
                         color={transaction.type === 'income' ? 'success.main' : 'error.main'}
                       >
                         {transaction.type === 'income' ? '+' : '-'}
-                        ${parseFloat(transaction.amount.toString()).toFixed(2)}
+                        {formatCurrency(parseFloat(transaction.amount.toString()))}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
