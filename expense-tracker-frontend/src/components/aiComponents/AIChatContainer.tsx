@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Box } from '@mui/material';
 import { 
   AIChatHeader, 
@@ -11,8 +11,18 @@ import {
 import { useAIChat } from '../../hooks/useAIChat';
 
 export default function AIChatContainer() {
-  const { messages, isLoading, sendMessage, clearMessages } = useAIChat();
+  const { messages, isLoading, sendMessage, clearMessages, loadChatHistory } = useAIChat();
   const [showSuggestions, setShowSuggestions] = useState(true);
+
+  // Load chat history when component mounts
+  useEffect(() => {
+    loadChatHistory();
+  }, [loadChatHistory]);
+
+  // Update showSuggestions based on whether there are messages
+  useEffect(() => {
+    setShowSuggestions(messages.length === 0);
+  }, [messages.length]);
 
   const handleSendMessage = useCallback(async (content: string) => {
     if (!content.trim()) return;
@@ -35,7 +45,6 @@ export default function AIChatContainer() {
   };
 
   return (
-    
     <Box 
       component="form"
       onSubmit={handleSubmit}
