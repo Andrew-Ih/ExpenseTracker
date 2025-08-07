@@ -14,10 +14,12 @@
     "@fontsource/roboto": "^5.2.6",
     "@mui/icons-material": "^7.2.0",
     "@mui/material": "^7.2.0",
+    "@types/uuid": "^10.0.0",
     "aws-sdk": "^2.1692.0",
     "next": "15.3.5",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
