@@ -22,15 +22,15 @@ provider:
             - dynamodb:Query
             - dynamodb:Scan
           Resource:
-            - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerUsers"
-            - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerTransactions"
-            - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerTransactions/index/*"
-            - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerBudgets"
-            - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerBudgets/index/*"
-            - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerRecurringTransactions"
-            - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerRecurringTransactions/index/*"
-            - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerChatHistory"
-            - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerChatHistory/index/*"
+            - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerUsers-${self:provider.stage}"
+            - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerTransactions-${self:provider.stage}"
+            - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerTransactions-${self:provider.stage}/index/*"
+            - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerBudgets-${self:provider.stage}"
+            - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerBudgets-${self:provider.stage}/index/*"
+            - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerRecurringTransactions-${self:provider.stage}"
+            - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerRecurringTransactions-${self:provider.stage}/index/*"
+            - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerChatHistory-${self:provider.stage}"
+            - "arn:aws:dynamodb:ca-central-1:*:table/ExpenseTrackerChatHistory-${self:provider.stage}/index/*"
 
 functions:
   api:
@@ -43,7 +43,7 @@ resources:
     UsersTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ExpenseTrackerUsers
+        TableName: ExpenseTrackerUsers-${self:provider.stage}
         AttributeDefinitions:
           - AttributeName: userId
             AttributeType: S
@@ -55,7 +55,7 @@ resources:
     TransactionsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ExpenseTrackerTransactions
+        TableName: ExpenseTrackerTransactions-${self:provider.stage}
         AttributeDefinitions:
           - AttributeName: transactionId
             AttributeType: S
@@ -80,7 +80,7 @@ resources:
     BudgetsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ExpenseTrackerBudgets
+        TableName: ExpenseTrackerBudgets-${self:provider.stage}
         AttributeDefinitions:
           - AttributeName: budgetId
             AttributeType: S
@@ -105,7 +105,7 @@ resources:
     RecurringTransactionsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ExpenseTrackerRecurringTransactions
+        TableName: ExpenseTrackerRecurringTransactions-${self:provider.stage}
         AttributeDefinitions:
           - AttributeName: recurringId
             AttributeType: S
@@ -126,7 +126,7 @@ resources:
     ChatHistoryTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ExpenseTrackerChatHistory
+        TableName: ExpenseTrackerChatHistory-${self:provider.stage}
         AttributeDefinitions:
           - AttributeName: messageId
             AttributeType: S

@@ -1,0 +1,47 @@
+name: Frontend Deploy
+
+on:
+  push:
+    branches: [develop, main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: expense-tracker-frontend/package-lock.json
+
+    - name: Install dependencies
+      working-directory: expense-tracker-frontend
+      run: npm ci
+
+    - name: Build application
+      working-directory: expense-tracker-frontend
+      env:
+        NEXT_PUBLIC_API_URL: ${{ github.ref == 'refs/heads/main' && 'https://s9umyk6qa9.execute-api.ca-central-1.amazonaws.com/prod' || 'https://s9umyk6qa9.execute-api.ca-central-1.amazonaws.com/dev' }}
+      run: npm run build
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Deploy to S3
+      run: |
+        if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+          BUCKET_NAME="andrew-ih-expense-tracker-prod"
+        else
+          BUCKET_NAME="andrew-ih-expense-tracker-dev"
+        fi
+        
+        aws s3 sync expense-tracker-frontend/out s3://$BUCKET_NAME --delete
