@@ -145,7 +145,7 @@ export function useAIChat() {
   const clearMessages = useCallback(async () => {
     try {
       // Clear backend chat history
-      // await aiService.clearChatHistory();
+      await aiService.clearChatHistory();
       
       // Clear frontend state
       setState(prev => ({
@@ -154,9 +154,6 @@ export function useAIChat() {
         error: null,
         suggestions: []
       }));
-      
-      // Clear localStorage
-      localStorage.removeItem(STORAGE_KEY);
     } catch (error) {
       console.error('Failed to clear chat history:', error);
       // Still clear frontend state even if backend fails
@@ -166,7 +163,6 @@ export function useAIChat() {
         error: null,
         suggestions: []
       }));
-      localStorage.removeItem(STORAGE_KEY);
     }
   }, []);
 
