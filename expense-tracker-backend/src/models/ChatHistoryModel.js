@@ -8,7 +8,7 @@ const dbClient = (() => {
 })();
 
 class ChatHistoryModel {
-  static TABLE_NAME = 'ExpenseTrackerChatHistory';
+  static TABLE_NAME = 'ExpenseTrackerChatHistory-dev';
   
   static createChatMessageItem(userId, message, role = 'user') {
     const currentDate = new Date().toISOString();

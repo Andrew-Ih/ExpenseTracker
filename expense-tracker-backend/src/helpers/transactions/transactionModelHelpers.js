@@ -35,7 +35,7 @@ export const buildTransactionQueryParams = (userId, options = {}) => {
 // ******************************************************
 const _getTransactionById = async (docClient, transactionId) => {
   const getParams = {
-    TableName: 'ExpenseTrackerTransactions',
+    TableName: 'ExpenseTrackerTransactions-dev',
     Key: { transactionId }
   };
 
@@ -97,7 +97,7 @@ const _formatUpdateExpression = (expressions) => {
 // ******************************************************
 const _initializeBaseParams = (userId) => {
   return {
-    TableName: 'ExpenseTrackerTransactions',
+    TableName: 'ExpenseTrackerTransactions-dev',
     IndexName: 'UserDateIndex',
     KeyConditionExpression: 'userId = :userId',
     ExpressionAttributeValues: {

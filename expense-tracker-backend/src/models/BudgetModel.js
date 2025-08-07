@@ -9,7 +9,7 @@ const dbClient = (() => {
 })();
 
 class BudgetModel {
-  static TABLE_NAME = 'ExpenseTrackerBudgets';
+  static TABLE_NAME = 'ExpenseTrackerBudgets-dev';
   
   static createBudgetItem(budgetData, userId) {
     const currentDate = new Date().toISOString().split('T')[0];
