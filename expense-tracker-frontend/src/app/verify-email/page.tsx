@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { confirmSignUp, resendConfirmationCode } from '@/lib/cognito';
 import PageLayout from '@/components/common/layout/PageLayout';
@@ -8,7 +8,7 @@ import VerificationCard from '@/components/verificationComponents/VerificationCa
 import VerificationForm from '@/components/verificationComponents/VerificationForm';
 import { createUser } from '@/services/userService';
 
-const VerifyEmailPage = () => {
+const VerifyEmailContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -69,6 +69,18 @@ const VerifyEmailPage = () => {
         />
       </VerificationCard>
     </PageLayout>
+  );
+};
+
+const VerifyEmailPage = () => {
+  return (
+    <Suspense fallback={
+      <PageLayout>
+        <div>Loading...</div>
+      </PageLayout>
+    }>
+      <VerifyEmailContent />
+    </Suspense>
   );
 };
 
