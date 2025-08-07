@@ -26,7 +26,7 @@ jobs:
     - name: Build application
       working-directory: expense-tracker-frontend
       env:
-        NEXT_PUBLIC_API_URL: ${{ github.ref == 'refs/heads/main' && 'https://s9umyk6qa9.execute-api.ca-central-1.amazonaws.com/prod' || 'https://s9umyk6qa9.execute-api.ca-central-1.amazonaws.com/dev' }}
+        NEXT_PUBLIC_API_URL: 'https://s9umyk6qa9.execute-api.ca-central-1.amazonaws.com'
       run: npm run build
 
     - name: Configure AWS credentials
