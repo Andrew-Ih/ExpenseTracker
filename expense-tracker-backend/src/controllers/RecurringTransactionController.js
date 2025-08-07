@@ -12,11 +12,7 @@ class RecurringTransactionController {
     if (validationErrors) {
       throw { type: 'validation', message: 'Validation failed', details: validationErrors };
     }
-
-    // Create recurring template
     const recurringTemplate = await RecurringTransactionModel.createRecurring(recurringData, userId);
-    
-    // Generate all instances at once
     const transactions = await TransactionModel.createRecurringInstances(recurringTemplate, userId);
     
     res.status(201).json({
