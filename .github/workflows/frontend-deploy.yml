@@ -45,3 +45,4 @@ jobs:
         fi
         
         aws s3 sync expense-tracker-frontend/out s3://$BUCKET_NAME --delete
+        aws s3 website s3://$BUCKET_NAME --index-document index.html --error-document index.html
