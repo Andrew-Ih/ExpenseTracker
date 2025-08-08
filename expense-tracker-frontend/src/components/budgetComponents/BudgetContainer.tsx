@@ -55,13 +55,44 @@ const BudgetContainer = () => {
   };
 
   return (
-    <Box sx={{ width: '100%', maxWidth: 1200, mx: 'auto' }}>
-      <Typography variant="h4" gutterBottom>
+    <Box sx={{ 
+      width: '100%', 
+      maxWidth: 1200, 
+      mx: 'auto',
+      p: { xs: 1, md: 3 },
+      overflowX: 'hidden'
+    }}>
+      <Typography 
+        variant="h4" 
+        gutterBottom
+        sx={{
+          fontSize: { xs: '1.75rem', md: '2.125rem' },
+          fontWeight: 700,
+          mb: { xs: 2, md: 3 }
+        }}
+      >
         Budget Management
       </Typography>
 
-      <Paper sx={{ mb: 3 }}>
-        <Tabs value={activeTab} onChange={handleTabChange} centered>
+      <Paper sx={{ mb: { xs: 2, md: 3 }, overflow: 'hidden' }}>
+        <Tabs 
+          value={activeTab} 
+          onChange={handleTabChange} 
+          centered
+          sx={{
+            '& .MuiTabs-flexContainer': {
+              justifyContent: { xs: 'space-between', md: 'center' }
+            },
+            '& .MuiTab-root': {
+              fontSize: { xs: '0.875rem', md: '1rem' },
+              fontWeight: 600,
+              minHeight: { xs: 48, md: 56 },
+              flex: { xs: 1, md: 'none' },
+              textTransform: 'none',
+              whiteSpace: 'nowrap'
+            }
+          }}
+        >
           <Tab label="View Budgets" />
           <Tab label="Add Budget" />
           <Tab label="Budget History" />

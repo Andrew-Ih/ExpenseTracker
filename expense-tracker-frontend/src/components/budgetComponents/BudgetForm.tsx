@@ -169,8 +169,16 @@ const BudgetForm = ({ onBudgetAdded }: BudgetFormProps) => {
   };
 
   return (
-    <Paper sx={{ p: 3 }}>
-      <Typography variant="h6" gutterBottom>
+    <Paper sx={{ p: { xs: 2, md: 3 }, overflow: 'hidden' }}>
+      <Typography 
+        variant="h6" 
+        gutterBottom
+        sx={{
+          fontSize: { xs: '1.25rem', md: '1.5rem' },
+          fontWeight: 700,
+          mb: { xs: 2, md: 3 }
+        }}
+      >
         Create New Budget
       </Typography>
 
@@ -178,7 +186,7 @@ const BudgetForm = ({ onBudgetAdded }: BudgetFormProps) => {
       {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
 
       <Box component="form" onSubmit={handleSubmit}>
-        <Stack spacing={3}>
+        <Stack spacing={{ xs: 2, md: 3 }}>
           <FormControl fullWidth required error={!!validationErrors.category}>
             <InputLabel>Category</InputLabel>
             <Select
@@ -248,7 +256,11 @@ const BudgetForm = ({ onBudgetAdded }: BudgetFormProps) => {
             variant="contained" 
             color="primary" 
             disabled={loading}
-            sx={{ mt: 2 }}
+            sx={{ 
+              mt: { xs: 1, md: 2 },
+              py: { xs: 1.5, md: 1 },
+              fontSize: { xs: '1rem', md: '1.125rem' }
+            }}
           >
             {loading ? 'Creating...' : 'Create Budget'}
           </Button>
