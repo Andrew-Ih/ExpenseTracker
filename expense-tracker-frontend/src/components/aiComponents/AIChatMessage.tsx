@@ -19,8 +19,8 @@ export default function AIChatMessage({ message }: AIChatMessageProps) {
       mb: 1
     }}>
       <Box sx={{
-        maxWidth: '80%',
-        minWidth: '200px'
+        maxWidth: { xs: '90%', md: '80%' },
+        minWidth: { xs: '150px', md: '200px' }
       }}>
         {/* Message Header */}
         <Stack 
@@ -28,7 +28,7 @@ export default function AIChatMessage({ message }: AIChatMessageProps) {
           spacing={1} 
           alignItems="center" 
           sx={{ 
-            mb: 1,
+            mb: { xs: 0.5, md: 1 },
             justifyContent: isAI ? 'flex-start' : 'flex-end'
           }}
         >
@@ -37,17 +37,23 @@ export default function AIChatMessage({ message }: AIChatMessageProps) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: 24,
-              height: 24,
+              width: { xs: 20, md: 24 },
+              height: { xs: 20, md: 24 },
               borderRadius: 1,
               bgcolor: 'primary.main',
               color: 'white'
             }}>
-              <SmartToy sx={{ fontSize: 16 }} />
+              <SmartToy sx={{ fontSize: { xs: 14, md: 16 } }} />
             </Box>
           )}
           
-          <Typography variant="caption" color="text.secondary">
+          <Typography 
+            variant="caption" 
+            color="text.secondary"
+            sx={{
+              fontSize: { xs: '0.7rem', md: '0.75rem' }
+            }}
+          >
             {isAI ? 'AI Assistant' : 'You'}
           </Typography>
           
@@ -56,20 +62,20 @@ export default function AIChatMessage({ message }: AIChatMessageProps) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: 24,
-              height: 24,
+              width: { xs: 20, md: 24 },
+              height: { xs: 20, md: 24 },
               borderRadius: 1,
               bgcolor: 'secondary.main',
               color: 'white'
             }}>
-              <Person sx={{ fontSize: 16 }} />
+              <Person sx={{ fontSize: { xs: 14, md: 16 } }} />
             </Box>
           )}
         </Stack>
 
         {/* Message Content */}
         <Paper sx={{
-          p: 2,
+          p: { xs: 1.5, md: 2 },
           bgcolor: isAI ? 'background.paper' : 'primary.main',
           color: isAI ? 'text.primary' : 'white',
           borderRadius: 2,
@@ -84,7 +90,8 @@ export default function AIChatMessage({ message }: AIChatMessageProps) {
             variant="body2" 
             sx={{ 
               whiteSpace: 'pre-wrap',
-              lineHeight: 1.6
+              lineHeight: 1.6,
+              fontSize: { xs: '0.875rem', md: '1rem' }
             }}
           >
             {message.content}
@@ -92,15 +99,21 @@ export default function AIChatMessage({ message }: AIChatMessageProps) {
           
           {/* Message Metadata */}
           <Box sx={{ 
-            mt: 1, 
-            pt: 1, 
+            mt: { xs: 0.75, md: 1 }, 
+            pt: { xs: 0.75, md: 1 }, 
             borderTop: 1, 
             borderColor: isAI ? 'divider' : 'rgba(255,255,255,0.2)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center'
           }}>
-            <Typography variant="caption" color={isAI ? 'text.secondary' : 'rgba(255,255,255,0.7)'}>
+            <Typography 
+              variant="caption" 
+              color={isAI ? 'text.secondary' : 'rgba(255,255,255,0.7)'}
+              sx={{
+                fontSize: { xs: '0.65rem', md: '0.75rem' }
+              }}
+            >
               {new Date(message.timestamp).toLocaleTimeString([], { 
                 hour: '2-digit', 
                 minute: '2-digit' 
@@ -113,8 +126,8 @@ export default function AIChatMessage({ message }: AIChatMessageProps) {
                 size="small" 
                 variant="outlined"
                 sx={{ 
-                  fontSize: '0.7rem',
-                  height: 20,
+                  fontSize: { xs: '0.6rem', md: '0.7rem' },
+                  height: { xs: 18, md: 20 },
                   borderColor: isAI ? 'primary.main' : 'rgba(255,255,255,0.5)',
                   color: isAI ? 'primary.main' : 'rgba(255,255,255,0.8)'
                 }}

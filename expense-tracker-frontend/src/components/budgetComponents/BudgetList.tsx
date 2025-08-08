@@ -28,8 +28,7 @@ import {
   SelectChangeEvent,
   Stack,
   Card,
-  CardContent,
-  Chip
+  CardContent
 } from '@mui/material';
 import { Edit, Delete, ChevronLeft, ChevronRight } from '@mui/icons-material';
 import { Budget, deleteBudget } from '@/services/budgetService';

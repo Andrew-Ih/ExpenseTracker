@@ -35,7 +35,7 @@ export default function AIChatMessages({ messages, isLoading }: AIChatMessagesPr
       sx={{ 
         height: '100%',
         overflow: 'auto',
-        p: 2,
+        p: { xs: 1, md: 2 },
         display: 'flex',
         flexDirection: 'column',
         bgcolor: 'background.default',
@@ -52,7 +52,7 @@ export default function AIChatMessages({ messages, isLoading }: AIChatMessagesPr
         },
       }}
     >
-      <Stack spacing={2}>
+      <Stack spacing={{ xs: 1.5, md: 2 }}>
         {messages.map((message, index) => (
           <AIChatMessage 
             key={`${message.id}-${index}`}

@@ -46,7 +46,7 @@ export default function AIChatInput({ onSendMessage, isLoading, disabled = false
 
   return (
     <Paper sx={{
-      p: 1,
+      p: { xs: 0.75, md: 1 },
       bgcolor: 'background.paper',
       border: 1,
       borderColor: 'divider',
@@ -55,37 +55,43 @@ export default function AIChatInput({ onSendMessage, isLoading, disabled = false
       <Box sx={{
         display: 'flex',
         alignItems: 'flex-end',
-        gap: 1
+        gap: { xs: 0.5, md: 1 }
       }}>
-        {/* File Upload Button */}
-        <Tooltip title="Attach file (coming soon)">
-          <IconButton
-            size="small"
-            onClick={handleFileUpload}
-            disabled={isLoading || disabled}
-            sx={{ 
-              color: 'text.secondary',
-              '&:hover': { color: 'primary.main' }
-            }}
-          >
-            <AttachFile />
-          </IconButton>
-        </Tooltip>
+        {/* File Upload Button - Desktop Only */}
+        <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+          <Tooltip title="Attach file (coming soon)">
+            <IconButton
+              size="small"
+              onClick={handleFileUpload}
+              disabled={isLoading || disabled}
+              sx={{ 
+                color: 'text.secondary',
+                '&:hover': { color: 'primary.main' },
+                p: { xs: 0.5, md: 1 }
+              }}
+            >
+              <AttachFile sx={{ fontSize: { xs: 18, md: 20 } }} />
+            </IconButton>
+          </Tooltip>
+        </Box>
 
-        {/* Voice Input Button */}
-        <Tooltip title="Voice input (coming soon)">
-          <IconButton
-            size="small"
-            onClick={handleVoiceInput}
-            disabled={isLoading || disabled}
-            sx={{ 
-              color: 'text.secondary',
-              '&:hover': { color: 'primary.main' }
-            }}
-          >
-            <Mic />
-          </IconButton>
-        </Tooltip>
+        {/* Voice Input Button - Desktop Only */}
+        <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+          <Tooltip title="Voice input (coming soon)">
+            <IconButton
+              size="small"
+              onClick={handleVoiceInput}
+              disabled={isLoading || disabled}
+              sx={{ 
+                color: 'text.secondary',
+                '&:hover': { color: 'primary.main' },
+                p: { xs: 0.5, md: 1 }
+              }}
+            >
+              <Mic sx={{ fontSize: { xs: 18, md: 20 } }} />
+            </IconButton>
+          </Tooltip>
+        </Box>
 
         {/* Text Input */}
         <TextField
@@ -103,6 +109,7 @@ export default function AIChatInput({ onSendMessage, isLoading, disabled = false
           sx={{
             '& .MuiOutlinedInput-root': {
               borderRadius: 1,
+              fontSize: { xs: '0.875rem', md: '1rem' },
               '& fieldset': {
                 borderColor: 'transparent'
               },
@@ -124,6 +131,7 @@ export default function AIChatInput({ onSendMessage, isLoading, disabled = false
             sx={{
               bgcolor: 'primary.main',
               color: 'white',
+              p: { xs: 0.75, md: 1 },
               '&:hover': {
                 bgcolor: 'primary.dark'
               },
@@ -133,7 +141,7 @@ export default function AIChatInput({ onSendMessage, isLoading, disabled = false
               }
             }}
           >
-            <Send />
+            <Send sx={{ fontSize: { xs: 18, md: 20 } }} />
           </IconButton>
         </Tooltip>
       </Box>
