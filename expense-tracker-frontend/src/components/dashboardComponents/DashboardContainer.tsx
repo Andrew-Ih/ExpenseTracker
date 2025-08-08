@@ -104,7 +104,7 @@ const DashboardContainer = () => {
 
   if (error) {
     return (
-      <Box sx={{ width: '100%', maxWidth: 1200, mx: 'auto', p: 3 }}>
+      <Box sx={{ width: '100%', maxWidth: 1200, mx: 'auto', p: { xs: 1, md: 3 } }}>
         <Alert severity="error" sx={{ mb: 3 }}>
           {error}
         </Alert>
@@ -113,21 +113,40 @@ const DashboardContainer = () => {
   }
 
   return (
-    <Box sx={{ width: '100%', maxWidth: 1200, mx: 'auto', p: 3 }}>
+    <Box sx={{ 
+      width: '100%', 
+      maxWidth: 1200, 
+      mx: 'auto', 
+      p: { xs: 1, md: 3 },
+      overflowX: 'hidden' // Prevent horizontal scrolling
+    }}>
       <DashboardWelcome userProfile={userProfile} />
       
       <DashboardStats stats={dashboardStats} />
       
-      <Stack spacing={3} sx={{ mt: 2 }}>
-        <Stack direction="row" spacing={3}>
-          <Box sx={{ flex: 1 }}>
+      <Stack spacing={3}>
+        {/* Mobile: Stack vertically, Desktop: Side by side */}
+        <Stack 
+          direction={{ xs: 'column', md: 'row' }} 
+          spacing={3}
+          sx={{ width: '100%' }}
+        >
+          <Box sx={{ 
+            flex: { xs: 'none', md: 1 },
+            width: '100%',
+            minHeight: { xs: 'auto', md: '400px' }
+          }}>
             <DashboardTransactionSummary 
               summary={transactionSummary?.summary || null} 
               period={transactionSummary?.period || null}
             />
           </Box>
           
-          <Box sx={{ flex: 1 }}>
+          <Box sx={{ 
+            flex: { xs: 'none', md: 1 },
+            width: '100%',
+            minHeight: { xs: 'auto', md: '400px' }
+          }}>
             <DashboardBudgetOverview budgets={budgets} />
           </Box>
         </Stack>

@@ -252,8 +252,16 @@ const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
   };
 
   return (
-    <Paper sx={{ p: 3 }}>
-      <Typography variant="h6" gutterBottom>
+    <Paper sx={{ p: { xs: 2, md: 3 }, overflow: 'hidden' }}>
+      <Typography 
+        variant="h5" 
+        gutterBottom 
+        sx={{ 
+          fontWeight: 700,
+          fontSize: { xs: '1.25rem', md: '1.5rem' },
+          mb: { xs: 2, md: 3 }
+        }}
+      >
         Add New Transaction
       </Typography>
 
@@ -261,7 +269,7 @@ const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
       {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
 
       <Box component="form" onSubmit={handleSubmit}>
-        <Stack spacing={3}>
+        <Stack spacing={{ xs: 2, md: 3 }}>
           <TextField
             name="amount"
             label="Amount"
@@ -358,7 +366,7 @@ const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
               </FormControl>
               
               {recurringConfig.frequency === 'yearly' ? (
-                <Stack direction="row" spacing={2}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                   <TextField
                     type="number"
                     label="Day of Month"
@@ -386,7 +394,7 @@ const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
                   </FormControl>
                 </Stack>
               ) : recurringConfig.frequency === 'bi-weekly' ? (
-                <Stack direction="row" spacing={2}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                   <TextField
                     type="number"
                     label="First Day of Month"
@@ -420,7 +428,7 @@ const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
               )}
               
               {recurringConfig.frequency === 'yearly' ? (
-                <Stack direction="row" spacing={2}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                   <TextField
                     type="number"
                     label="Start Year"
@@ -442,7 +450,7 @@ const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
                 </Stack>
               ) : (
                 <>
-                  <Stack direction="row" spacing={2}>
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                     <FormControl fullWidth required>
                       <InputLabel>Start Month</InputLabel>
                       <Select
@@ -471,7 +479,7 @@ const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
                     />
                   </Stack>
                   
-                  <Stack direction="row" spacing={2}>
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                     <FormControl fullWidth required>
                       <InputLabel>End Month</InputLabel>
                       <Select
@@ -509,7 +517,11 @@ const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
             variant="contained" 
             color="primary" 
             disabled={loading}
-            sx={{ mt: 2 }}
+            sx={{ 
+              mt: 2,
+              py: { xs: 1.5, md: 1 },
+              fontSize: { xs: '1rem', md: '1.125rem' }
+            }}
           >
             {loading ? 'Creating...' : isRecurring ? 'Create Recurring Transaction' : 'Create Transaction'}
           </Button>

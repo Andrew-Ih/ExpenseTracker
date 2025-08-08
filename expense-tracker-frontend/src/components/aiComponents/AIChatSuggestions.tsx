@@ -57,19 +57,34 @@ const suggestionCategories = [
 export default function AIChatSuggestions({ onSuggestionClick }: AIChatSuggestionsProps) {
   return (
     <Box sx={{ 
-      p: 2,
+      p: { xs: 1, md: 2 },
       height: '100%',
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'center',
+      justifyContent: { xs: 'flex-start', md: 'center' },
       overflow: 'auto'
     }}>
       {/* Welcome Message */}
-      <Box sx={{ textAlign: 'center', mb: 4 }}>
-        <Typography variant="h4" fontWeight="bold" color="text.primary" sx={{ mb: 1 }}>
+      <Box sx={{ textAlign: 'center', mb: { xs: 1, md: 4 }, flexShrink: 0 }}>
+        <Typography 
+          variant="h4" 
+          fontWeight="bold" 
+          color="text.primary" 
+          sx={{ 
+            mb: 1,
+            fontSize: { xs: '1.125rem', md: '2.125rem' }
+          }}
+        >
           Welcome to your AI Financial Assistant! 🤖
         </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+        <Typography 
+          variant="body1" 
+          color="text.secondary" 
+          sx={{ 
+            mb: { xs: 1, md: 3 },
+            fontSize: { xs: '0.7rem', md: '1rem' }
+          }}
+        >
           I can help you analyze your spending, track budgets, and provide financial insights. 
           Try asking me one of these questions or type your own!
         </Typography>
@@ -77,15 +92,17 @@ export default function AIChatSuggestions({ onSuggestionClick }: AIChatSuggestio
 
       {/* Suggestions Grid */}
       <Stack 
-        direction={{ xs: 'column', sm: 'row' }} 
-        spacing={3}
-        sx={{ mb: 4 }}
+        direction={{ xs: 'column', md: 'row' }} 
+        spacing={{ xs: 1, md: 3 }}
+        sx={{ 
+          flexShrink: 0
+        }}
       >
         {suggestionCategories.map((category, index) => (
           <Paper
             key={index}
             sx={{
-              p: 2,
+              p: { xs: 0.75, md: 2 },
               flex: 1,
               bgcolor: 'background.paper',
               border: 1,
@@ -99,26 +116,33 @@ export default function AIChatSuggestions({ onSuggestionClick }: AIChatSuggestio
             }}
           >
             {/* Category Header */}
-            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: { xs: 0.75, md: 2 } }}>
               <Box sx={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: 32,
-                height: 32,
+                width: { xs: 20, md: 32 },
+                height: { xs: 20, md: 32 },
                 borderRadius: 1,
                 bgcolor: `${category.color}.main`,
                 color: 'white'
               }}>
                 {category.icon}
               </Box>
-              <Typography variant="h6" fontWeight="bold" color="text.primary">
+              <Typography 
+                variant="h6" 
+                fontWeight="bold" 
+                color="text.primary"
+                sx={{
+                  fontSize: { xs: '0.8rem', md: '1.25rem' }
+                }}
+              >
                 {category.title}
               </Typography>
             </Stack>
 
             {/* Suggestions */}
-            <Stack spacing={1}>
+            <Stack spacing={{ xs: 0.25, md: 1 }}>
               {category.suggestions.map((suggestion, suggestionIndex) => (
                 <Chip
                   key={suggestionIndex}
@@ -128,14 +152,15 @@ export default function AIChatSuggestions({ onSuggestionClick }: AIChatSuggestio
                     justifyContent: 'flex-start',
                     textAlign: 'left',
                     height: 'auto',
-                    minHeight: 40,
-                    p: 1,
+                    minHeight: { xs: 28, md: 40 },
+                    p: { xs: 0.5, md: 1 },
                     bgcolor: 'background.default',
                     border: 1,
                     borderColor: 'divider',
+                    fontSize: { xs: '0.65rem', md: '0.875rem' },
                     '& .MuiChip-label': {
                       whiteSpace: 'normal',
-                      lineHeight: 1.4,
+                      lineHeight: 1.2,
                       color: 'text.primary'
                     },
                     '&:hover': {
@@ -155,8 +180,14 @@ export default function AIChatSuggestions({ onSuggestionClick }: AIChatSuggestio
       </Stack>
 
       {/* Footer */}
-      <Box sx={{ textAlign: 'center', mt: 4 }}>
-        <Typography variant="body2" color="text.secondary">
+      <Box sx={{ textAlign: 'center', mt: { xs: 0.5, md: 4 }, flexShrink: 0 }}>
+        <Typography 
+          variant="body2" 
+          color="text.secondary"
+          sx={{
+            fontSize: { xs: '0.6rem', md: '0.875rem' }
+          }}
+        >
           💡 Tip: You can ask me anything about your finances in natural language!
         </Typography>
       </Box>

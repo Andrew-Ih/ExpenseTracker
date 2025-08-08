@@ -50,15 +50,34 @@ const TransactionSummary = ({ summary, loading, error, period }: TransactionSumm
   };
 
   return (
-    <Paper sx={{ p: 3, mb: 3 }}>
+    <Paper sx={{ 
+      p: { xs: 2, md: 3 }, 
+      mb: 3,
+      overflow: 'hidden'
+    }}>
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       
-      <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <Typography 
+        variant="h5" 
+        gutterBottom 
+        sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 1,
+          fontWeight: 700,
+          fontSize: { xs: '1.25rem', md: '1.5rem' },
+          mb: { xs: 2, md: 3 }
+        }}
+      >
         <Receipt />
         Transaction Summary - {getPeriodDisplay()}
       </Typography>
       
-      <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} sx={{ textAlign: 'center' }}>
+      <Stack 
+        direction={{ xs: 'column', sm: 'row' }} 
+        spacing={{ xs: 2, md: 3 }} 
+        sx={{ textAlign: 'center' }}
+      >
         <Box sx={{ flex: 1 }}>
           <Typography 
             variant="h4" 
@@ -69,13 +88,19 @@ const TransactionSummary = ({ summary, loading, error, period }: TransactionSumm
               justifyContent: 'center', 
               gap: 1,
               opacity: loading ? 0.5 : 1,
-              transition: 'opacity 0.3s ease'
+              transition: 'opacity 0.3s ease',
+              fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' },
+              fontWeight: 700
             }}
           >
             <TrendingUp />
             {formatCurrency(displaySummary.totalIncome)}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography 
+            variant="body2" 
+            color="text.secondary"
+            sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' } }}
+          >
             Total Income ({displaySummary.incomeCount} transactions)
           </Typography>
         </Box>
@@ -90,13 +115,19 @@ const TransactionSummary = ({ summary, loading, error, period }: TransactionSumm
               justifyContent: 'center', 
               gap: 1,
               opacity: loading ? 0.5 : 1,
-              transition: 'opacity 0.3s ease'
+              transition: 'opacity 0.3s ease',
+              fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' },
+              fontWeight: 700
             }}
           >
             <TrendingDown />
             {formatCurrency(displaySummary.totalExpenses)}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography 
+            variant="body2" 
+            color="text.secondary"
+            sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' } }}
+          >
             Total Expenses ({displaySummary.expenseCount} transactions)
           </Typography>
         </Box>
@@ -111,13 +142,19 @@ const TransactionSummary = ({ summary, loading, error, period }: TransactionSumm
               justifyContent: 'center', 
               gap: 1,
               opacity: loading ? 0.5 : 1,
-              transition: 'opacity 0.3s ease'
+              transition: 'opacity 0.3s ease',
+              fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' },
+              fontWeight: 700
             }}
           >
             {isPositiveNet ? <TrendingUp /> : <TrendingDown />}
             {isPositiveNet ? '+' : ''}{formatCurrency(displaySummary.netIncome)}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography 
+            variant="body2" 
+            color="text.secondary"
+            sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' } }}
+          >
             Net Income
           </Typography>
         </Box>
@@ -132,13 +169,19 @@ const TransactionSummary = ({ summary, loading, error, period }: TransactionSumm
               justifyContent: 'center', 
               gap: 1,
               opacity: loading ? 0.5 : 1,
-              transition: 'opacity 0.3s ease'
+              transition: 'opacity 0.3s ease',
+              fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' },
+              fontWeight: 700
             }}
           >
             <AccountBalance />
             {displaySummary.transactionCount}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography 
+            variant="body2" 
+            color="text.secondary"
+            sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' } }}
+          >
             Total Transactions
           </Typography>
         </Box>

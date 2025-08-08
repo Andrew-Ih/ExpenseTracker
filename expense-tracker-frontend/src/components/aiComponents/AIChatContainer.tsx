@@ -49,10 +49,11 @@ export default function AIChatContainer() {
       component="form"
       onSubmit={handleSubmit}
       sx={{ 
-        height: 'calc(100vh - 48px)', // Account for AppLayout padding
+        height: { xs: 'calc(100vh - 112px)', md: 'calc(100vh - 48px)' }, // Account for mobile navigation
         display: 'flex',
         flexDirection: 'column',
-        bgcolor: 'background.default'
+        bgcolor: 'background.default',
+        overflow: 'hidden'
     }}>
       {/* Header */}
       <AIChatHeader onClearChat={handleClearChat} />
@@ -74,7 +75,12 @@ export default function AIChatContainer() {
         </Box>
         
         {/* Input */}
-        <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
+        <Box sx={{ 
+          p: { xs: 1, md: 2 }, 
+          borderTop: 1, 
+          borderColor: 'divider',
+          bgcolor: 'background.paper'
+        }}>
           <AIChatInput 
             onSendMessage={handleSendMessage}
             isLoading={isLoading}

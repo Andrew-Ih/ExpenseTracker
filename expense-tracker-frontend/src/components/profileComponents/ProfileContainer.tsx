@@ -197,28 +197,70 @@ const ProfileContainer = () => {
   }
 
   return (
-    <Stack spacing={3} sx={{ maxWidth: 1200, mx: 'auto', p: 3 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
+    <Box sx={{ 
+      width: '100%', 
+      maxWidth: 1200, 
+      mx: 'auto',
+      p: { xs: 1, md: 3 },
+      overflowX: 'hidden'
+    }}>
+      <Typography 
+        variant="h4" 
+        component="h1" 
+        gutterBottom
+        sx={{
+          fontSize: { xs: '1.75rem', md: '2.125rem' },
+          fontWeight: 700,
+          mb: { xs: 2, md: 3 }
+        }}
+      >
         Profile Settings
       </Typography>
 
-      <Stack spacing={3}>
-        {/* Top Row - 3 Cards */}
-        <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} sx={{ alignItems: 'stretch' }}>
+      <Stack spacing={{ xs: 2, md: 3 }}>
+        {/* Top Row - 2 Cards */}
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={{ xs: 2, md: 3 }} sx={{ alignItems: 'stretch' }}>
           {/* Personal Information */}
-          <Paper sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+          <Paper sx={{ 
+            p: { xs: 2, md: 3 }, 
+            flex: 1, 
+            display: 'flex', 
+            flexDirection: 'column',
+            overflow: 'hidden'
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: { xs: 2, md: 3 } }}>
               <Person color="primary" />
-              <Typography variant="h6">Personal Information</Typography>
+              <Typography 
+                variant="h6"
+                sx={{
+                  fontSize: { xs: '1.25rem', md: '1.5rem' },
+                  fontWeight: 700
+                }}
+              >
+                Personal Information
+              </Typography>
             </Box>
 
-            <Stack spacing={3} sx={{ flex: 1 }}>
+            <Stack spacing={{ xs: 2, md: 3 }} sx={{ flex: 1 }}>
               {/* Email - Read Only */}
               <Box>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
+                <Typography 
+                  variant="body2" 
+                  color="text.secondary" 
+                  gutterBottom
+                  sx={{
+                    fontSize: { xs: '0.875rem', md: '1rem' }
+                  }}
+                >
                   Email Address
                 </Typography>
-                <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                <Typography 
+                  variant="body1" 
+                  sx={{ 
+                    fontWeight: 600,
+                    fontSize: { xs: '1rem', md: '1.125rem' }
+                  }}
+                >
                   {userProfile.email}
                 </Typography>
               </Box>
@@ -252,6 +294,10 @@ const ProfileContainer = () => {
                       onClick={handleSave}
                       disabled={updateLoading}
                       size="small"
+                      sx={{
+                        py: { xs: 1.5, md: 1 },
+                        fontSize: { xs: '1rem', md: '1.125rem' }
+                      }}
                     >
                       {updateLoading ? 'Saving...' : 'Save'}
                     </Button>
@@ -260,6 +306,10 @@ const ProfileContainer = () => {
                       onClick={handleCancel}
                       disabled={updateLoading}
                       size="small"
+                      sx={{
+                        py: { xs: 1.5, md: 1 },
+                        fontSize: { xs: '1rem', md: '1.125rem' }
+                      }}
                     >
                       Cancel
                     </Button>
@@ -267,17 +317,34 @@ const ProfileContainer = () => {
                 </Stack>
               ) : (
                 <Box>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                  <Typography 
+                    variant="body2" 
+                    color="text.secondary" 
+                    gutterBottom
+                    sx={{
+                      fontSize: { xs: '0.875rem', md: '1rem' }
+                    }}
+                  >
                     Display Name
                   </Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                  <Typography 
+                    variant="body1" 
+                    sx={{ 
+                      fontWeight: 600,
+                      fontSize: { xs: '1rem', md: '1.125rem' }
+                    }}
+                  >
                     {userProfile.firstName} {userProfile.lastName}
                   </Typography>
                   <Button
                     variant="outlined"
                     onClick={handleEdit}
                     size="small"
-                    sx={{ mt: 1 }}
+                    sx={{ 
+                      mt: 1,
+                      py: { xs: 1.5, md: 1 },
+                      fontSize: { xs: '1rem', md: '1.125rem' }
+                    }}
                   >
                     Edit
                   </Button>
@@ -286,52 +353,47 @@ const ProfileContainer = () => {
             </Stack>
           </Paper>
 
-          {/* Account Statistics */}
-          {/* <Paper sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-              <TrendingUp color="primary" />
-              <Typography variant="h6">Account Overview</Typography>
-            </Box>
-
-            <Stack spacing={3} sx={{ flex: 1 }}>
-              <Box>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  Total Transactions
-                </Typography>
-                <Typography variant="h4" color="primary">
-                  {accountStats?.totalTransactions || 0}
-                </Typography>
-              </Box>
-
-              <Divider />
-
-              <Box>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  Budget Categories
-                </Typography>
-                <Typography variant="h4" color="primary">
-                  {accountStats?.totalBudgets || 0}
-                </Typography>
-              </Box>
-            </Stack>
-          </Paper> */}
-
           {/* Security Settings */}
-          <Paper sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+          <Paper sx={{ 
+            p: { xs: 2, md: 3 }, 
+            flex: 1, 
+            display: 'flex', 
+            flexDirection: 'column',
+            overflow: 'hidden'
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: { xs: 2, md: 3 } }}>
               <Security color="primary" />
-              <Typography variant="h6">Security</Typography>
+              <Typography 
+                variant="h6"
+                sx={{
+                  fontSize: { xs: '1.25rem', md: '1.5rem' },
+                  fontWeight: 700
+                }}
+              >
+                Security
+              </Typography>
             </Box>
 
-            <Stack spacing={3} sx={{ flex: 1 }}>
+            <Stack spacing={{ xs: 2, md: 3 }} sx={{ flex: 1 }}>
               <Box>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
+                <Typography 
+                  variant="body2" 
+                  color="text.secondary" 
+                  gutterBottom
+                  sx={{
+                    fontSize: { xs: '0.875rem', md: '1rem' }
+                  }}
+                >
                   Password Management
                 </Typography>
                 <Button
                   variant="contained"
                   onClick={handleChangePassword}
                   size="small"
+                  sx={{
+                    py: { xs: 1.5, md: 1 },
+                    fontSize: { xs: '1rem', md: '1.125rem' }
+                  }}
                 >
                   Change Password
                 </Button>
@@ -340,10 +402,24 @@ const ProfileContainer = () => {
               <Divider />
 
               <Box>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
+                <Typography 
+                  variant="body2" 
+                  color="text.secondary" 
+                  gutterBottom
+                  sx={{
+                    fontSize: { xs: '0.875rem', md: '1rem' },
+                    fontWeight: 600
+                  }}
+                >
                   Password Requirements
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography 
+                  variant="body2" 
+                  color="text.secondary"
+                  sx={{
+                    fontSize: { xs: '0.875rem', md: '1rem' }
+                  }}
+                >
                   • At least 8 characters long<br/>
                   • Contains uppercase and lowercase letters<br/>
                   • Contains at least one number<br/>
@@ -355,18 +431,48 @@ const ProfileContainer = () => {
         </Stack>
 
         {/* Bottom Row - Danger Zone */}
-        <Paper sx={{ p: 3, border: '2px solid', borderColor: 'error.main', display: 'flex', flexDirection: 'column' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+        <Paper sx={{ 
+          p: { xs: 2, md: 3 }, 
+          border: '2px solid', 
+          borderColor: 'error.main', 
+          display: 'flex', 
+          flexDirection: 'column',
+          overflow: 'hidden'
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: { xs: 2, md: 3 } }}>
             <DeleteForever color="error" />
-            <Typography variant="h6" color="error.main">Danger Zone</Typography>
+            <Typography 
+              variant="h6" 
+              color="error.main"
+              sx={{
+                fontSize: { xs: '1.25rem', md: '1.5rem' },
+                fontWeight: 700
+              }}
+            >
+              Danger Zone
+            </Typography>
           </Box>
 
-          <Stack spacing={3}>
+          <Stack spacing={{ xs: 2, md: 3 }}>
             <Box>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
+              <Typography 
+                variant="body2" 
+                color="text.secondary" 
+                gutterBottom
+                sx={{
+                  fontSize: { xs: '0.875rem', md: '1rem' }
+                }}
+              >
                 Delete Account
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              <Typography 
+                variant="body2" 
+                color="text.secondary" 
+                sx={{ 
+                  mb: 2,
+                  fontSize: { xs: '0.875rem', md: '1rem' }
+                }}
+              >
                 This action will permanently delete your account and all associated data.
               </Typography>
               <Button
@@ -374,6 +480,10 @@ const ProfileContainer = () => {
                 color="error"
                 onClick={handleAccountDeletion}
                 disabled={updateLoading}
+                sx={{
+                  py: { xs: 1.5, md: 1 },
+                  fontSize: { xs: '1rem', md: '1.125rem' }
+                }}
               >
                 {updateLoading ? 'Deleting...' : 'Delete Account'}
               </Button>
@@ -434,7 +544,7 @@ const ProfileContainer = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Stack>
+    </Box>
   );
 };
 

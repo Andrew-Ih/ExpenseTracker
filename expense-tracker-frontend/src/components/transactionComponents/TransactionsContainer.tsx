@@ -28,8 +28,6 @@ const TransactionsContainer = () => {
   const currentDate = new Date();
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
-  // const [isCustomDateRange, setIsCustomDateRange] = useState(false);
-  // const [customDateRange, setCustomDateRange] = useState<{ startDate: string; endDate: string } | null>(null);
   const [summaryPeriod, setSummaryPeriod] = useState<{
     month: number;
     year: number;
@@ -96,12 +94,7 @@ const TransactionsContainer = () => {
   };
 
   const handleTransactionAdded = () => {
-    // Refresh data based on current state
-    // if (isCustomDateRange && customDateRange) {
-    //   handleFilterChange(filters);
-    // } else {
-      fetchCurrentMonthData();
-    // }
+    fetchCurrentMonthData();
   };
 
   const handleFilterChange = useCallback(async (newFilters: TransactionQueryParams) => {
@@ -110,17 +103,11 @@ const TransactionsContainer = () => {
     // Combine filters with date range
     const combinedFilters: TransactionQueryParams = { ...newFilters };
     
-    // if (isCustomDateRange && customDateRange) {
-    //   // Use custom date range
-    //   combinedFilters.startDate = customDateRange.startDate;
-    //   combinedFilters.endDate = customDateRange.endDate;
-    // } else {
-      // Use selected month/year
-      const startDate = new Date(selectedYear, selectedMonth - 1, 1).toISOString().split('T')[0];
-      const endDate = new Date(selectedYear, selectedMonth, 0).toISOString().split('T')[0];
-      combinedFilters.startDate = startDate;
-      combinedFilters.endDate = endDate;
-    // }
+    // Use selected month/year
+    const startDate = new Date(selectedYear, selectedMonth - 1, 1).toISOString().split('T')[0];
+    const endDate = new Date(selectedYear, selectedMonth, 0).toISOString().split('T')[0];
+    combinedFilters.startDate = startDate;
+    combinedFilters.endDate = endDate;
     
     // Fetch transactions with combined filters
     setLoading(true);
@@ -148,22 +135,12 @@ const TransactionsContainer = () => {
       
       setSummary(calculatedSummary);
       
-      // Set summary period based on current state
-      // if (isCustomDateRange && customDateRange) {
-      //   setSummaryPeriod({
-      //     startDate: customDateRange.startDate,
-      //     endDate: customDateRange.endDate,
-      //     month: 0,
-      //     year: 0
-      //   });
-      // } else {
-        setSummaryPeriod({
-          startDate: '',
-          endDate: '',
-          month: selectedMonth,
-          year: selectedYear
-        });
-      // }
+      setSummaryPeriod({
+        startDate: '',
+        endDate: '',
+        month: selectedMonth,
+        year: selectedYear
+      });
       
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch transactions');
@@ -175,8 +152,6 @@ const TransactionsContainer = () => {
   const handleMonthYearChange = (month: number, year: number) => {
     setSelectedMonth(month);
     setSelectedYear(year);
-    // setIsCustomDateRange(false);
-    // setCustomDateRange(null);
     // Keep existing filters but apply them to new month
     if (Object.keys(filters).length > 0) {
       handleFilterChange(filters);
@@ -184,78 +159,6 @@ const TransactionsContainer = () => {
       fetchCurrentMonthData();
     }
   };
-
-  // const handleCustomDateRangeChange = (startDate: string, endDate: string) => {
-  //   const newCustomDateRange = { startDate, endDate };
-  //   setIsCustomDateRange(true);
-  //   setCustomDateRange(newCustomDateRange);
-    
-  //   // Create combined filters with the new custom date range
-  //   const combinedFilters: TransactionQueryParams = { ...filters };
-  //   combinedFilters.startDate = startDate;
-  //   combinedFilters.endDate = endDate;
-    
-  //   // Apply the combined filters immediately
-  //   setFilters(combinedFilters);
-    
-  //   // Fetch transactions with the new custom date range
-  //   setLoading(true);
-  //   setError(null);
-    
-  //   getTransactions(combinedFilters)
-  //     .then(result => {
-  //       setTransactions(result.transactions);
-  //       setPagination(result.pagination);
-        
-  //       // Calculate summary from filtered transactions
-  //       const calculatedSummary = {
-  //         totalIncome: result.transactions
-  //           .filter((t: Transaction) => t.type === 'income')
-  //           .reduce((sum: number, t: Transaction) => sum + parseFloat(t.amount.toString()), 0),
-  //         totalExpenses: result.transactions
-  //           .filter((t: Transaction) => t.type === 'expense')
-  //           .reduce((sum: number, t: Transaction) => sum + parseFloat(t.amount.toString()), 0),
-  //         transactionCount: result.transactions.length,
-  //         incomeCount: result.transactions.filter((t: Transaction) => t.type === 'income').length,
-  //         expenseCount: result.transactions.filter((t: Transaction) => t.type === 'expense').length,
-  //         netIncome: 0
-  //       };
-        
-  //       calculatedSummary.netIncome = calculatedSummary.totalIncome - calculatedSummary.totalExpenses;
-        
-  //       setSummary(calculatedSummary);
-        
-  //       // Set summary period to show custom date range
-  //       setSummaryPeriod({
-  //         startDate: startDate,
-  //         endDate: endDate,
-  //         month: 0, // 0 indicates custom date range
-  //         year: 0   // 0 indicates custom date range
-  //       });
-  //     })
-  //     .catch(err => {
-  //       setError(err instanceof Error ? err.message : 'Failed to fetch transactions');
-  //     })
-  //     .finally(() => {
-  //       setLoading(false);
-  //     });
-  // };
-
-  // const handleResetToCurrentMonth = () => {
-  //   setIsCustomDateRange(false);
-  //   setCustomDateRange(null);
-  //   const currentDate = new Date();
-  //   const currentMonth = currentDate.getMonth() + 1;
-  //   const currentYear = currentDate.getFullYear();
-  //   setSelectedMonth(currentMonth);
-  //   setSelectedYear(currentYear);
-  //   // Keep existing filters but apply them to current month
-  //   if (Object.keys(filters).length > 0) {
-  //     handleFilterChange(filters);
-  //   } else {
-  //     fetchCurrentMonthData();
-  //   }
-  // };
 
   const handleLoadMore = () => {
     if (pagination.hasMore && pagination.lastEvaluatedKey) {
@@ -265,15 +168,10 @@ const TransactionsContainer = () => {
       };
       
       // Add date range to load more filters
-      // if (isCustomDateRange && customDateRange) {
-      //   newFilters.startDate = customDateRange.startDate;
-      //   newFilters.endDate = customDateRange.endDate;
-      // } else {
-        const startDate = new Date(selectedYear, selectedMonth - 1, 1).toISOString().split('T')[0];
-        const endDate = new Date(selectedYear, selectedMonth, 0).toISOString().split('T')[0];
-        newFilters.startDate = startDate;
-        newFilters.endDate = endDate;
-      // }
+      const startDate = new Date(selectedYear, selectedMonth - 1, 1).toISOString().split('T')[0];
+      const endDate = new Date(selectedYear, selectedMonth, 0).toISOString().split('T')[0];
+      newFilters.startDate = startDate;
+      newFilters.endDate = endDate;
       
       setLoading(true);
       getTransactions(newFilters)
@@ -292,34 +190,49 @@ const TransactionsContainer = () => {
 
   const handleTransactionDeleted = (transactionId: string) => {
     setTransactions(prev => prev.filter(t => t.transactionId !== transactionId));
-    // Refresh summary after deletion
-    // if (isCustomDateRange && customDateRange) {
-    //   handleFilterChange(filters);
-    // } else {
-      fetchSummary(selectedMonth, selectedYear);
-    // }
+    fetchSummary(selectedMonth, selectedYear);
   };
 
   const handleTransactionUpdated = (updatedTransaction: Transaction) => {
     setTransactions(prev => 
       prev.map(t => t.transactionId === updatedTransaction.transactionId ? updatedTransaction : t)
     );
-    // Refresh summary based on current filters or month/year
-    // if (isCustomDateRange && customDateRange) {
-    //   handleFilterChange(filters);
-    // } else {
-      fetchSummary(selectedMonth, selectedYear);
-    // }
+    fetchSummary(selectedMonth, selectedYear);
   };
 
   return (
-    <Box sx={{ width: '100%', maxWidth: 1200, mx: 'auto' }}>
-      <Typography variant="h4" gutterBottom>
+    <Box sx={{ 
+      width: '100%', 
+      maxWidth: 1200, 
+      mx: 'auto',
+      p: { xs: 1, md: 3 },
+      overflowX: 'hidden' // Prevent horizontal scrolling
+    }}>
+      <Typography 
+        variant="h4" 
+        gutterBottom 
+        sx={{ 
+          fontSize: { xs: '1.75rem', md: '2.125rem' },
+          fontWeight: 700,
+          mb: { xs: 2, md: 3 }
+        }}
+      >
         Transactions
       </Typography>
 
       <Paper sx={{ mb: 3 }}>
-        <Tabs value={activeTab} onChange={handleTabChange} centered>
+        <Tabs 
+          value={activeTab} 
+          onChange={handleTabChange} 
+          centered
+          sx={{
+            '& .MuiTab-root': {
+              fontSize: { xs: '0.875rem', md: '1rem' },
+              fontWeight: 600,
+              minHeight: { xs: 48, md: 56 }
+            }
+          }}
+        >
           <Tab label="View Transactions" />
           <Tab label="Add Transaction" />
         </Tabs>
@@ -339,10 +252,6 @@ const TransactionsContainer = () => {
             selectedMonth={selectedMonth}
             selectedYear={selectedYear}
             onMonthYearChange={handleMonthYearChange}
-            // onCustomDateRangeChange={handleCustomDateRangeChange}
-            // onResetToCurrentMonth={handleResetToCurrentMonth}
-            // isCustomDateRange={isCustomDateRange}
-            // customDateRange={customDateRange}
           />
           
           <TransactionList 

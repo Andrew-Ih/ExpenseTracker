@@ -26,7 +26,9 @@ import {
   Select,
   MenuItem,
   SelectChangeEvent,
-  Stack
+  Stack,
+  Card,
+  CardContent
 } from '@mui/material';
 import { Edit, Delete, ChevronLeft, ChevronRight } from '@mui/icons-material';
 import { Budget, deleteBudget } from '@/services/budgetService';
@@ -132,10 +134,18 @@ const BudgetList = ({
 
   return (
     <>
-      <Paper sx={{ p: 3, mb: 3 }}>
+      <Paper sx={{ p: { xs: 2, md: 3 }, mb: { xs: 2, md: 3 }, overflow: 'hidden' }}>
         {/* Month/Year Navigation */}
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center" sx={{ mb: 3 }}>
-          <Typography variant="h6">Budgets for:</Typography>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center" sx={{ mb: { xs: 2, md: 3 } }}>
+          <Typography 
+            variant="h6"
+            sx={{
+              fontSize: { xs: '1.25rem', md: '1.5rem' },
+              fontWeight: 700
+            }}
+          >
+            Budgets for:
+          </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <IconButton onClick={handlePreviousMonth} size="small">
               <ChevronLeft />
@@ -180,95 +190,195 @@ const BudgetList = ({
           </Box>
         </Stack>
 
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Category</TableCell>
-                <TableCell align="right" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Budget Amount</TableCell>
-                <TableCell align="right" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Spent</TableCell>
-                <TableCell align="right" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Remaining</TableCell>
-                <TableCell align="center" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Progress</TableCell>
-                <TableCell align="center" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {loading ? (
+        {/* Desktop Table Layout */}
+        <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+          <TableContainer>
+            <Table>
+              <TableHead>
                 <TableRow>
-                  <TableCell colSpan={6} align="center">
-                    <CircularProgress size={24} />
-                  </TableCell>
+                  <TableCell sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Category</TableCell>
+                  <TableCell align="right" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Budget Amount</TableCell>
+                  <TableCell align="right" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Spent</TableCell>
+                  <TableCell align="right" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Remaining</TableCell>
+                  <TableCell align="center" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Progress</TableCell>
+                  <TableCell align="center" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Actions</TableCell>
                 </TableRow>
-              ) : budgets.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} align="center">
-                    <Typography variant="body1" sx={{ py: 2 }}>
-                      No budgets found for this month
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                budgets.map((budget) => {
-                  const spent = budget.budgetId ? budgetProgress[budget.budgetId] || 0 : 0;
-                  const budgetAmount = parseFloat(budget.amount.toString());
-                  const remaining = budgetAmount - spent;
-                  const progressPercent = budgetAmount > 0 ? (spent / budgetAmount) * 100 : 0;
-                  const isOverBudget = spent > budgetAmount;
-                  
-                  return (
-                    <TableRow key={budget.budgetId}>
-                      <TableCell sx={{ fontSize: '1rem' }}>{budget.category}</TableCell>
-                      <TableCell align="right">
-                        <Typography color="primary.main" variant="body1" sx={{ fontWeight: 'medium' }}>
-                          {formatCurrency(budgetAmount)}
+              </TableHead>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center">
+                      <CircularProgress size={24} />
+                    </TableCell>
+                  </TableRow>
+                ) : budgets.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center">
+                      <Typography variant="body1" sx={{ py: 2 }}>
+                        No budgets found for this month
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  budgets.map((budget) => {
+                    const spent = budget.budgetId ? budgetProgress[budget.budgetId] || 0 : 0;
+                    const budgetAmount = parseFloat(budget.amount.toString());
+                    const remaining = budgetAmount - spent;
+                    const progressPercent = budgetAmount > 0 ? (spent / budgetAmount) * 100 : 0;
+                    const isOverBudget = spent > budgetAmount;
+                    
+                    return (
+                      <TableRow key={budget.budgetId}>
+                        <TableCell sx={{ fontSize: '1rem' }}>{budget.category}</TableCell>
+                        <TableCell align="right">
+                          <Typography color="primary.main" variant="body1" sx={{ fontWeight: 'medium' }}>
+                            {formatCurrency(budgetAmount)}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="right">
+                          <Typography color={isOverBudget ? "error.main" : "text.primary"} variant="body1" sx={{ fontWeight: 'medium' }}>
+                            {formatCurrency(spent)}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="right">
+                          <Typography color={remaining >= 0 ? "success.main" : "error.main"} variant="body1" sx={{ fontWeight: 'medium' }}>
+                            {formatCurrency(remaining >= 0 ? remaining : 0)}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center" sx={{ minWidth: 120 }}>
+                          <Box sx={{ width: '100%' }}>
+                            <LinearProgress 
+                              variant="determinate" 
+                              value={Math.min(progressPercent, 100)}
+                              color={isOverBudget ? "error" : progressPercent > 80 ? "warning" : "success"}
+                              sx={{ mb: 0.5 }}
+                            />
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                              {progressPercent.toFixed(0)}%
+                            </Typography>
+                          </Box>
+                        </TableCell>
+                        <TableCell align="center">
+                          <IconButton 
+                            size="small" 
+                            color="primary" 
+                            onClick={() => handleEditClick(budget)}
+                          >
+                            <Edit />
+                          </IconButton>
+                          <IconButton 
+                            size="small" 
+                            color="error" 
+                            onClick={() => handleDeleteClick(budget)}
+                          >
+                            <Delete />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
+
+        {/* Mobile Card Layout */}
+        <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+              <CircularProgress size={32} />
+            </Box>
+          ) : budgets.length === 0 ? (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <Typography variant="body1">
+                No budgets found for this month
+              </Typography>
+            </Box>
+          ) : (
+            <Stack spacing={2}>
+              {budgets.map((budget) => {
+                const spent = budget.budgetId ? budgetProgress[budget.budgetId] || 0 : 0;
+                const budgetAmount = parseFloat(budget.amount.toString());
+                const remaining = budgetAmount - spent;
+                const progressPercent = budgetAmount > 0 ? (spent / budgetAmount) * 100 : 0;
+                const isOverBudget = spent > budgetAmount;
+                
+                return (
+                  <Card key={budget.budgetId} sx={{ p: 2 }}>
+                    <CardContent sx={{ p: '0 !important' }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                        <Typography 
+                          variant="h6" 
+                          sx={{ 
+                            fontSize: '1.125rem',
+                            fontWeight: 700
+                          }}
+                        >
+                          {budget.category}
                         </Typography>
-                      </TableCell>
-                      <TableCell align="right">
-                        <Typography color={isOverBudget ? "error.main" : "text.primary"} variant="body1" sx={{ fontWeight: 'medium' }}>
-                          {formatCurrency(spent)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="right">
-                        <Typography color={remaining >= 0 ? "success.main" : "error.main"} variant="body1" sx={{ fontWeight: 'medium' }}>
-                          {formatCurrency(remaining >= 0 ? remaining : 0)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="center" sx={{ minWidth: 120 }}>
-                        <Box sx={{ width: '100%' }}>
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                          <IconButton 
+                            size="small" 
+                            color="primary" 
+                            onClick={() => handleEditClick(budget)}
+                          >
+                            <Edit />
+                          </IconButton>
+                          <IconButton 
+                            size="small" 
+                            color="error" 
+                            onClick={() => handleDeleteClick(budget)}
+                          >
+                            <Delete />
+                          </IconButton>
+                        </Box>
+                      </Box>
+                      
+                      <Stack spacing={1.5}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Typography variant="body2" color="text.secondary">Budget Amount:</Typography>
+                          <Typography color="primary.main" variant="body1" sx={{ fontWeight: 600 }}>
+                            {formatCurrency(budgetAmount)}
+                          </Typography>
+                        </Box>
+                        
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Typography variant="body2" color="text.secondary">Spent:</Typography>
+                          <Typography color={isOverBudget ? "error.main" : "text.primary"} variant="body1" sx={{ fontWeight: 600 }}>
+                            {formatCurrency(spent)}
+                          </Typography>
+                        </Box>
+                        
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Typography variant="body2" color="text.secondary">Remaining:</Typography>
+                          <Typography color={remaining >= 0 ? "success.main" : "error.main"} variant="body1" sx={{ fontWeight: 600 }}>
+                            {formatCurrency(remaining >= 0 ? remaining : 0)}
+                          </Typography>
+                        </Box>
+                        
+                        <Box sx={{ mt: 1 }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                            <Typography variant="body2" color="text.secondary">Progress:</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                              {progressPercent.toFixed(0)}%
+                            </Typography>
+                          </Box>
                           <LinearProgress 
                             variant="determinate" 
                             value={Math.min(progressPercent, 100)}
                             color={isOverBudget ? "error" : progressPercent > 80 ? "warning" : "success"}
-                            sx={{ mb: 0.5 }}
+                            sx={{ height: 6, borderRadius: 3 }}
                           />
-                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
-                            {progressPercent.toFixed(0)}%
-                          </Typography>
                         </Box>
-                      </TableCell>
-                      <TableCell align="center">
-                        <IconButton 
-                          size="small" 
-                          color="primary" 
-                          onClick={() => handleEditClick(budget)}
-                        >
-                          <Edit />
-                        </IconButton>
-                        <IconButton 
-                          size="small" 
-                          color="error" 
-                          onClick={() => handleDeleteClick(budget)}
-                        >
-                          <Delete />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </Stack>
+          )}
+        </Box>
       </Paper>
 
       {/* Delete Confirmation Dialog */}
