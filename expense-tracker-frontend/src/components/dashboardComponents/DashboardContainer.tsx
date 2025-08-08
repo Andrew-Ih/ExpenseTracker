@@ -118,14 +118,13 @@ const DashboardContainer = () => {
       maxWidth: 1200, 
       mx: 'auto', 
       p: { xs: 1, md: 3 },
-      overflowX: 'hidden', // Prevent horizontal scrolling
-      minHeight: '100vh'
+      overflowX: 'hidden' // Prevent horizontal scrolling
     }}>
       <DashboardWelcome userProfile={userProfile} />
       
       <DashboardStats stats={dashboardStats} />
       
-      <Stack spacing={3} sx={{ mt: 2 }}>
+      <Stack spacing={3}>
         {/* Mobile: Stack vertically, Desktop: Side by side */}
         <Stack 
           direction={{ xs: 'column', md: 'row' }} 

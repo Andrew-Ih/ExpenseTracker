@@ -519,7 +519,7 @@ const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
             disabled={loading}
             sx={{ 
               mt: 2,
-              py: { xs: 1.5, md: 2 },
+              py: { xs: 1.5, md: 1 },
               fontSize: { xs: '1rem', md: '1.125rem' }
             }}
           >

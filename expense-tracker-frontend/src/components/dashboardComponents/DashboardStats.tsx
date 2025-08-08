@@ -57,25 +57,86 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
 
   return (
     <Box sx={{ mb: 3 }}>
+      {/* Desktop Layout - Single Row */}
       <Box sx={{ 
-        display: 'flex', 
-        flexDirection: { xs: 'column', sm: 'row' },
-        gap: { xs: 2, sm: 3 },
+        display: { xs: 'none', md: 'flex' },
+        gap: 3,
+        width: '100%'
+      }}>
+        {statCards.map((card, index) => (
+          <Paper 
+            key={index}
+            sx={{ 
+              p: 3, 
+              flex: 1,
+              minHeight: 120,
+              background: `linear-gradient(135deg, ${card.bgColor}15 0%, ${card.bgColor}05 100%)`,
+              border: `1px solid ${card.bgColor}30`,
+              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: 3
+              }
+            }}
+          >
+            <Stack spacing={2} sx={{ height: '100%' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Typography 
+                  variant="h6" 
+                  color="text.secondary"
+                  sx={{ 
+                    fontWeight: 700,
+                    fontSize: '1.125rem'
+                  }}
+                >
+                  {card.title}
+                </Typography>
+                <Box 
+                  sx={{ 
+                    p: 1, 
+                    borderRadius: 1, 
+                    bgcolor: `${card.iconBgColor}20`,
+                    color: card.iconBgColor
+                  }}
+                >
+                  {card.icon}
+                </Box>
+              </Box>
+              
+              <Typography 
+                variant="h4" 
+                color={card.color}
+                sx={{ 
+                  fontWeight: 700,
+                  fontSize: '2rem'
+                }}
+              >
+                {card.value}
+              </Typography>
+            </Stack>
+          </Paper>
+        ))}
+      </Box>
+
+      {/* Mobile Layout - 2x2 Grid */}
+      <Box sx={{ 
+        display: { xs: 'flex', md: 'none' },
+        flexDirection: 'column',
+        gap: 2,
         width: '100%'
       }}>
         {/* First row - Total Income and Total Expenses */}
         <Box sx={{ 
           display: 'flex', 
-          flexDirection: { xs: 'row', sm: 'column' },
-          gap: { xs: 2, sm: 3 },
-          flex: { xs: 'none', sm: 1 }
+          flexDirection: 'row',
+          gap: 2
         }}>
           {/* Total Income */}
           <Paper 
             sx={{ 
-              p: { xs: 2, md: 3 }, 
-              flex: { xs: 1, sm: 'none' },
-              minHeight: { xs: 100, md: 120 },
+              p: 2, 
+              flex: 1,
+              minHeight: 100,
               background: `linear-gradient(135deg, ${statCards[0].bgColor}15 0%, ${statCards[0].bgColor}05 100%)`,
               border: `1px solid ${statCards[0].bgColor}30`,
               transition: 'transform 0.2s ease, box-shadow 0.2s ease',
@@ -92,7 +153,7 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
                   color="text.secondary"
                   sx={{ 
                     fontWeight: 700,
-                    fontSize: { xs: '1rem', md: '1.125rem' }
+                    fontSize: '1rem'
                   }}
                 >
                   {statCards[0].title}
@@ -114,7 +175,7 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
                 color={statCards[0].color}
                 sx={{ 
                   fontWeight: 700,
-                  fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' }
+                  fontSize: '1.25rem'
                 }}
               >
                 {statCards[0].value}
@@ -125,9 +186,9 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
           {/* Total Expenses */}
           <Paper 
             sx={{ 
-              p: { xs: 2, md: 3 }, 
-              flex: { xs: 1, sm: 'none' },
-              minHeight: { xs: 100, md: 120 },
+              p: 2, 
+              flex: 1,
+              minHeight: 100,
               background: `linear-gradient(135deg, ${statCards[1].bgColor}15 0%, ${statCards[1].bgColor}05 100%)`,
               border: `1px solid ${statCards[1].bgColor}30`,
               transition: 'transform 0.2s ease, box-shadow 0.2s ease',
@@ -144,7 +205,7 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
                   color="text.secondary"
                   sx={{ 
                     fontWeight: 700,
-                    fontSize: { xs: '1rem', md: '1.125rem' }
+                    fontSize: '1rem'
                   }}
                 >
                   {statCards[1].title}
@@ -166,7 +227,7 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
                 color={statCards[1].color}
                 sx={{ 
                   fontWeight: 700,
-                  fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' }
+                  fontSize: '1.25rem'
                 }}
               >
                 {statCards[1].value}
@@ -178,16 +239,15 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
         {/* Second row - Net Income and Savings Rate */}
         <Box sx={{ 
           display: 'flex', 
-          flexDirection: { xs: 'row', sm: 'column' },
-          gap: { xs: 2, sm: 3 },
-          flex: { xs: 'none', sm: 1 }
+          flexDirection: 'row',
+          gap: 2
         }}>
           {/* Net Income */}
           <Paper 
             sx={{ 
-              p: { xs: 2, md: 3 }, 
-              flex: { xs: 1, sm: 'none' },
-              minHeight: { xs: 100, md: 120 },
+              p: 2, 
+              flex: 1,
+              minHeight: 100,
               background: `linear-gradient(135deg, ${statCards[2].bgColor}15 0%, ${statCards[2].bgColor}05 100%)`,
               border: `1px solid ${statCards[2].bgColor}30`,
               transition: 'transform 0.2s ease, box-shadow 0.2s ease',
@@ -204,7 +264,7 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
                   color="text.secondary"
                   sx={{ 
                     fontWeight: 700,
-                    fontSize: { xs: '1rem', md: '1.125rem' }
+                    fontSize: '1rem'
                   }}
                 >
                   {statCards[2].title}
@@ -226,7 +286,7 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
                 color={statCards[2].color}
                 sx={{ 
                   fontWeight: 700,
-                  fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' }
+                  fontSize: '1.25rem'
                 }}
               >
                 {statCards[2].value}
@@ -237,9 +297,9 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
           {/* Savings Rate */}
           <Paper 
             sx={{ 
-              p: { xs: 2, md: 3 }, 
-              flex: { xs: 1, sm: 'none' },
-              minHeight: { xs: 100, md: 120 },
+              p: 2, 
+              flex: 1,
+              minHeight: 100,
               background: `linear-gradient(135deg, ${statCards[3].bgColor}15 0%, ${statCards[3].bgColor}05 100%)`,
               border: `1px solid ${statCards[3].bgColor}30`,
               transition: 'transform 0.2s ease, box-shadow 0.2s ease',
@@ -256,7 +316,7 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
                   color="text.secondary"
                   sx={{ 
                     fontWeight: 700,
-                    fontSize: { xs: '1rem', md: '1.125rem' }
+                    fontSize: '1rem'
                   }}
                 >
                   {statCards[3].title}
@@ -278,7 +338,7 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
                 color={statCards[3].color}
                 sx={{ 
                   fontWeight: 700,
-                  fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' }
+                  fontSize: '1.25rem'
                 }}
               >
                 {statCards[3].value}
