@@ -97,8 +97,14 @@ const DashboardBudgetOverview = ({ budgets }: DashboardBudgetOverviewProps) => {
 
   if (budgets.length === 0) {
     return (
-      <Paper sx={{ p: 3, height: '100%' }}>
-        <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <Paper sx={{ p: { xs: 2, md: 3 }, height: '100%', overflow: 'hidden' }}>
+        <Typography variant="h5" gutterBottom sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 1,
+          fontWeight: 700,
+          fontSize: { xs: '1.25rem', md: '1.5rem' }
+        }}>
           <AccountBalance />
           Budget Overview
         </Typography>
@@ -108,7 +114,8 @@ const DashboardBudgetOverview = ({ budgets }: DashboardBudgetOverviewProps) => {
           sx={{ 
             textAlign: 'center', 
             py: 4,
-            fontStyle: 'italic'
+            fontStyle: 'italic',
+            fontSize: { xs: '1rem', md: '1.25rem' }
           }}
         >
           No budgets set for this month
@@ -118,8 +125,14 @@ const DashboardBudgetOverview = ({ budgets }: DashboardBudgetOverviewProps) => {
   }
 
   return (
-    <Paper sx={{ p: 3, height: '100%' }}>
-      <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+    <Paper sx={{ p: { xs: 2, md: 3 }, height: '100%', overflow: 'hidden' }}>
+      <Typography variant="h5" gutterBottom sx={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: 1,
+        fontWeight: 700,
+        fontSize: { xs: '1.25rem', md: '1.5rem' }
+      }}>
         <AccountBalance />
         Budget Overview
       </Typography>
@@ -145,7 +158,7 @@ const DashboardBudgetOverview = ({ budgets }: DashboardBudgetOverviewProps) => {
       <Box sx={{ 
         display: 'flex', 
         flexDirection: 'column', 
-        height: 300,
+        height: { xs: 250, md: 300 },
         position: 'relative'
       }}>
         <Box sx={{ 
@@ -174,10 +187,10 @@ const DashboardBudgetOverview = ({ budgets }: DashboardBudgetOverviewProps) => {
               return (
                 <Box key={budget.budgetId}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                    <Typography variant="body2" fontWeight={500}>
+                    <Typography variant="body2" fontWeight={500} sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
                       {budget.category}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
                       {progress.toFixed(0)}%
                     </Typography>
                   </Box>
@@ -190,13 +203,14 @@ const DashboardBudgetOverview = ({ budgets }: DashboardBudgetOverviewProps) => {
                   />
                   
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: '0.625rem', md: '0.75rem' } }}>
                       {formatCurrency(spent)} / {formatCurrency(budget.amount)}
                     </Typography>
                     <Typography 
                       variant="caption" 
                       color={remaining >= 0 ? 'success.main' : 'error.main'}
                       fontWeight={500}
+                      sx={{ fontSize: { xs: '0.625rem', md: '0.75rem' } }}
                     >
                       {remaining >= 0 ? `+${formatCurrency(remaining)}` : formatCurrency(Math.abs(remaining))} remaining
                     </Typography>

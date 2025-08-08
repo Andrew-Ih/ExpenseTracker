@@ -57,22 +57,27 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
 
   return (
     <Box sx={{ mb: 3 }}>
-      <Stack 
-        direction="row" 
-        spacing={3} 
-        sx={{ 
-          width: '100%'
-        }}
-      >
-        {statCards.map((card, index) => (
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: { xs: 'column', sm: 'row' },
+        gap: { xs: 2, sm: 3 },
+        width: '100%'
+      }}>
+        {/* First row - Total Income and Total Expenses */}
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'row', sm: 'column' },
+          gap: { xs: 2, sm: 3 },
+          flex: { xs: 'none', sm: 1 }
+        }}>
+          {/* Total Income */}
           <Paper 
-            key={index}
             sx={{ 
-              p: 3, 
-              flex: 1,
-              minHeight: 120,
-              background: `linear-gradient(135deg, ${card.bgColor}15 0%, ${card.bgColor}05 100%)`,
-              border: `1px solid ${card.bgColor}30`,
+              p: { xs: 2, md: 3 }, 
+              flex: { xs: 1, sm: 'none' },
+              minHeight: { xs: 100, md: 120 },
+              background: `linear-gradient(135deg, ${statCards[0].bgColor}15 0%, ${statCards[0].bgColor}05 100%)`,
+              border: `1px solid ${statCards[0].bgColor}30`,
               transition: 'transform 0.2s ease, box-shadow 0.2s ease',
               '&:hover': {
                 transform: 'translateY(-2px)',
@@ -85,36 +90,203 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
                 <Typography 
                   variant="h6" 
                   color="text.secondary"
-                  sx={{ fontWeight: 500 }}
+                  sx={{ 
+                    fontWeight: 700,
+                    fontSize: { xs: '1rem', md: '1.125rem' }
+                  }}
                 >
-                  {card.title}
+                  {statCards[0].title}
                 </Typography>
                 <Box 
                   sx={{ 
                     p: 1, 
                     borderRadius: 1, 
-                    bgcolor: `${card.iconBgColor}20`,
-                    color: card.iconBgColor
+                    bgcolor: `${statCards[0].iconBgColor}20`,
+                    color: statCards[0].iconBgColor
                   }}
                 >
-                  {card.icon}
+                  {statCards[0].icon}
                 </Box>
               </Box>
               
               <Typography 
                 variant="h4" 
-                color={card.color}
+                color={statCards[0].color}
                 sx={{ 
                   fontWeight: 700,
-                  fontSize: { xs: '1.5rem', md: '2rem' }
+                  fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' }
                 }}
               >
-                {card.value}
+                {statCards[0].value}
               </Typography>
             </Stack>
           </Paper>
-        ))}
-      </Stack>
+
+          {/* Total Expenses */}
+          <Paper 
+            sx={{ 
+              p: { xs: 2, md: 3 }, 
+              flex: { xs: 1, sm: 'none' },
+              minHeight: { xs: 100, md: 120 },
+              background: `linear-gradient(135deg, ${statCards[1].bgColor}15 0%, ${statCards[1].bgColor}05 100%)`,
+              border: `1px solid ${statCards[1].bgColor}30`,
+              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: 3
+              }
+            }}
+          >
+            <Stack spacing={2} sx={{ height: '100%' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Typography 
+                  variant="h6" 
+                  color="text.secondary"
+                  sx={{ 
+                    fontWeight: 700,
+                    fontSize: { xs: '1rem', md: '1.125rem' }
+                  }}
+                >
+                  {statCards[1].title}
+                </Typography>
+                <Box 
+                  sx={{ 
+                    p: 1, 
+                    borderRadius: 1, 
+                    bgcolor: `${statCards[1].iconBgColor}20`,
+                    color: statCards[1].iconBgColor
+                  }}
+                >
+                  {statCards[1].icon}
+                </Box>
+              </Box>
+              
+              <Typography 
+                variant="h4" 
+                color={statCards[1].color}
+                sx={{ 
+                  fontWeight: 700,
+                  fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' }
+                }}
+              >
+                {statCards[1].value}
+              </Typography>
+            </Stack>
+          </Paper>
+        </Box>
+
+        {/* Second row - Net Income and Savings Rate */}
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'row', sm: 'column' },
+          gap: { xs: 2, sm: 3 },
+          flex: { xs: 'none', sm: 1 }
+        }}>
+          {/* Net Income */}
+          <Paper 
+            sx={{ 
+              p: { xs: 2, md: 3 }, 
+              flex: { xs: 1, sm: 'none' },
+              minHeight: { xs: 100, md: 120 },
+              background: `linear-gradient(135deg, ${statCards[2].bgColor}15 0%, ${statCards[2].bgColor}05 100%)`,
+              border: `1px solid ${statCards[2].bgColor}30`,
+              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: 3
+              }
+            }}
+          >
+            <Stack spacing={2} sx={{ height: '100%' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Typography 
+                  variant="h6" 
+                  color="text.secondary"
+                  sx={{ 
+                    fontWeight: 700,
+                    fontSize: { xs: '1rem', md: '1.125rem' }
+                  }}
+                >
+                  {statCards[2].title}
+                </Typography>
+                <Box 
+                  sx={{ 
+                    p: 1, 
+                    borderRadius: 1, 
+                    bgcolor: `${statCards[2].iconBgColor}20`,
+                    color: statCards[2].iconBgColor
+                  }}
+                >
+                  {statCards[2].icon}
+                </Box>
+              </Box>
+              
+              <Typography 
+                variant="h4" 
+                color={statCards[2].color}
+                sx={{ 
+                  fontWeight: 700,
+                  fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' }
+                }}
+              >
+                {statCards[2].value}
+              </Typography>
+            </Stack>
+          </Paper>
+
+          {/* Savings Rate */}
+          <Paper 
+            sx={{ 
+              p: { xs: 2, md: 3 }, 
+              flex: { xs: 1, sm: 'none' },
+              minHeight: { xs: 100, md: 120 },
+              background: `linear-gradient(135deg, ${statCards[3].bgColor}15 0%, ${statCards[3].bgColor}05 100%)`,
+              border: `1px solid ${statCards[3].bgColor}30`,
+              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: 3
+              }
+            }}
+          >
+            <Stack spacing={2} sx={{ height: '100%' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Typography 
+                  variant="h6" 
+                  color="text.secondary"
+                  sx={{ 
+                    fontWeight: 700,
+                    fontSize: { xs: '1rem', md: '1.125rem' }
+                  }}
+                >
+                  {statCards[3].title}
+                </Typography>
+                <Box 
+                  sx={{ 
+                    p: 1, 
+                    borderRadius: 1, 
+                    bgcolor: `${statCards[3].iconBgColor}20`,
+                    color: statCards[3].iconBgColor
+                  }}
+                >
+                  {statCards[3].icon}
+                </Box>
+              </Box>
+              
+              <Typography 
+                variant="h4" 
+                color={statCards[3].color}
+                sx={{ 
+                  fontWeight: 700,
+                  fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' }
+                }}
+              >
+                {statCards[3].value}
+              </Typography>
+            </Stack>
+          </Paper>
+        </Box>
+      </Box>
     </Box>
   );
 };
