@@ -2,7 +2,40 @@
 
 This document contains detailed information about issues encountered during development, solutions implemented, and key learnings from building the Expense Tracker application.
 
+## Development Workflow
+
+1. **Local Development**:
+   - Frontend runs on http://localhost:3000
+   - Backend runs on http://localhost:3001
+
+2. **Authentication Flow**:
+   - Registration → Email verification → Login → JWT token
+   - Token-based API authentication
+
+3. **Data Flow**:
+   - User data stored in both Cognito and DynamoDB
+   - Profile updates sync between both systems
+   - Transactions stored in DynamoDB with user isolation
+
+4. **Transaction Operations**:
+   - Create: Add new income or expense entries
+   - Read: View transaction history with filtering options
+   - Update: Modify transaction details as needed
+   - Delete: Remove unwanted transactions
+
+5. **Budget Operations**:
+  - Create: Monthly budget allocation by category
+  - Track: Real-time spending vs budget comparison
+  - Analyze: Historical performance and trends
+  - Visualize: Progress bars and color-coded indicators
+
 ## Issues Encountered & Solutions
+**Key Issues Resolved:**
+- Performance optimization (24 API calls → 2 API calls)
+- Improved loading states and user experience
+- Input validation and error handling
+- Code architecture and maintainability
+- UI consistency and professional formatting
 
 ### 1. Performance Issue: Multiple API Calls
 **Problem**: Budget History page was making 24 sequential API calls (12 for budgets + 12 for transactions), causing 2-3 second load times.
