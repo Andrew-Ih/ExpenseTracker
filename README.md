@@ -2,6 +2,36 @@
 
 A full-stack SaaS web app that allows users to track expenses, manage budgets and receive AI-powered financial insights through natural language queries using an AI assistant chatbot, currently serving 20+ users.
 
+## 🔗 Live Demo: **[Try the Live App](https://andrew-ih-expense-tracker-dev.s3.ca-central-1.amazonaws.com/index.html)**
+
+## 📸 Screenshots
+
+### Dashboard Overview
+| Main Dashboard |
+|----------------|
+| ![Dashboard](./expense-tracker-frontend/images/dashboard/dashboard.png) |
+
+### Transaction Management
+| Transaction Overview | Add Transaction |
+|--------|--------|
+| ![Transactions 1](./expense-tracker-frontend/images/transaction/transactionOverview.png) | ![Transactions 2](./expense-tracker-frontend/images/transaction/addTransaction.png) |
+
+### Budget Tracking
+| Budget Overview | Add Budget | Budget History |
+|----------|---------|---------|
+| ![Budget 1](./expense-tracker-frontend/images/budget/budgetOverview.png) | ![Budget 2](./expense-tracker-frontend/images/budget/addBudget.png) | ![Budget 3](./expense-tracker-frontend/images/budget/budgetHistory.png) |
+
+### AI Financial Assistant
+| Insights | Chat Interface |
+|----------------|----------|
+| ![AI 1](./expense-tracker-frontend/images/AI-assistant/AI_Insights.png) | ![AI 2](./expense-tracker-frontend/images/AI-assistant/chatInterface.png) |
+
+### Profile Management
+| Profile Page |
+|--------------|
+| ![Profile Page](./expense-tracker-frontend/images/profile/profileManagement.png) |
+
+
 <details style="margin-bottom: 20px;">
 <summary><h2 style="display: inline;">Features</h2></summary>
 
@@ -174,4 +204,4 @@ Benefits of using IaC with CloudFormation:
 
 7. **Error Handling**: User-friendly error messages are crucial. Technical errors should be logged, not displayed to users.
 
-</details>
+</details>git reset --soft HEAD~4
