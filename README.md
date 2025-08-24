@@ -204,4 +204,4 @@ Benefits of using IaC with CloudFormation:
 
 7. **Error Handling**: User-friendly error messages are crucial. Technical errors should be logged, not displayed to users.
 
-</details>git reset --soft HEAD~4
+</details>
