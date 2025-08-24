@@ -9,7 +9,7 @@ const dbClient = (() => {
 })();
 
 class TransactionModel {
-  static TABLE_NAME = 'ExpenseTrackerTransactions-dev';
+  static TABLE_NAME = `ExpenseTrackerTransactions-${process.env.NODE_ENV || 'dev'}`;
   
   static createTransactionItem(transactionData, userId) {
     const currentDate = new Date().toISOString();

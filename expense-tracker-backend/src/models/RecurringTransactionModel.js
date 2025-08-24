@@ -8,7 +8,7 @@ const dbClient = (() => {
 })();
 
 class RecurringTransactionModel {
-  static TABLE_NAME = 'ExpenseTrackerRecurringTransactions-dev';
+  static TABLE_NAME = `ExpenseTrackerRecurringTransactions-${process.env.NODE_ENV || 'dev'}`;
   
   static createRecurringItem(recurringData, userId) {
     const currentDate = new Date().toISOString().split('T')[0];

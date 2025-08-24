@@ -5,7 +5,7 @@ const client = new DynamoDBClient({ region: 'ca-central-1' });
 const docClient = DynamoDBDocumentClient.from(client);
 
 class UserModel {
-  static TABLE_NAME = 'ExpenseTrackerUsers-dev';
+  static TABLE_NAME = `ExpenseTrackerUsers-${process.env.NODE_ENV || 'dev'}`;
 
   static async create(userData) {
     const params = {

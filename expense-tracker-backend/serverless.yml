@@ -9,6 +9,7 @@ provider:
     COGNITO_USER_POOL_CLIENT_ID: 6co59j70meatfn2u3964k6r8ns
     COGNITO_USER_POOL_ID: ca-central-1_uLrgknZWQ
     OPENAI_API_KEY: ${env:OPENAI_API_KEY}
+    NODE_ENV: ${self:provider.stage}
 
   iam:
     role:
