@@ -2,7 +2,7 @@
 
 A full-stack SaaS web app that allows users to track expenses, manage budgets and receive AI-powered financial insights through natural language queries using an AI assistant chatbot, currently serving 20+ users.
 
-## 🔗 Live Demo: **[Try the Live App](https://andrew-ih-expense-tracker-dev.s3.ca-central-1.amazonaws.com/index.html)**
+## 🔗 Live Demo: **[Try the Live App](https://d1o22euki608lo.cloudfront.net)**
 
 ## 📸 Screenshots
 

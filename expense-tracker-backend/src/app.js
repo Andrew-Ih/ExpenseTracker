@@ -15,6 +15,7 @@ app.use(cors({
     'https://andrew-ih-expense-tracker-prod.s3.ca-central-1.amazonaws.com', 
     'http://andrew-ih-expense-tracker-dev.s3-website.ca-central-1.amazonaws.com',
     'http://andrew-ih-expense-tracker-prod.s3-website.ca-central-1.amazonaws.com',
+    'https://d1o22euki608lo.cloudfront.net',
   ],
   credentials: true
 }));
