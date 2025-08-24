@@ -5,9 +5,11 @@ const client = new DynamoDBClient({ region: 'ca-central-1' });
 const docClient = DynamoDBDocumentClient.from(client);
 
 class UserModel {
+  static TABLE_NAME = `ExpenseTrackerUsers-${process.env.NODE_ENV || 'dev'}`;
+
   static async create(userData) {
     const params = {
-      TableName: 'ExpenseTrackerUsers',
+      TableName: this.TABLE_NAME,
       Item: {
         userId: userData.userId,
         firstName: userData.firstName,
@@ -22,7 +24,7 @@ class UserModel {
 
   static async getById(userId) {
     const params = {
-      TableName: 'ExpenseTrackerUsers',
+      TableName: this.TABLE_NAME,
       Key: { userId }
     };
     
@@ -55,7 +57,7 @@ class UserModel {
     }
 
     const params = {
-      TableName: 'ExpenseTrackerUsers',
+      TableName: this.TABLE_NAME,
       Key: { userId },
       UpdateExpression: `set ${updateExpressions.join(', ')}`,
       ExpressionAttributeNames: expressionAttributeNames,
@@ -69,7 +71,7 @@ class UserModel {
 
   static async deleteById(userId) {
     const params = {
-      TableName: 'ExpenseTrackerUsers',
+      TableName: this.TABLE_NAME,
       Key: { userId },
       ReturnValues: 'ALL_OLD'  // Return deleted item
     };

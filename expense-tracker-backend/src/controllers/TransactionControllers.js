@@ -1,7 +1,8 @@
 import TransactionModel from "../models/TransactionModel.js";
 import { validateTransactionData, validateTransactionQueryParams, parseTransactionQueryParams } from "../helpers/transactions/transactionValidators.js";
-import { formatTransactionsResponse } from '../helpers/transactions/transactionControllerHelpers.js';
+import { formatTransactionsResponse, getDateRange } from '../helpers/transactions/transactionControllerHelpers.js';
 import { transactionControllerWrapper } from '../helpers/transactions/transactionControllerWrapper.js';
+import { calculateTransactionSummary } from '../helpers/transactions/transactionSummaryHelpers.js';
 
 class TransactionControllers {
   static createTransaction = transactionControllerWrapper(async (req, res) => {
@@ -65,6 +66,42 @@ class TransactionControllers {
     res.status(200).json({
       message: "Transaction deleted successfully",
       transaction: deletedTransaction
+    });
+  });
+
+  static getTransactionSummary = transactionControllerWrapper(async (req, res) => {
+    const userId = req.user.userId;
+    const { month, year, period } = req.query;
+
+    const dateRange = getDateRange(period, month, year);
+    const result = await TransactionModel.getTransactions(userId, { startDate: dateRange.startDate, endDate: dateRange.endDate });
+    const summary = calculateTransactionSummary(result.transactions);
+    
+    res.status(200).json({
+      summary,
+      period: {
+        startDate: dateRange.startDate,
+        endDate: dateRange.endDate,
+        month: month ? parseInt(month) : new Date().getMonth() + 1,
+        year: year ? parseInt(year) : new Date().getFullYear()
+      }
+    });
+  });
+
+  static getAllTimeTransactionSummary = transactionControllerWrapper(async (req, res) => {
+    const userId = req.user.userId;
+    const result = await TransactionModel.getTransactions(userId, { limit: 10000 }); // High limit to get all transactions
+    const summary = calculateTransactionSummary(result.transactions);
+    
+    res.status(200).json({
+      summary,
+      period: {
+        startDate: null,
+        endDate: null,
+        month: null,
+        year: null,
+        type: 'all-time'
+      }
     });
   });
 }

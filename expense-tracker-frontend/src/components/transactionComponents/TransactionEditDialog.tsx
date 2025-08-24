@@ -77,12 +77,28 @@ const TransactionEditDialog = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Edit Transaction</DialogTitle>
-      <DialogContent>
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="sm" 
+      fullWidth
+      sx={{
+        '& .MuiDialog-paper': {
+          margin: { xs: 2, sm: 'auto' },
+          width: { xs: 'calc(100% - 32px)', sm: 'auto' }
+        }
+      }}
+    >
+      <DialogTitle sx={{ 
+        fontSize: { xs: '1.25rem', md: '1.5rem' },
+        fontWeight: 700
+      }}>
+        Edit Transaction
+      </DialogTitle>
+      <DialogContent sx={{ p: { xs: 2, md: 3 } }}>
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         
-        <Stack spacing={3} sx={{ mt: 1 }}>
+        <Stack spacing={{ xs: 2, md: 3 }} sx={{ mt: 1 }}>
           <TextField
             name="amount"
             label="Amount"
@@ -143,13 +159,17 @@ const TransactionEditDialog = ({
           />
         </Stack>
       </DialogContent>
-      <DialogActions>
+      <DialogActions sx={{ p: { xs: 2, md: 3 } }}>
         <Button onClick={onClose}>Cancel</Button>
         <Button 
           onClick={handleSubmit} 
           variant="contained" 
           color="primary"
           disabled={loading}
+          sx={{ 
+            py: { xs: 1, md: 1.5 },
+            px: { xs: 2, md: 3 }
+          }}
         >
           {loading ? 'Updating...' : 'Update'}
         </Button>

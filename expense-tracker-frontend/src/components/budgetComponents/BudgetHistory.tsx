@@ -59,6 +59,7 @@ const BudgetHistory = ({}: BudgetHistoryProps) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [yearInput, setYearInput] = useState(new Date().getFullYear().toString());
   const [startMonth, setStartMonth] = useState(1);
   const [endMonth, setEndMonth] = useState(12);
 
@@ -66,6 +67,11 @@ const BudgetHistory = ({}: BudgetHistoryProps) => {
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
+
+  // Update yearInput when selectedYear changes from external sources
+  useEffect(() => {
+    setYearInput(selectedYear.toString());
+  }, [selectedYear]);
 
   useEffect(() => {
     const fetchYearlySummary = async () => {
@@ -136,31 +142,80 @@ const BudgetHistory = ({}: BudgetHistoryProps) => {
   return (
     <>
       {/* Summary Cards */}
-      <Card sx={{ mb: 3 }}>
+      <Card sx={{ mb: { xs: 2, md: 3 } }}>
         <CardContent>
-          <Typography variant="h6" gutterBottom>Budget History Summary</Typography>
-          <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} sx={{ textAlign: 'center' }}>
+          <Typography 
+            variant="h6" 
+            gutterBottom
+            sx={{
+              fontSize: { xs: '1.25rem', md: '1.5rem' },
+              fontWeight: 700,
+              mb: { xs: 2, md: 3 }
+            }}
+          >
+            Budget History Summary
+          </Typography>
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={{ xs: 2, md: 3 }} sx={{ textAlign: 'center' }}>
             <Box sx={{ flex: 1 }}>
-              <Typography variant="h4" color="primary.main">
+              <Typography 
+                variant="h4" 
+                color="primary.main"
+                sx={{
+                  fontSize: { xs: '1.75rem', md: '2.125rem' },
+                  fontWeight: 700
+                }}
+              >
                 {formatCurrency(totalBudgeted)}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography 
+                variant="body2" 
+                color="text.secondary"
+                sx={{
+                  fontSize: { xs: '0.875rem', md: '1rem' }
+                }}
+              >
                 Total Budgeted
               </Typography>
             </Box>
             <Box sx={{ flex: 1 }}>
-              <Typography variant="h4" color={totalSpent > totalBudgeted ? "error.main" : "text.primary"}>
+              <Typography 
+                variant="h4" 
+                color={totalSpent > totalBudgeted ? "error.main" : "text.primary"}
+                sx={{
+                  fontSize: { xs: '1.75rem', md: '2.125rem' },
+                  fontWeight: 700
+                }}
+              >
                 {formatCurrency(totalSpent)}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography 
+                variant="body2" 
+                color="text.secondary"
+                sx={{
+                  fontSize: { xs: '0.875rem', md: '1rem' }
+                }}
+              >
                 Total Spent
               </Typography>
             </Box>
             <Box sx={{ flex: 1 }}>
-              <Typography variant="h4" color={totalSaved >= 0 ? "success.main" : "error.main"}>
+              <Typography 
+                variant="h4" 
+                color={totalSaved >= 0 ? "success.main" : "error.main"}
+                sx={{
+                  fontSize: { xs: '1.75rem', md: '2.125rem' },
+                  fontWeight: 700
+                }}
+              >
                 {formatCurrency(Math.abs(totalSaved))}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography 
+                variant="body2" 
+                color="text.secondary"
+                sx={{
+                  fontSize: { xs: '0.875rem', md: '1rem' }
+                }}
+              >
                 {totalSaved >= 0 ? 'Total Saved' : 'Total Over Budget'}
               </Typography>
             </Box>
@@ -168,14 +223,35 @@ const BudgetHistory = ({}: BudgetHistoryProps) => {
         </CardContent>
       </Card>
 
-      <Paper sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3, flexWrap: 'wrap' }}>
-          <Typography variant="h6">Budget Summary for:</Typography>
+      <Paper sx={{ p: { xs: 2, md: 3 }, overflow: 'hidden' }}>
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 2, 
+          mb: { xs: 2, md: 3 }, 
+          flexWrap: 'wrap',
+          flexDirection: { xs: 'column', sm: 'row' }
+        }}>
+          <Typography 
+            variant="h6"
+            sx={{
+              fontSize: { xs: '1.25rem', md: '1.5rem' },
+              fontWeight: 700
+            }}
+          >
+            Budget Summary for:
+          </Typography>
           <TextField
             type="number"
             label="Year"
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+            value={yearInput}
+            onChange={(e) => {
+              const value = e.target.value;
+              setYearInput(value); // Always update display
+              if (value.length === 4 && !isNaN(parseInt(value))) {
+                setSelectedYear(parseInt(value));
+              }
+            }}
             size="small"
             sx={{ minWidth: 100, maxWidth: 120 }}
           />
@@ -205,80 +281,163 @@ const BudgetHistory = ({}: BudgetHistoryProps) => {
           </FormControl>
         </Box>
       
-      <TableContainer>
-        <Table sx={{ tableLayout: 'fixed' }}>
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ width: '15%', fontSize: '1rem', fontWeight: 'bold' }}>Month</TableCell>
-              <TableCell align="right" sx={{ width: '20%', fontSize: '1rem', fontWeight: 'bold' }}>Total Budgeted</TableCell>
-              <TableCell align="right" sx={{ width: '20%', fontSize: '1rem', fontWeight: 'bold' }}>Total Spent</TableCell>
-              <TableCell align="right" sx={{ width: '20%', fontSize: '1rem', fontWeight: 'bold' }}>Over/Under Budget</TableCell>
-              <TableCell align="center" sx={{ width: '25%', fontSize: '1rem', fontWeight: 'bold' }}>Progress</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={5} align="center">
-                  <CircularProgress size={24} sx={{ my: 2 }} />
-                </TableCell>
-              </TableRow>
-            ) : summaries.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} align="center">
-                  <Typography variant="body1" sx={{ py: 4 }}>
-                    {!selectedYear || selectedYear.toString().length !== 4 || isNaN(selectedYear)
-                      ? 'Please enter a valid 4-digit year'
-                      : 'No budget history available for this period'}
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            ) : (
-              summaries.map((summary) => {
+        {/* Desktop Table Layout */}
+        <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+          <TableContainer>
+            <Table sx={{ tableLayout: 'fixed' }}>
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ width: '15%', fontSize: '1rem', fontWeight: 'bold' }}>Month</TableCell>
+                  <TableCell align="right" sx={{ width: '20%', fontSize: '1rem', fontWeight: 'bold' }}>Total Budgeted</TableCell>
+                  <TableCell align="right" sx={{ width: '20%', fontSize: '1rem', fontWeight: 'bold' }}>Total Spent</TableCell>
+                  <TableCell align="right" sx={{ width: '20%', fontSize: '1rem', fontWeight: 'bold' }}>Over/Under Budget</TableCell>
+                  <TableCell align="center" sx={{ width: '25%', fontSize: '1rem', fontWeight: 'bold' }}>Progress</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={5} align="center">
+                      <CircularProgress size={24} sx={{ my: 2 }} />
+                    </TableCell>
+                  </TableRow>
+                ) : summaries.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} align="center">
+                      <Typography variant="body1" sx={{ py: 4 }}>
+                        {!selectedYear || selectedYear.toString().length !== 4 || isNaN(selectedYear)
+                          ? 'Please enter a valid 4-digit year'
+                          : 'No budget history available for this period'}
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  summaries.map((summary) => {
+                    const progressPercent = summary.totalBudgeted > 0 ? (summary.totalSpent / summary.totalBudgeted) * 100 : 0;
+                    const isOverBudget = summary.totalSpent > summary.totalBudgeted;
+                    const monthIndex = parseInt(summary.month.split('-')[1]) - 1;
+                    
+                    return (
+                      <TableRow key={summary.month}>
+                        <TableCell sx={{ fontWeight: 'medium', fontSize: '1rem' }}>
+                          {monthNames[monthIndex]}
+                        </TableCell>
+                        <TableCell align="right" sx={{ px: 2 }}>
+                          <Typography color="primary.main" variant="body1" sx={{ fontWeight: 'medium' }}>
+                            {formatCurrency(summary.totalBudgeted)}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="right" sx={{ px: 2 }}>
+                          <Typography color={isOverBudget ? "error.main" : "text.primary"} variant="body1" sx={{ fontWeight: 'medium' }}>
+                            {formatCurrency(summary.totalSpent)}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="right" sx={{ px: 2 }}>
+                          <Typography color={summary.overUnderBudget >= 0 ? "success.main" : "error.main"} variant="body1" sx={{ fontWeight: 'medium' }}>
+                            {summary.overUnderBudget >= 0 ? '+' : '-'}{formatCurrency(Math.abs(summary.overUnderBudget))}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center" sx={{ px: 3 }}>
+                          <Box sx={{ width: '100%', maxWidth: 150, mx: 'auto' }}>
+                            <LinearProgress 
+                              variant="determinate" 
+                              value={Math.min(progressPercent, 100)}
+                              color={isOverBudget ? "error" : progressPercent > 80 ? "warning" : "success"}
+                              sx={{ mb: 0.5, height: 6, borderRadius: 3 }}
+                            />
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                              {progressPercent.toFixed(0)}%
+                            </Typography>
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
+
+        {/* Mobile Card Layout */}
+        <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+              <CircularProgress size={32} />
+            </Box>
+          ) : summaries.length === 0 ? (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <Typography variant="body1">
+                {!selectedYear || selectedYear.toString().length !== 4 || isNaN(selectedYear)
+                  ? 'Please enter a valid 4-digit year'
+                  : 'No budget history available for this period'}
+              </Typography>
+            </Box>
+          ) : (
+            <Stack spacing={2}>
+              {summaries.map((summary) => {
                 const progressPercent = summary.totalBudgeted > 0 ? (summary.totalSpent / summary.totalBudgeted) * 100 : 0;
                 const isOverBudget = summary.totalSpent > summary.totalBudgeted;
                 const monthIndex = parseInt(summary.month.split('-')[1]) - 1;
                 
                 return (
-                  <TableRow key={summary.month}>
-                    <TableCell sx={{ fontWeight: 'medium', fontSize: '1rem' }}>
-                      {monthNames[monthIndex]}
-                    </TableCell>
-                    <TableCell align="right" sx={{ px: 2 }}>
-                      <Typography color="primary.main" variant="body1" sx={{ fontWeight: 'medium' }}>
-                        {formatCurrency(summary.totalBudgeted)}
+                  <Card key={summary.month} sx={{ p: 2 }}>
+                    <CardContent sx={{ p: '0 !important' }}>
+                      <Typography 
+                        variant="h6" 
+                        sx={{ 
+                          fontSize: '1.125rem',
+                          fontWeight: 700,
+                          mb: 2
+                        }}
+                      >
+                        {monthNames[monthIndex]}
                       </Typography>
-                    </TableCell>
-                    <TableCell align="right" sx={{ px: 2 }}>
-                      <Typography color={isOverBudget ? "error.main" : "text.primary"} variant="body1" sx={{ fontWeight: 'medium' }}>
-                        {formatCurrency(summary.totalSpent)}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="right" sx={{ px: 2 }}>
-                      <Typography color={summary.overUnderBudget >= 0 ? "success.main" : "error.main"} variant="body1" sx={{ fontWeight: 'medium' }}>
-                        {summary.overUnderBudget >= 0 ? '+' : '-'}{formatCurrency(Math.abs(summary.overUnderBudget))}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="center" sx={{ px: 3 }}>
-                      <Box sx={{ width: '100%', maxWidth: 150, mx: 'auto' }}>
-                        <LinearProgress 
-                          variant="determinate" 
-                          value={Math.min(progressPercent, 100)}
-                          color={isOverBudget ? "error" : progressPercent > 80 ? "warning" : "success"}
-                          sx={{ mb: 0.5, height: 6, borderRadius: 3 }}
-                        />
-                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
-                          {progressPercent.toFixed(0)}%
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
+                      
+                      <Stack spacing={1.5}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Typography variant="body2" color="text.secondary">Total Budgeted:</Typography>
+                          <Typography color="primary.main" variant="body1" sx={{ fontWeight: 600 }}>
+                            {formatCurrency(summary.totalBudgeted)}
+                          </Typography>
+                        </Box>
+                        
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Typography variant="body2" color="text.secondary">Total Spent:</Typography>
+                          <Typography color={isOverBudget ? "error.main" : "text.primary"} variant="body1" sx={{ fontWeight: 600 }}>
+                            {formatCurrency(summary.totalSpent)}
+                          </Typography>
+                        </Box>
+                        
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Typography variant="body2" color="text.secondary">Over/Under Budget:</Typography>
+                          <Typography color={summary.overUnderBudget >= 0 ? "success.main" : "error.main"} variant="body1" sx={{ fontWeight: 600 }}>
+                            {summary.overUnderBudget >= 0 ? '+' : '-'}{formatCurrency(Math.abs(summary.overUnderBudget))}
+                          </Typography>
+                        </Box>
+                        
+                        <Box sx={{ mt: 1 }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                            <Typography variant="body2" color="text.secondary">Progress:</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                              {progressPercent.toFixed(0)}%
+                            </Typography>
+                          </Box>
+                          <LinearProgress 
+                            variant="determinate" 
+                            value={Math.min(progressPercent, 100)}
+                            color={isOverBudget ? "error" : progressPercent > 80 ? "warning" : "success"}
+                            sx={{ height: 6, borderRadius: 3 }}
+                          />
+                        </Box>
+                      </Stack>
+                    </CardContent>
+                  </Card>
                 );
-              })
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+              })}
+            </Stack>
+          )}
+        </Box>
       </Paper>
     </>
   );

@@ -7,7 +7,7 @@ import BudgetForm from './BudgetForm';
 import BudgetSummary from './BudgetSummary';
 import BudgetHistory from './BudgetHistory';
 import { getBudgets, Budget } from '@/services/budgetService';
-import { getTransactions, Transaction } from '@/services/transactionService';
+import { useBudgetProgress } from '@/hooks/useBudgetProgress';
 
 const BudgetContainer = () => {
   const [budgets, setBudgets] = useState<Budget[]>([]);
@@ -15,7 +15,9 @@ const BudgetContainer = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(0);
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
-  const [budgetProgress, setBudgetProgress] = useState<Record<string, number>>({});
+  
+  // Use custom hook for budget progress
+  const { budgetProgress, loading: progressLoading, error: progressError } = useBudgetProgress(budgets, selectedMonth);
 
   const fetchBudgets = async (month?: string) => {
     setLoading(true);
@@ -33,49 +35,6 @@ const BudgetContainer = () => {
   useEffect(() => {
     fetchBudgets(selectedMonth);
   }, [selectedMonth]);
-
-  useEffect(() => {
-    const fetchBudgetProgress = async () => {
-      // Validate year from selectedMonth - only proceed if it's a valid 4-digit year
-      const year = selectedMonth.split('-')[0];
-      if (!year || year.length !== 4 || isNaN(parseInt(year))) {
-        setBudgetProgress({});
-        return;
-      }
-
-      const progress: Record<string, number> = {};
-      
-      for (const budget of budgets) {
-        try {
-          const startDate = `${selectedMonth}-01`;
-          const endDate = `${selectedMonth}-31`;
-          
-          const result = await getTransactions({
-            startDate,
-            endDate,
-            category: budget.category,
-            type: 'expense'
-          });
-          
-          const totalSpent = result.transactions.reduce((sum: number, transaction: Transaction) => 
-            sum + parseFloat(transaction.amount.toString()), 0
-          );
-          
-          if (budget.budgetId) {
-            progress[budget.budgetId] = totalSpent;
-          }
-        } catch (error) {
-          console.error('Error fetching progress for', budget.category, error);
-        }
-      }
-      
-      setBudgetProgress(progress);
-    };
-
-    if (budgets.length > 0) {
-      fetchBudgetProgress();
-    }
-  }, [budgets, selectedMonth]);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
@@ -96,13 +55,44 @@ const BudgetContainer = () => {
   };
 
   return (
-    <Box sx={{ width: '100%', maxWidth: 1200, mx: 'auto' }}>
-      <Typography variant="h4" gutterBottom>
+    <Box sx={{ 
+      width: '100%', 
+      maxWidth: 1200, 
+      mx: 'auto',
+      p: { xs: 1, md: 3 },
+      overflowX: 'hidden'
+    }}>
+      <Typography 
+        variant="h4" 
+        gutterBottom
+        sx={{
+          fontSize: { xs: '1.75rem', md: '2.125rem' },
+          fontWeight: 700,
+          mb: { xs: 2, md: 3 }
+        }}
+      >
         Budget Management
       </Typography>
 
-      <Paper sx={{ mb: 3 }}>
-        <Tabs value={activeTab} onChange={handleTabChange} centered>
+      <Paper sx={{ mb: { xs: 2, md: 3 }, overflow: 'hidden' }}>
+        <Tabs 
+          value={activeTab} 
+          onChange={handleTabChange} 
+          centered
+          sx={{
+            '& .MuiTabs-flexContainer': {
+              justifyContent: { xs: 'space-between', md: 'center' }
+            },
+            '& .MuiTab-root': {
+              fontSize: { xs: '0.875rem', md: '1rem' },
+              fontWeight: 600,
+              minHeight: { xs: 48, md: 56 },
+              flex: { xs: 1, md: 'none' },
+              textTransform: 'none',
+              whiteSpace: 'nowrap'
+            }
+          }}
+        >
           <Tab label="View Budgets" />
           <Tab label="Add Budget" />
           <Tab label="Budget History" />
@@ -114,12 +104,13 @@ const BudgetContainer = () => {
           <BudgetSummary budgets={budgets} budgetProgress={budgetProgress} />
           <BudgetList 
             budgets={budgets}
-            loading={loading}
-            error={error}
+            loading={loading || progressLoading}
+            error={error || progressError}
             selectedMonth={selectedMonth}
             onMonthChange={setSelectedMonth}
             onDelete={handleBudgetDeleted}
             onUpdate={handleBudgetUpdated}
+            budgetProgress={budgetProgress}
           />
         </>
       )}

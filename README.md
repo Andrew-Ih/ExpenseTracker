@@ -1,8 +1,39 @@
 # Expense Tracker
 
-A full-stack web application for tracking personal expenses with secure user authentication, profile management, transactions and and comprehensive budget tracking. 
+A full-stack SaaS web app that allows users to track expenses, manage budgets and receive AI-powered financial insights through natural language queries using an AI assistant chatbot, currently serving 20+ users.
 
-## Features
+## 🔗 Live Demo: **[Try the Live App](https://andrew-ih-expense-tracker-dev.s3.ca-central-1.amazonaws.com/index.html)**
+
+## 📸 Screenshots
+
+### Dashboard Overview
+| Main Dashboard |
+|----------------|
+| ![Dashboard](./expense-tracker-frontend/images/dashboard/dashboard.png) |
+
+### Transaction Management
+| Transaction Overview | Add Transaction |
+|--------|--------|
+| ![Transactions 1](./expense-tracker-frontend/images/transaction/transactionOverview.png) | ![Transactions 2](./expense-tracker-frontend/images/transaction/addTransaction.png) |
+
+### Budget Tracking
+| Budget Overview | Add Budget | Budget History |
+|----------|---------|---------|
+| ![Budget 1](./expense-tracker-frontend/images/budget/budgetOverview.png) | ![Budget 2](./expense-tracker-frontend/images/budget/addBudget.png) | ![Budget 3](./expense-tracker-frontend/images/budget/budgetHistory.png) |
+
+### AI Financial Assistant
+| Insights | Chat Interface |
+|----------------|----------|
+| ![AI 1](./expense-tracker-frontend/images/AI-assistant/AI_Insights.png) | ![AI 2](./expense-tracker-frontend/images/AI-assistant/chatInterface.png) |
+
+### Profile Management
+| Profile Page |
+|--------------|
+| ![Profile Page](./expense-tracker-frontend/images/profile/profileManagement.png) |
+
+
+<details style="margin-bottom: 20px;">
+<summary><h2 style="display: inline;">Features</h2></summary>
 
 - **User Authentication**
   - Secure registration and login with AWS Cognito
@@ -20,8 +51,6 @@ A full-stack web application for tracking personal expenses with secure user aut
   - Categorize expenses and income
   - Track transaction history with advanced filtering
   - User-specific transaction isolation
-  - Partial updates for transaction fields
-  - Pagination support for large datasets
 
 - **Budget Management**
   - Create monthly budgets by category
@@ -31,33 +60,62 @@ A full-stack web application for tracking personal expenses with secure user aut
   - Over/under budget analysis
   - Duplicate budget prevention
 
+- **AI Financial Assistant**
+  - Chat interface powered by OpenAI GPT
+  - Personalized financial insights and spending analysis
+  - Budget optimization recommendations
+  - Persistent chat history with real-time data integration
+
 - **Enhanced UI/UX**
   - Modern Material UI components with dark theme
   - Mobile-friendly responsive design
-  - Professional currency formatting with commas
-  - Smooth loading states without jarring re-renders
   - Intuitive navigation with sidebar layout
 
-## Tech Stack
+</details>
 
-### Frontend
-- **Framework**: Next.js 15 with React 19
-- **UI Library**: Material UI (MUI) v7
-- **Authentication**: AWS Cognito integration
-- **Styling**: Tailwind CSS
-- **State Management**: React hooks
-- **Type Safety**: TypeScript
+<details style="margin-bottom: 20px;">
+<summary><h2 style="display: inline;">Complete Tech Stack, Tools & AWS Services</h2></summary>
 
-### Backend
-- **Runtime**: Node.js with Express.js
+### 🎨 Frontend Development
+- **Framework**: Next.js 15 with TypeScript for fast, responsive UI
+- **UI Library**: Material UI (MUI) v7 with dark theme
+- **Styling**: Tailwind CSS for utility-first styling
+- **State Management**: React hooks and context
+- **Type Safety**: Full TypeScript implementation
+
+### ⚙️ Backend Development
+- **Runtime**: Node.js with Express.js framework
 - **Architecture**: MVC pattern with helper abstraction
-- **Database**: Amazon DynamoDB with GSI optimization
-- **Authentication**: Amazon Cognito User Pools
-- **Deployment**: AWS Lambda via Serverless Framework
-- **Infrastructure as Code**: AWS CloudFormation
+- **Deployment**: AWS Lambda serverless functions
+- **API Management**: AWS API Gateway for endpoint routing
 - **Error Handling**: Centralized error management
 
-## Getting Started
+### 🗄️ Database & Storage
+- **Database**: AWS DynamoDB with GSI optimization
+- **Data Access**: DynamoDB Document Client with batch operations
+- **Indexing**: Global Secondary Indexes for efficient queries
+
+### 🔐 Authentication & Security
+- **Authentication**: AWS Cognito User Pools
+- **Authorization**: JWT token-based authentication
+- **Security**: IAM roles with least privilege access
+
+### 🚀 Infrastructure & Deployment
+- **Infrastructure as Code**: AWS CloudFormation via Serverless Framework
+- **Frontend Hosting**: AWS S3 and CloudFront for global CDN
+- **CI/CD**: GitHub Actions for continuous integration and deployment
+- **Environment Management**: Multi-stage deployments (dev/prod)
+
+### 🤖 AI Integration
+- **AI Platform**: OpenAI API integration
+- **Prompt Engineering**: Custom prompts for financial insights
+- **Data Integration**: Real-time user data for personalized responses
+- **Chat Storage**: Persistent conversation history in DynamoDB
+
+</details>
+
+<details style="margin-bottom: 20px;">
+<summary><h2 style="display: inline;">Getting Started</h2></summary>
 
 ### Prerequisites
 - Node.js 18+
@@ -89,21 +147,17 @@ npm run deploy
 # Update frontend environment variables with new API URL
 ```
 
-## AWS Services Used:
-- **Amazon Cognito**: User authentication and management
-- **AWS Lambda**: Serverless backend compute
-- **Amazon API Gateway**: REST API endpoints
-- **Amazon DynamoDB**: NoSQL database with GSI
-- **AWS IAM**: Security and permissions
-- **AWS CloudFormation**: Infrastructure as Code
+</details>
 
-## Architecture Highlights
+<details style="margin-bottom: 20px;">
+<summary><h2 style="display: inline;">Architecture Highlights</h2></summary>
 
 ### Database Design
 - **Users Table**: Profile information synced with Cognito
 - **Transactions Table**: Financial records with UserDateIndex GSI
 - **Budgets Table**: Monthly budget allocations with UserMonthIndex GSI
 - **Optimized Queries**: Single-query operations for better performance
+- **Chat History Table**: AI conversation storage with UserTimestampIndex GSI
 
 ### Code Organization
 - **MVC Pattern**: Clear separation of concerns
@@ -112,8 +166,10 @@ npm run deploy
 - **Validation**: Input validation at multiple layers
 - **Type Safety**: Full TypeScript implementation
 
+</details>
 
-## Infrastructure as Code (IaC)
+<details style="margin-bottom: 20px;">
+<summary><h2 style="display: inline;">Infrastructure as Code (IaC)</h2></summary>
 
 This project uses AWS CloudFormation through the Serverless Framework to define and provision AWS infrastructure:
 
@@ -129,45 +185,10 @@ Benefits of using IaC with CloudFormation:
 - **Reduced human error**: No manual steps in the AWS console
 - **Cost management**: Resources are defined explicitly, preventing unexpected charges
 
-## Development Workflow
+</details>
 
-1. **Local Development**:
-   - Frontend runs on http://localhost:3000
-   - Backend runs on http://localhost:3001
-
-2. **Authentication Flow**:
-   - Registration → Email verification → Login → JWT token
-   - Token-based API authentication
-
-3. **Data Flow**:
-   - User data stored in both Cognito and DynamoDB
-   - Profile updates sync between both systems
-   - Transactions stored in DynamoDB with user isolation
-
-4. **Transaction Operations**:
-   - Create: Add new income or expense entries
-   - Read: View transaction history with filtering options
-   - Update: Modify transaction details as needed
-   - Delete: Remove unwanted transactions
-
-5. **Budget Operations**:
-  - Create: Monthly budget allocation by category
-  - Track: Real-time spending vs budget comparison
-  - Analyze: Historical performance and trends
-  - Visualize: Progress bars and color-coded indicators
-
-  ## Development Notes
-
-For detailed information about issues encountered during development, solutions implemented, and technical learnings, see [DEVELOPMENT_NOTES.md](./DEVELOPMENT_NOTES.md).
-
-**Key Issues Resolved:**
-- Performance optimization (24 API calls → 2 API calls)
-- Improved loading states and user experience
-- Input validation and error handling
-- Code architecture and maintainability
-- UI consistency and professional formatting
-
-## Key Learnings
+<details style="margin-bottom: 20px;">
+<summary><h2 style="display: inline;">Key Learnings</h2></summary>
 
 1. **Performance Optimization**: Always consider the number of API calls and database queries. Batch operations when possible.
 
@@ -182,3 +203,5 @@ For detailed information about issues encountered during development, solutions 
 6. **Database Design**: Proper GSI design enables efficient queries. Consider access patterns when designing tables.
 
 7. **Error Handling**: User-friendly error messages are crucial. Technical errors should be logged, not displayed to users.
+
+</details>git reset --soft HEAD~4

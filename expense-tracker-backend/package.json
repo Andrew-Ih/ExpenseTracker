@@ -16,8 +16,10 @@
     "@aws-sdk/client-dynamodb": "^3.844.0",
     "@aws-sdk/lib-dynamodb": "^3.844.0",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
+    "openai": "^5.11.0",
     "serverless-http": "^3.2.0",
     "uuid": "^11.1.0"
   },

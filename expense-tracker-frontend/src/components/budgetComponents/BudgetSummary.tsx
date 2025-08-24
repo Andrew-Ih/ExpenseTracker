@@ -21,27 +21,68 @@ const BudgetSummary = ({ budgets, budgetProgress }: BudgetSummaryProps) => {
   const isOverBudget = totalSpent > totalBudgeted;
 
   return (
-    <Paper sx={{ p: 3, mb: 3 }}>
-      <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+    <Paper sx={{ 
+      p: { xs: 2, md: 3 }, 
+      mb: { xs: 2, md: 3 },
+      overflow: 'hidden'
+    }}>
+      <Typography 
+        variant="h6" 
+        gutterBottom 
+        sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 1,
+          fontSize: { xs: '1.25rem', md: '1.5rem' },
+          fontWeight: 700,
+          mb: { xs: 2, md: 3 }
+        }}
+      >
         <AccountBalance />
         Budget Summary
       </Typography>
       
-      <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} sx={{ textAlign: 'center' }}>
+      <Stack direction={{ xs: 'column', md: 'row' }} spacing={{ xs: 2, md: 3 }} sx={{ textAlign: 'center' }}>
         <Box sx={{ flex: 1 }}>
-          <Typography variant="h4" color="primary.main">
+          <Typography 
+            variant="h4" 
+            color="primary.main"
+            sx={{
+              fontSize: { xs: '1.75rem', md: '2.125rem' },
+              fontWeight: 700
+            }}
+          >
             {formatCurrency(totalBudgeted)}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography 
+            variant="body2" 
+            color="text.secondary"
+            sx={{
+              fontSize: { xs: '0.875rem', md: '1rem' }
+            }}
+          >
             Total Budgeted
           </Typography>
         </Box>
         
         <Box sx={{ flex: 1 }}>
-          <Typography variant="h4" color={isOverBudget ? "error.main" : "text.primary"}>
+          <Typography 
+            variant="h4" 
+            color={isOverBudget ? "error.main" : "text.primary"}
+            sx={{
+              fontSize: { xs: '1.75rem', md: '2.125rem' },
+              fontWeight: 700
+            }}
+          >
             {formatCurrency(totalSpent)}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography 
+            variant="body2" 
+            color="text.secondary"
+            sx={{
+              fontSize: { xs: '0.875rem', md: '1rem' }
+            }}
+          >
             Total Spent
           </Typography>
         </Box>
@@ -50,27 +91,56 @@ const BudgetSummary = ({ budgets, budgetProgress }: BudgetSummaryProps) => {
           <Typography 
             variant="h4" 
             color={remaining >= 0 ? "success.main" : "error.main"}
-            sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}
+            sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              gap: 1,
+              fontSize: { xs: '1.75rem', md: '2.125rem' },
+              fontWeight: 700
+            }}
           >
             {remaining >= 0 ? <TrendingUp /> : <TrendingDown />}
             {formatCurrency(Math.abs(remaining))}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography 
+            variant="body2" 
+            color="text.secondary"
+            sx={{
+              fontSize: { xs: '0.875rem', md: '1rem' }
+            }}
+          >
             {remaining >= 0 ? 'Remaining' : 'Over Budget'}
           </Typography>
         </Box>
       </Stack>
       
-      <Box sx={{ mt: 3 }}>
+      <Box sx={{ mt: { xs: 2, md: 3 } }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-          <Typography variant="body2">Overall Progress</Typography>
-          <Typography variant="body2">{overallProgress.toFixed(0)}%</Typography>
+          <Typography 
+            variant="body2"
+            sx={{
+              fontSize: { xs: '0.875rem', md: '1rem' },
+              fontWeight: 600
+            }}
+          >
+            Overall Progress
+          </Typography>
+          <Typography 
+            variant="body2"
+            sx={{
+              fontSize: { xs: '0.875rem', md: '1rem' },
+              fontWeight: 600
+            }}
+          >
+            {overallProgress.toFixed(0)}%
+          </Typography>
         </Box>
         <LinearProgress 
           variant="determinate" 
           value={Math.min(overallProgress, 100)}
           color={isOverBudget ? "error" : overallProgress > 80 ? "warning" : "success"}
-          sx={{ height: 8, borderRadius: 4 }}
+          sx={{ height: { xs: 6, md: 8 }, borderRadius: { xs: 3, md: 4 } }}
         />
       </Box>
     </Paper>

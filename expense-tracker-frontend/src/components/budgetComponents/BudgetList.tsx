@@ -25,11 +25,13 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  SelectChangeEvent
+  SelectChangeEvent,
+  Stack,
+  Card,
+  CardContent
 } from '@mui/material';
-import { Edit, Delete } from '@mui/icons-material';
+import { Edit, Delete, ChevronLeft, ChevronRight } from '@mui/icons-material';
 import { Budget, deleteBudget } from '@/services/budgetService';
-import { getTransactions, Transaction } from '@/services/transactionService';
 import BudgetEditDialog from './BudgetEditDialog';
 import { formatCurrency } from '@/utils/formatCurrency';
 
@@ -41,6 +43,7 @@ interface BudgetListProps {
   onMonthChange: (month: string) => void;
   onDelete: (budgetId: string) => void;
   onUpdate: (budget: Budget) => void;
+  budgetProgress: Record<string, number>;
 }
 
 const BudgetList = ({ 
@@ -50,57 +53,50 @@ const BudgetList = ({
   selectedMonth,
   onMonthChange,
   onDelete,
-  onUpdate
+  onUpdate,
+  budgetProgress
 }: BudgetListProps) => {
-  const [budgetProgress, setBudgetProgress] = useState<Record<string, number>>({});
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [yearInput, setYearInput] = useState(selectedMonth.split('-')[0]);
 
-
+  // Update yearInput when selectedMonth changes from external sources
   useEffect(() => {
-    const fetchBudgetProgress = async () => {
-      // Validate year from selectedMonth - only proceed if it's a valid 4-digit year
-      const year = selectedMonth.split('-')[0];
-      if (!year || year.length !== 4 || isNaN(parseInt(year))) {
-        setBudgetProgress({});
-        return;
-      }
+    setYearInput(selectedMonth.split('-')[0]);
+  }, [selectedMonth]);
 
-      const progress: Record<string, number> = {};
-      
-      for (const budget of budgets) {
-        try {
-          const startDate = `${selectedMonth}-01`;
-          const endDate = `${selectedMonth}-31`;
-          
-          const result = await getTransactions({
-            startDate,
-            endDate,
-            category: budget.category,
-            type: 'expense'
-          });
-          
-          const totalSpent = result.transactions.reduce((sum: number, transaction: Transaction) => 
-            sum + parseFloat(transaction.amount.toString()), 0
-          );
-          
-          if (budget.budgetId) {
-            progress[budget.budgetId] = totalSpent;
-          }
-        } catch (error) {
-          console.error('Error fetching progress for', budget.category, error);
-        }
-      }
-      
-      setBudgetProgress(progress);
-    };
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
 
-    if (budgets.length > 0) {
-      fetchBudgetProgress();
+  const currentMonth = parseInt(selectedMonth.split('-')[1]);
+  const currentYear = parseInt(selectedMonth.split('-')[0]);
+
+  const handlePreviousMonth = () => {
+    if (currentMonth === 1) {
+      onMonthChange(`${currentYear - 1}-12`);
+    } else {
+      const newMonth = (currentMonth - 1).toString().padStart(2, '0');
+      onMonthChange(`${currentYear}-${newMonth}`);
     }
-  }, [budgets, selectedMonth]);
+  };
+
+  const handleNextMonth = () => {
+    if (currentMonth === 12) {
+      onMonthChange(`${currentYear + 1}-01`);
+    } else {
+      const newMonth = (currentMonth + 1).toString().padStart(2, '0');
+      onMonthChange(`${currentYear}-${newMonth}`);
+    }
+  };
+
+  const handleYearChange = (newYear: number) => {
+    const month = selectedMonth.split('-')[1];
+    onMonthChange(`${newYear}-${month}`);
+  };
 
   const handleEditClick = (budget: Budget) => {
     setSelectedBudget(budget);
@@ -132,145 +128,257 @@ const BudgetList = ({
     setEditDialogOpen(false);
   };
 
-
-
   if (error) {
     return <Alert severity="error">{error}</Alert>;
   }
 
   return (
     <>
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-          <Typography variant="h6">Budgets for:</Typography>
-          <FormControl size="small" sx={{ minWidth: 120 }}>
-            <InputLabel>Month</InputLabel>
-            <Select
-              value={parseInt(selectedMonth.split('-')[1])}
-              label="Month"
-              onChange={(e: SelectChangeEvent<number>) => {
-                const year = selectedMonth.split('-')[0];
-                const month = (e.target.value as number).toString().padStart(2, '0');
-                onMonthChange(`${year}-${month}`);
-              }}
-            >
-              <MenuItem value={1}>January</MenuItem>
-              <MenuItem value={2}>February</MenuItem>
-              <MenuItem value={3}>March</MenuItem>
-              <MenuItem value={4}>April</MenuItem>
-              <MenuItem value={5}>May</MenuItem>
-              <MenuItem value={6}>June</MenuItem>
-              <MenuItem value={7}>July</MenuItem>
-              <MenuItem value={8}>August</MenuItem>
-              <MenuItem value={9}>September</MenuItem>
-              <MenuItem value={10}>October</MenuItem>
-              <MenuItem value={11}>November</MenuItem>
-              <MenuItem value={12}>December</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField
-            type="number"
-            label="Year"
-            value={parseInt(selectedMonth.split('-')[0])}
-            onChange={(e) => {
-              const month = selectedMonth.split('-')[1];
-              const year = e.target.value;
-              onMonthChange(`${year}-${month}`);
+      <Paper sx={{ p: { xs: 2, md: 3 }, mb: { xs: 2, md: 3 }, overflow: 'hidden' }}>
+        {/* Month/Year Navigation */}
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center" sx={{ mb: { xs: 2, md: 3 } }}>
+          <Typography 
+            variant="h6"
+            sx={{
+              fontSize: { xs: '1.25rem', md: '1.5rem' },
+              fontWeight: 700
             }}
-            size="small"
-            sx={{ minWidth: 100, maxWidth: 120 }}
-          />
+          >
+            Budgets for:
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <IconButton onClick={handlePreviousMonth} size="small">
+              <ChevronLeft />
+            </IconButton>
+            
+            <FormControl size="small" sx={{ minWidth: 120 }}>
+              <InputLabel>Month</InputLabel>
+              <Select
+                value={currentMonth}
+                label="Month"
+                onChange={(e: SelectChangeEvent<number>) => {
+                  const newMonth = (e.target.value as number).toString().padStart(2, '0');
+                  onMonthChange(`${currentYear}-${newMonth}`);
+                }}
+              >
+                {monthNames.map((month, index) => (
+                  <MenuItem key={index} value={index + 1}>{month}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            
+            <Box sx={{ position: 'relative' }}>
+              <TextField
+                type="number"
+                label="Year"
+                value={yearInput}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setYearInput(value); // Always update display
+                  if (value.length === 4 && !isNaN(parseInt(value))) {
+                    handleYearChange(parseInt(value));
+                  }
+                }}
+                size="small"
+                sx={{ minWidth: 100, maxWidth: 120 }}
+              />
+            </Box>
+            
+            <IconButton onClick={handleNextMonth} size="small">
+              <ChevronRight />
+            </IconButton>
+          </Box>
+        </Stack>
+
+        {/* Desktop Table Layout */}
+        <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Category</TableCell>
+                  <TableCell align="right" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Budget Amount</TableCell>
+                  <TableCell align="right" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Spent</TableCell>
+                  <TableCell align="right" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Remaining</TableCell>
+                  <TableCell align="center" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Progress</TableCell>
+                  <TableCell align="center" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center">
+                      <CircularProgress size={24} />
+                    </TableCell>
+                  </TableRow>
+                ) : budgets.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center">
+                      <Typography variant="body1" sx={{ py: 2 }}>
+                        No budgets found for this month
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  budgets.map((budget) => {
+                    const spent = budget.budgetId ? budgetProgress[budget.budgetId] || 0 : 0;
+                    const budgetAmount = parseFloat(budget.amount.toString());
+                    const remaining = budgetAmount - spent;
+                    const progressPercent = budgetAmount > 0 ? (spent / budgetAmount) * 100 : 0;
+                    const isOverBudget = spent > budgetAmount;
+                    
+                    return (
+                      <TableRow key={budget.budgetId}>
+                        <TableCell sx={{ fontSize: '1rem' }}>{budget.category}</TableCell>
+                        <TableCell align="right">
+                          <Typography color="primary.main" variant="body1" sx={{ fontWeight: 'medium' }}>
+                            {formatCurrency(budgetAmount)}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="right">
+                          <Typography color={isOverBudget ? "error.main" : "text.primary"} variant="body1" sx={{ fontWeight: 'medium' }}>
+                            {formatCurrency(spent)}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="right">
+                          <Typography color={remaining >= 0 ? "success.main" : "error.main"} variant="body1" sx={{ fontWeight: 'medium' }}>
+                            {formatCurrency(remaining >= 0 ? remaining : 0)}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center" sx={{ minWidth: 120 }}>
+                          <Box sx={{ width: '100%' }}>
+                            <LinearProgress 
+                              variant="determinate" 
+                              value={Math.min(progressPercent, 100)}
+                              color={isOverBudget ? "error" : progressPercent > 80 ? "warning" : "success"}
+                              sx={{ mb: 0.5 }}
+                            />
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                              {progressPercent.toFixed(0)}%
+                            </Typography>
+                          </Box>
+                        </TableCell>
+                        <TableCell align="center">
+                          <IconButton 
+                            size="small" 
+                            color="primary" 
+                            onClick={() => handleEditClick(budget)}
+                          >
+                            <Edit />
+                          </IconButton>
+                          <IconButton 
+                            size="small" 
+                            color="error" 
+                            onClick={() => handleDeleteClick(budget)}
+                          >
+                            <Delete />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Box>
 
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Category</TableCell>
-                <TableCell align="right" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Budget Amount</TableCell>
-                <TableCell align="right" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Spent</TableCell>
-                <TableCell align="right" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Remaining</TableCell>
-                <TableCell align="center" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Progress</TableCell>
-                <TableCell align="center" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={6} align="center">
-                    <CircularProgress size={24} />
-                  </TableCell>
-                </TableRow>
-              ) : budgets.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} align="center">
-                    <Typography variant="body1" sx={{ py: 2 }}>
-                      No budgets found for this month
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                budgets.map((budget) => {
-                  const spent = budget.budgetId ? budgetProgress[budget.budgetId] || 0 : 0;
-                  const budgetAmount = parseFloat(budget.amount.toString());
-                  const remaining = budgetAmount - spent;
-                  const progressPercent = budgetAmount > 0 ? (spent / budgetAmount) * 100 : 0;
-                  const isOverBudget = spent > budgetAmount;
-                  
-                  return (
-                    <TableRow key={budget.budgetId}>
-                      <TableCell sx={{ fontSize: '1rem' }}>{budget.category}</TableCell>
-                      <TableCell align="right">
-                        <Typography color="primary.main" variant="body1" sx={{ fontWeight: 'medium' }}>
-                          {formatCurrency(budgetAmount)}
+        {/* Mobile Card Layout */}
+        <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+              <CircularProgress size={32} />
+            </Box>
+          ) : budgets.length === 0 ? (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <Typography variant="body1">
+                No budgets found for this month
+              </Typography>
+            </Box>
+          ) : (
+            <Stack spacing={2}>
+              {budgets.map((budget) => {
+                const spent = budget.budgetId ? budgetProgress[budget.budgetId] || 0 : 0;
+                const budgetAmount = parseFloat(budget.amount.toString());
+                const remaining = budgetAmount - spent;
+                const progressPercent = budgetAmount > 0 ? (spent / budgetAmount) * 100 : 0;
+                const isOverBudget = spent > budgetAmount;
+                
+                return (
+                  <Card key={budget.budgetId} sx={{ p: 2 }}>
+                    <CardContent sx={{ p: '0 !important' }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                        <Typography 
+                          variant="h6" 
+                          sx={{ 
+                            fontSize: '1.125rem',
+                            fontWeight: 700
+                          }}
+                        >
+                          {budget.category}
                         </Typography>
-                      </TableCell>
-                      <TableCell align="right">
-                        <Typography color={isOverBudget ? "error.main" : "text.primary"} variant="body1" sx={{ fontWeight: 'medium' }}>
-                          {formatCurrency(spent)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="right">
-                        <Typography color={remaining >= 0 ? "success.main" : "error.main"} variant="body1" sx={{ fontWeight: 'medium' }}>
-                          {formatCurrency(remaining >= 0 ? remaining : 0)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="center" sx={{ minWidth: 120 }}>
-                        <Box sx={{ width: '100%' }}>
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                          <IconButton 
+                            size="small" 
+                            color="primary" 
+                            onClick={() => handleEditClick(budget)}
+                          >
+                            <Edit />
+                          </IconButton>
+                          <IconButton 
+                            size="small" 
+                            color="error" 
+                            onClick={() => handleDeleteClick(budget)}
+                          >
+                            <Delete />
+                          </IconButton>
+                        </Box>
+                      </Box>
+                      
+                      <Stack spacing={1.5}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Typography variant="body2" color="text.secondary">Budget Amount:</Typography>
+                          <Typography color="primary.main" variant="body1" sx={{ fontWeight: 600 }}>
+                            {formatCurrency(budgetAmount)}
+                          </Typography>
+                        </Box>
+                        
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Typography variant="body2" color="text.secondary">Spent:</Typography>
+                          <Typography color={isOverBudget ? "error.main" : "text.primary"} variant="body1" sx={{ fontWeight: 600 }}>
+                            {formatCurrency(spent)}
+                          </Typography>
+                        </Box>
+                        
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Typography variant="body2" color="text.secondary">Remaining:</Typography>
+                          <Typography color={remaining >= 0 ? "success.main" : "error.main"} variant="body1" sx={{ fontWeight: 600 }}>
+                            {formatCurrency(remaining >= 0 ? remaining : 0)}
+                          </Typography>
+                        </Box>
+                        
+                        <Box sx={{ mt: 1 }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                            <Typography variant="body2" color="text.secondary">Progress:</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                              {progressPercent.toFixed(0)}%
+                            </Typography>
+                          </Box>
                           <LinearProgress 
                             variant="determinate" 
                             value={Math.min(progressPercent, 100)}
                             color={isOverBudget ? "error" : progressPercent > 80 ? "warning" : "success"}
-                            sx={{ mb: 0.5 }}
+                            sx={{ height: 6, borderRadius: 3 }}
                           />
-                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
-                            {progressPercent.toFixed(0)}%
-                          </Typography>
                         </Box>
-                      </TableCell>
-                      <TableCell align="center">
-                        <IconButton 
-                          size="small" 
-                          color="primary" 
-                          onClick={() => handleEditClick(budget)}
-                        >
-                          <Edit />
-                        </IconButton>
-                        <IconButton 
-                          size="small" 
-                          color="error" 
-                          onClick={() => handleDeleteClick(budget)}
-                        >
-                          <Delete />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </Stack>
+          )}
+        </Box>
       </Paper>
 
       {/* Delete Confirmation Dialog */}

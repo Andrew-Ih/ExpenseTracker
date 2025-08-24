@@ -1,7 +1,7 @@
 'use client';
 
 import { List } from '@mui/material';
-import { Dashboard, Receipt, AccountBalance } from '@mui/icons-material';
+import { Dashboard, Receipt, AccountBalance, Person, SmartToy } from '@mui/icons-material';
 import SidebarItem from './SidebarItem';
 
 interface SidebarNavigationProps {
@@ -12,7 +12,9 @@ const SidebarNavigation = ({ pathname }: SidebarNavigationProps) => {
   const menuItems = [
     { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
     { text: 'Transactions', icon: <Receipt />, path: '/transactions' },
-    { text: 'Budgets', icon: <AccountBalance />, path: '/budget' }
+    { text: 'Budgets', icon: <AccountBalance />, path: '/budget' },
+    { text: 'AI Assistant', icon: <SmartToy />, path: '/ai-assistant' },
+    { text: 'Profile', icon: <Person />, path: '/profile' }
   ];
 
   return (

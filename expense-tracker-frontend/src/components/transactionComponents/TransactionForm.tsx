@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Box, 
   Paper, 
@@ -13,12 +13,22 @@ import {
   MenuItem, 
   Alert,
   Stack,
-  SelectChangeEvent
+  SelectChangeEvent,
+  // FormControlLabel,
+  // Checkbox
 } from '@mui/material';
-import { createTransaction, Transaction } from '@/services/transactionService';
+import { createTransaction, createRecurringTransaction, Transaction, RecurringTransaction } from '@/services/transactionService';
 
 interface TransactionFormProps {
   onTransactionAdded: () => void;
+}
+
+interface FormData {
+  amount: string;
+  type: 'income' | 'expense';
+  category: string;
+  description: string;
+  date: string;
 }
 
 const categories = [
@@ -28,22 +38,80 @@ const categories = [
 ];
 
 const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
-  const [formData, setFormData] = useState<Omit<Transaction, 'transactionId'>>({
-    amount: 0,
+  const [formData, setFormData] = useState<FormData>({
+    amount: '',
     type: 'expense',
     category: '',
     description: '',
     date: new Date().toISOString().split('T')[0]
   });
   
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurringConfig, setRecurringConfig] = useState({
+    frequency: 'monthly' as 'monthly' | 'yearly' | 'bi-weekly',
+    dayOfMonth: 1,
+    monthOfYear: 1, // For yearly
+    dayOfMonth2: 15, // For bi-weekly
+    startMonth: new Date().getMonth() + 1,
+    startYear: new Date().getFullYear(),
+    endMonth: 12,
+    endYear: new Date().getFullYear()
+  });
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [amountError, setAmountError] = useState<string | null>(null);
+
+  // Auto-dismiss error messages after 5 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
 
   const handleTextFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     if (name) {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      if (name === 'amount') {
+        // Handle amount field specifically
+        setFormData(prev => ({ ...prev, [name]: value }));
+        
+        // Clear amount error when user starts typing
+        if (amountError) {
+          setAmountError(null);
+        }
+        
+        // Validate amount in real-time
+        if (value !== '') {
+          const numValue = parseFloat(value);
+          if (isNaN(numValue)) {
+            setAmountError('Please enter a valid number');
+          } else if (numValue < 0) {
+            setAmountError('Amount cannot be negative');
+          } else if (numValue === 0) {
+            setAmountError('Amount must be greater than 0');
+          } else {
+            setAmountError(null);
+          }
+        } else {
+          setAmountError(null);
+        }
+      } else {
+        setFormData(prev => ({ ...prev, [name]: value }));
+      }
     }
   };
 
@@ -54,24 +122,127 @@ const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
     }
   };
 
+  const validateRecurringConfig = () => {
+    const errors: string[] = [];
+    
+    // Basic field validation
+    if (recurringConfig.dayOfMonth < 1 || recurringConfig.dayOfMonth > 31) {
+      errors.push('Day of month must be between 1 and 31');
+    }
+    
+    if (recurringConfig.frequency === 'yearly') {
+      if (recurringConfig.startYear >= recurringConfig.endYear) {
+        errors.push(`End year (${recurringConfig.endYear}) must be after start year (${recurringConfig.startYear})`);
+      }
+      if (!recurringConfig.monthOfYear || recurringConfig.monthOfYear < 1 || recurringConfig.monthOfYear > 12) {
+        errors.push('Please select a valid month for yearly transactions');
+      }
+    } else {
+      // Monthly and bi-weekly validation
+      const startDate = new Date(recurringConfig.startYear, recurringConfig.startMonth - 1);
+      const endDate = new Date(recurringConfig.endYear, recurringConfig.endMonth - 1);
+      
+      if (startDate >= endDate) {
+        const startMonthName = new Date(0, recurringConfig.startMonth - 1).toLocaleString('default', { month: 'long' });
+        const endMonthName = new Date(0, recurringConfig.endMonth - 1).toLocaleString('default', { month: 'long' });
+        errors.push(`End date (${endMonthName} ${recurringConfig.endYear}) must be after start date (${startMonthName} ${recurringConfig.startYear})`);
+      }
+      
+      if (recurringConfig.frequency === 'bi-weekly') {
+        if (recurringConfig.dayOfMonth === recurringConfig.dayOfMonth2) {
+          errors.push(`Both days cannot be the same (${recurringConfig.dayOfMonth}). Please choose different days`);
+        }
+        if (recurringConfig.dayOfMonth2 < 1 || recurringConfig.dayOfMonth2 > 31) {
+          errors.push('Second day of month must be between 1 and 31');
+        }
+        const gap = Math.abs(recurringConfig.dayOfMonth - recurringConfig.dayOfMonth2);
+        if (gap < 7) {
+          errors.push(`Days are too close together (${gap} days apart). Consider at least 7 days apart for bi-weekly`);
+        }
+      }
+    }
+    
+    return errors;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setSuccess(null);
+    setAmountError(null); // Clear amount error on new submission
+
+    // Final validation before submission
+    if (formData.amount === '') {
+      setAmountError('Amount is required');
+      setLoading(false);
+      return;
+    }
+
+    const amount = parseFloat(formData.amount);
+    if (isNaN(amount) || amount <= 0) {
+      setAmountError('Amount must be greater than 0');
+      setLoading(false);
+      return;
+    }
 
     try {
-      await createTransaction(formData);
-      setSuccess('Transaction created successfully!');
+      if (isRecurring) {
+        // Client-side validation
+        const validationErrors = validateRecurringConfig();
+        if (validationErrors.length > 0) {
+          setError(validationErrors.join('. '));
+          setLoading(false);
+          return;
+        }
+        
+        const recurringData: RecurringTransaction = {
+          templateData: {
+            ...formData,
+            amount: amount
+          },
+          frequency: recurringConfig.frequency,
+          dayOfMonth: recurringConfig.dayOfMonth,
+          ...(recurringConfig.frequency === 'yearly' && { monthOfYear: recurringConfig.monthOfYear }),
+          ...(recurringConfig.frequency === 'bi-weekly' && { dayOfMonth2: recurringConfig.dayOfMonth2 }),
+          startMonth: recurringConfig.startMonth,
+          startYear: recurringConfig.startYear,
+          endMonth: recurringConfig.endMonth,
+          endYear: recurringConfig.endYear
+        };
+        
+        const result = await createRecurringTransaction(recurringData);
+        setSuccess(`Recurring transaction created! Generated ${result.generatedCount} transactions.`);
+      } else {
+        const transactionData: Transaction = {
+          ...formData,
+          amount: amount
+        };
+        
+        await createTransaction(transactionData);
+        setSuccess('Transaction created successfully!');
+      }
+      
       onTransactionAdded();
       
       // Reset form
       setFormData({
-        amount: 0,
+        amount: '',
         type: 'expense',
         category: '',
         description: '',
         date: new Date().toISOString().split('T')[0]
+      });
+      setIsRecurring(false);
+      setRecurringConfig({
+        frequency: 'monthly',
+        dayOfMonth: 1,
+        monthOfYear: 1,
+        dayOfMonth2: 15,
+        startMonth: new Date().getMonth() + 1,
+        startYear: new Date().getFullYear(),
+        endMonth: 12,
+        endYear: new Date().getFullYear()
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create transaction');
@@ -81,8 +252,16 @@ const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
   };
 
   return (
-    <Paper sx={{ p: 3 }}>
-      <Typography variant="h6" gutterBottom>
+    <Paper sx={{ p: { xs: 2, md: 3 }, overflow: 'hidden' }}>
+      <Typography 
+        variant="h5" 
+        gutterBottom 
+        sx={{ 
+          fontWeight: 700,
+          fontSize: { xs: '1.25rem', md: '1.5rem' },
+          mb: { xs: 2, md: 3 }
+        }}
+      >
         Add New Transaction
       </Typography>
 
@@ -90,7 +269,7 @@ const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
       {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
 
       <Box component="form" onSubmit={handleSubmit}>
-        <Stack spacing={3}>
+        <Stack spacing={{ xs: 2, md: 3 }}>
           <TextField
             name="amount"
             label="Amount"
@@ -99,7 +278,12 @@ const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
             onChange={handleTextFieldChange}
             required
             fullWidth
-            inputProps={{ step: "0.01" }}
+            error={!!amountError}
+            helperText={amountError}
+            inputProps={{ 
+              step: "0.01",
+              min: "0"
+            }}
           />
 
           <FormControl fullWidth required>
@@ -139,25 +323,207 @@ const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
             rows={2}
           />
 
-          <TextField
-            name="date"
-            label="Date"
-            type="date"
-            value={formData.date}
-            onChange={handleTextFieldChange}
-            required
-            fullWidth
-            InputLabelProps={{ shrink: true }}
-          />
+          {!isRecurring && (
+            <TextField
+              name="date"
+              label="Date"
+              type="date"
+              value={formData.date}
+              onChange={handleTextFieldChange}
+              required
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+            />
+          )}
+
+          {/* <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <FormControlLabel
+              control={
+                <Checkbox 
+                  checked={isRecurring} 
+                  onChange={(e) => setIsRecurring(e.target.checked)} 
+                />
+              }
+              label="Make this a recurring transaction"
+            />
+          </Box> */}
+
+          {isRecurring && (
+            <>
+              <FormControl fullWidth required>
+                <InputLabel>Frequency</InputLabel>
+                <Select
+                  value={recurringConfig.frequency}
+                  label="Frequency"
+                  onChange={(e: SelectChangeEvent) => 
+                    setRecurringConfig({...recurringConfig, frequency: e.target.value as 'monthly' | 'yearly' | 'bi-weekly'})
+                  }
+                >
+                  <MenuItem value="monthly">Monthly</MenuItem>
+                  <MenuItem value="yearly">Yearly</MenuItem>
+                  <MenuItem value="bi-weekly">Bi-weekly (twice per month)</MenuItem>
+                </Select>
+              </FormControl>
+              
+              {recurringConfig.frequency === 'yearly' ? (
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                  <TextField
+                    type="number"
+                    label="Day of Month"
+                    value={recurringConfig.dayOfMonth}
+                    onChange={(e) => setRecurringConfig({...recurringConfig, dayOfMonth: parseInt(e.target.value)})}
+                    required
+                    fullWidth
+                    inputProps={{ min: 1, max: 31 }}
+                  />
+                  <FormControl fullWidth required>
+                    <InputLabel>Month of Year</InputLabel>
+                    <Select
+                      value={recurringConfig.monthOfYear}
+                      label="Month of Year"
+                      onChange={(e: SelectChangeEvent<number>) => 
+                        setRecurringConfig({...recurringConfig, monthOfYear: e.target.value as number})
+                      }
+                    >
+                      {Array.from({length: 12}, (_, i) => (
+                        <MenuItem key={i+1} value={i+1}>
+                          {new Date(0, i).toLocaleString('default', { month: 'long' })}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Stack>
+              ) : recurringConfig.frequency === 'bi-weekly' ? (
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                  <TextField
+                    type="number"
+                    label="First Day of Month"
+                    value={recurringConfig.dayOfMonth}
+                    onChange={(e) => setRecurringConfig({...recurringConfig, dayOfMonth: parseInt(e.target.value)})}
+                    required
+                    fullWidth
+                    inputProps={{ min: 1, max: 31 }}
+                  />
+                  <TextField
+                    type="number"
+                    label="Second Day of Month"
+                    value={recurringConfig.dayOfMonth2}
+                    onChange={(e) => setRecurringConfig({...recurringConfig, dayOfMonth2: parseInt(e.target.value)})}
+                    required
+                    fullWidth
+                    inputProps={{ min: 1, max: 31 }}
+                  />
+                </Stack>
+              ) : (
+                <TextField
+                  type="number"
+                  label="Day of Month"
+                  value={recurringConfig.dayOfMonth}
+                  onChange={(e) => setRecurringConfig({...recurringConfig, dayOfMonth: parseInt(e.target.value)})}
+                  required
+                  fullWidth
+                  inputProps={{ min: 1, max: 31 }}
+                  helperText="Day 31 will become last day of month for months with fewer days"
+                />
+              )}
+              
+              {recurringConfig.frequency === 'yearly' ? (
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                  <TextField
+                    type="number"
+                    label="Start Year"
+                    value={recurringConfig.startYear}
+                    onChange={(e) => setRecurringConfig({...recurringConfig, startYear: parseInt(e.target.value)})}
+                    required
+                    fullWidth
+                    inputProps={{ min: 2020, max: 3000 }}
+                  />
+                  <TextField
+                    type="number"
+                    label="End Year"
+                    value={recurringConfig.endYear}
+                    onChange={(e) => setRecurringConfig({...recurringConfig, endYear: parseInt(e.target.value)})}
+                    required
+                    fullWidth
+                    inputProps={{ min: 2020, max: 3000 }}
+                  />
+                </Stack>
+              ) : (
+                <>
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                    <FormControl fullWidth required>
+                      <InputLabel>Start Month</InputLabel>
+                      <Select
+                        value={recurringConfig.startMonth}
+                        label="Start Month"
+                        onChange={(e: SelectChangeEvent<number>) => 
+                          setRecurringConfig({...recurringConfig, startMonth: e.target.value as number})
+                        }
+                      >
+                        {Array.from({length: 12}, (_, i) => (
+                          <MenuItem key={i+1} value={i+1}>
+                            {new Date(0, i).toLocaleString('default', { month: 'long' })}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    
+                    <TextField
+                      type="number"
+                      label="Start Year"
+                      value={recurringConfig.startYear}
+                      onChange={(e) => setRecurringConfig({...recurringConfig, startYear: parseInt(e.target.value)})}
+                      required
+                      fullWidth
+                      inputProps={{ min: 2020, max: 3000 }}
+                    />
+                  </Stack>
+                  
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                    <FormControl fullWidth required>
+                      <InputLabel>End Month</InputLabel>
+                      <Select
+                        value={recurringConfig.endMonth}
+                        label="End Month"
+                        onChange={(e: SelectChangeEvent<number>) => 
+                          setRecurringConfig({...recurringConfig, endMonth: e.target.value as number})
+                        }
+                      >
+                        {Array.from({length: 12}, (_, i) => (
+                          <MenuItem key={i+1} value={i+1}>
+                            {new Date(0, i).toLocaleString('default', { month: 'long' })}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    
+                    <TextField
+                      type="number"
+                      label="End Year"
+                      value={recurringConfig.endYear}
+                      onChange={(e) => setRecurringConfig({...recurringConfig, endYear: parseInt(e.target.value)})}
+                      required
+                      fullWidth
+                      inputProps={{ min: 2020, max: 3000 }}
+                    />
+                  </Stack>
+                </>
+              )}
+            </>
+          )}
 
           <Button 
             type="submit" 
             variant="contained" 
             color="primary" 
             disabled={loading}
-            sx={{ mt: 2 }}
+            sx={{ 
+              mt: 2,
+              py: { xs: 1.5, md: 1 },
+              fontSize: { xs: '1rem', md: '1.125rem' }
+            }}
           >
-            {loading ? 'Creating...' : 'Create Transaction'}
+            {loading ? 'Creating...' : isRecurring ? 'Create Recurring Transaction' : 'Create Transaction'}
           </Button>
         </Stack>
       </Box>

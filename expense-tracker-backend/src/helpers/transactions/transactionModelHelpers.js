@@ -35,7 +35,7 @@ export const buildTransactionQueryParams = (userId, options = {}) => {
 // ******************************************************
 const _getTransactionById = async (docClient, transactionId) => {
   const getParams = {
-    TableName: 'ExpenseTrackerTransactions',
+    TableName: `ExpenseTrackerTransactions-${process.env.NODE_ENV || 'dev'}`,
     Key: { transactionId }
   };
 
@@ -97,12 +97,13 @@ const _formatUpdateExpression = (expressions) => {
 // ******************************************************
 const _initializeBaseParams = (userId) => {
   return {
-    TableName: 'ExpenseTrackerTransactions',
+    TableName: `ExpenseTrackerTransactions-${process.env.NODE_ENV || 'dev'}`,
     IndexName: 'UserDateIndex',
     KeyConditionExpression: 'userId = :userId',
     ExpressionAttributeValues: {
       ':userId': userId
-    }
+    },
+    ScanIndexForward: false // Sort in descending order (latest first)
   };
 };
 

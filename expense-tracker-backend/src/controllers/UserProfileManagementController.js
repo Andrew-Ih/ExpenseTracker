@@ -6,7 +6,7 @@ class UserProfileManagementController {
     try {
       const { firstName, lastName, email, userId } = req.body;
       
-      if (!firstName || !lastName || !email || !userId) {
+      if (!firstName || !email || !userId) {
         return res.status(400).json({ 
           error: 'All fields required',
           received: {
@@ -22,7 +22,7 @@ class UserProfileManagementController {
       const user = await UserModel.create({
         userId,
         firstName,
-        lastName,
+        lastName: lastName || '', 
         email
       });
 
