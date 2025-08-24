@@ -14,8 +14,8 @@ import {
   Alert,
   Stack,
   SelectChangeEvent,
-  FormControlLabel,
-  Checkbox
+  // FormControlLabel,
+  // Checkbox
 } from '@mui/material';
 import { createTransaction, createRecurringTransaction, Transaction, RecurringTransaction } from '@/services/transactionService';
 
@@ -336,7 +336,7 @@ const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
             />
           )}
 
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          {/* <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <FormControlLabel
               control={
                 <Checkbox 
@@ -346,7 +346,7 @@ const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) => {
               }
               label="Make this a recurring transaction"
             />
-          </Box>
+          </Box> */}
 
           {isRecurring && (
             <>
